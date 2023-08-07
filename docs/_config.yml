@@ -2,12 +2,12 @@ remote_theme: chrisrhymes/bulma-clean-theme
 
 # Site Settings
 lang: es
-title: Aprendizaje Automático Aplicado (2023-1)
-tagline: MCD-UNISON 
+title: Reconocimiento de Patrones (2023-2)
+tagline: LCC-UNISON 
 email: julio.waissman@unison.mx
 description: Material del curso
 baseurl: "/"
-url: "https://mcd-unison/ing-caract"
+url: "https://ml-unison/ml-unison.github.io"
 permalink: pretty
 #favicon: /path/to/favicon.png
 #gh_sponsor: juliowaissman

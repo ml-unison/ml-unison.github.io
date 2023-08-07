@@ -6,13 +6,14 @@ backgroundColor: #fff
 backgroundImage: url('https://marp.app/assets/hero-background.svg')
 ---
 
-![bg left:40% 40%](logo_mcd.png)
 
-# **¿En que sentido el aprendizaje supervisado es posible?**
+# **¿El aprendizaje supervisado es posible?**
 
-Curso Aprendizaje Automático Aplicado
+Curso Reconocimiento de Patrones LCC/UNISON
 
 Julio Waissman
+
+![bg right:35% 35%](logo.jpg)
 
 ---
 

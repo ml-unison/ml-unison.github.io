@@ -1,6 +1,6 @@
 ---
 title: Sistemas recomendadores 
-subtitle: Curso Aprendizaje Automático Aplicado
+subtitle: Curso Reconocimiento de Patrones LCC/UNISON
 layout: page
 hero_image: https://github.com/ml-unison/ml-unison.github.io/raw/main/docs/img/alt-banner.jpg
 hero_darken: true

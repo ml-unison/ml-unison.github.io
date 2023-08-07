@@ -1,6 +1,6 @@
 ---
 title: Introducción 
-subtitle: Curso Aprendizaje Automático Aplicado
+subtitle: Curso Reconocimiento de Patrones LCC/UNISON
 layout: page
 hero_image: https://github.com/ml-unison/ml-unison.github.io/raw/main/docs/img/alt-banner.jpg
 hero_darken: true
@@ -30,16 +30,10 @@ show_sidebar: false
 9.  [Introducción a las MLOps](https://github.com/mcd-unison/aaa-curso/raw/main/slides/MLOps-intro.pdf)
 
 
-## Módulos y librerías para Aprendizaje automático
+## La librerías para Aprendizaje automático que vamos a usar
 
-1. **Python**. Empezando por [*sci-kit learn*](https://scikit-learn.org/), la librería más utilizada (por mucho). Para grandes cantidades de datos [pyspark](https://spark.apache.org/docs/latest/api/python/index.html) incluye el módulo `MLlib` para flujos de aprendizaje automático. Y por último, el nuevo muchacho en el barrio: [pycaret](https://pycaret.org), que ha tenido un crecimiento importante recientemente. 
+1. [*Sci-Kit Learn*](https://scikit-learn.org/), la librería más utilizada (por mucho). Para grandes cantidades de datos [pyspark](https://spark.apache.org/docs/latest/api/python/index.html) incluye el módulo `MLlib` para flujos de aprendizaje automático. Y por último, el nuevo muchacho en el barrio: [pycaret](https://pycaret.org), que ha tenido un crecimiento importante recientemente. 
    
-2. **R**. Una gran cantidad de paquetes de aprendizaje se encuentran reunidos en el *metapaquete* [caret](https://topepo.github.io/caret/index.html), el primer lugar a consultar para hacer ML en R.
-
-
-## Libretas *jupyter*
-
-1. [Comparación de modelos de clasificación](https://colab.research.google.com/github/mcd-unison/aaa-curso/blob/main/ejemplos/plot_classifier_comparison.ipynb)
 
 ## Lecturas y enlaces recomendados
 
@@ -55,8 +49,9 @@ show_sidebar: false
   
 2. El [curso de Machine Learning en Coursera](https://www.coursera.org/learn/machine-learning) de [Andrew Ng](https://www.andrewng.org) es posiblemente el curso en linea más popular en Aprendizaje Automático. El profesor es magistral y explica los métodos sin requerir conocimientos en matemáticas, lo que hace que el curso sea a un nivel bastante superficial, pero muy recomendable.
 
-3. [The Elements of Statistical Learning](https://hastie.su.domains/ElemStatLearn/) el cual se encuentra en la biblioteca de la DCEN y la biblioteca digital. Una buena introducción (no sencilla) a la teoría del aprendizaje y las SVM.
+3. [The Elements of Statistical Learning](https://hastie.su.domains/ElemStatLearn/) el cual se encuentra en la biblioteca de la DCEN y la biblioteca digital. Muy teórico, para quien quiera profundizar mas en las bases del Aprendizaje Automñatico.
 
+4. [An Introduction to Statistical Learning](https://www.statlearning.com) de los mismos autores del libro de *Elements* pero a un nivel mas *undergraduate*, está la versión del libro con ejemplos en R y la versión con ejemplos en python.
 
 4. [Hands-On machine learning with scikit-learn and tensorflow : concepts, tools, and techniques to build intelligent systems](http://www.bibliotecas.uson.mx/sib_acervodet.aspx?bib=15&c1=Titulo&c2=Titulo&t1=Hands-On%20machine%20learning%20with%20scikit-learn%20and%20tensorflow&t2=&cat=) es un texto muy aplicado, con mucho código y poca teoría. Es mi recomendación para buscar como hacer prácticamente cosas y no te gusta buscarlas en internet. Aquí dejo una liga con [libretas jupyter con los ejemplos del libro](https://github.com/ageron/handson-ml3)
 
@@ -64,7 +59,7 @@ show_sidebar: false
   
 ## Repositorios de datos con problemas de aprendizaje automático
 
-1. [Kaggle](https://www.kaggle.com) es la puerta de entrada a básicamente la mayor parte de las habilidades en ML que se requieren para Ciencia de Datos. El sitio incluye:
+1. [Kaggle](https://www.kaggle.com) es la puerta de entrada a básicamente la mayor parte de las habilidades en ML que se requieren. El sitio incluye:
 
     1. Datos reales y sintéticos para practicar y aprender
     
@@ -81,7 +76,3 @@ show_sidebar: false
 ## Actividades de aprendizaje a realizar
 
 1. [Ethics in AI and Data Science](https://enterprise.edx.org/uni-sonora/course/LinuxFoundationX+LFS112x?). Curso de [EdX](https://www.edx.org) desarrollado por la *Linux Foundation*. El curso se encuentra de forma gratuita para los estudiantes de la Universidad de Sonora gracias al *Edx Campus*.
-
-2.  [Build your first Machine Learning Pipeline using Dataiku](https://www.coursera.org/programs/universidad-de-sonora-on-coursera-ggm7m/data-science/all-data-science?productId=zQEpc78BEeuDZhJOHjRP6Q&productType=course&showMiniModal=true&source=browse). Curso de [Coursera Project Network de la Universdad de Sonora](https://www.coursera.org/programs/universidad-de-sonora-on-coursera-ggm7m/?currentTab=CATALOG) donde exploramos el 
-
-3. [Machine learning with scikit-learn](https://campus.datacamp.com/courses/supervised-learning-with-scikit-learn/). Curso de [DataCamp](http://datacamp.com/).

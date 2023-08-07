@@ -17,7 +17,7 @@
   link: /#
   dropdown:
   - name: Teoría
-    link: /#
+    link: /t_teoria/
   - name: Lineales
     link: /#
   - name: No Lineales

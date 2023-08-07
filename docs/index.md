@@ -1,6 +1,6 @@
 ---
 title: Curso Reconocimiento de Patrones
-subtitle: Licenciatura en Coencoas de la Computación, Universidad de Sonora
+subtitle: Licenciatura en Ciencias de la Computación, Universidad de Sonora
 layout: page
 hero_image: https://github.com/ml-unison/ml-unison.github.io/raw/main/docs/img/alt-banner.jpg
 hero_darken: true

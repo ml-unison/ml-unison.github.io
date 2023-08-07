@@ -4,14 +4,14 @@ _class: lead
 paginate: true
 backgroundColor: #fff
 backgroundImage: url('https://marp.app/assets/hero-background.svg')
+marp: false
 ---
 
-![bg left:40% 40%](logo_mcd.png)
+![bg left:35% 35%](logo.jpg)
 
 # **¿Que es el aprendizaje supervisado?**
 
-Curso Aprendizaje Automático Aplicado
-
+Curso Reconocimiento de Patrones LCC/UNISON
 Julio Waissman
 
 ---
@@ -134,8 +134,9 @@ y el aprendizaje consiste en seleccionar un $h^* \in \mathcal{H}$
 
 # Ejemplo
 
-Si $X = \mathbb{R}$ y
-
+Si 
+$$X = \mathbb{R}$$ 
+y 
 $$h_i(x) = w_i x + b_i$$
 
 - ¿Cual es el vector $\theta$?

@@ -1,0 +1,41 @@
+- name: Temas
+  link: /#
+  dropdown:
+    - name: Introducción 
+      link: /intro/
+    - name: Modelos lineales de aprendizaje supervisado
+      link: /lineales/
+    - name: Modelos no lineales de aprendizaje supervisado
+      link: /nolineales/
+    - name: Redes neuronales
+      link: /rn/
+    - name: Aprendizaje no supervisado
+      link: /nosupervisado/
+    - name: Sistemas recomendadores
+      link: /recsys/
+- name: Tareas
+  link: /#
+  dropdown:
+  - name: Teoría
+    link: /#
+  - name: Lineales
+    link: /#
+  - name: No Lineales
+    link: /#
+  - name: RN
+    link: /#
+  - name: No supervisado
+    link: /#
+  - name: Recsys
+    link: /#
+- name: Proyecto
+  link: /#
+  dropdown:
+    - name: Recopilación y limpieza de datos
+      link: /limpieza/
+    - name: Análisis exploratorio y definición de problema
+      link: /definiciones/
+    - name: Modelos de aprendizaje
+      link: /solucion/
+    - name: El proyecto completo
+      link: /reporte/

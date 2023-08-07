@@ -73,6 +73,3 @@ show_sidebar: false
     
 2. [UCI database repository](https://archive.ics.uci.edu/ml/index.php) Es el sitio más clásico (venerable y feo, por cierto) de conjuntos de datos para tareas de Aprendizaje Automñatico. Es un poco complicada la navegación y entender la organización de los datos, pero es realmente un muy buen sitio para escoger problemas a resolver.
 
-## Actividades de aprendizaje a realizar
-
-1. [Ethics in AI and Data Science](https://enterprise.edx.org/uni-sonora/course/LinuxFoundationX+LFS112x?). Curso de [EdX](https://www.edx.org) desarrollado por la *Linux Foundation*. El curso se encuentra de forma gratuita para los estudiantes de la Universidad de Sonora gracias al *Edx Campus*.

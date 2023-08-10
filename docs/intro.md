@@ -10,14 +10,13 @@ show_sidebar: false
 
 ## Presentaciones
 
-1. [¿Qué es el aprendizaje automático?](https://github.com/mcd-unison/aaa-curso/raw/main/slides/intro-curso.pptx) 
+1. [¿Qué es el aprendizaje automático?](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/intro-curso.pptx) 
 
-2. [¿Qué es el aprendizaje supervisado?](https://github.com/mcd-unison/aaa-curso/raw/main/slides/intro-supervisado.pdf)
+2. [¿Qué es el aprendizaje supervisado?](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/intro-supervisado.pdf)
 
-3. [¿En que sentido el aprendizaje supervisado es posible?](https://github.com/mcd-unison/aaa-curso/raw/main/slides/generalizacion.pdf)
+3. [¿En que sentido el aprendizaje supervisado es posible?](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/generalizacion.pdf)
 
-4. [Mi primer modelo de aprendizaje](https://github.com/mcd-unison/aaa-curso/raw/main/slides/ejemplo_modelo.pdf) y como saber si mi modelo está bien usando diferentes métricas como [coeficiente de determinación](https://en.wikipedia.org/wiki/Coefficient_of_determination), [matrices de confusión](https://en.wikipedia.org/wiki/Confusion_matrix) o [la curva ROC](https://en.wikipedia.org/wiki/Receiver_operating_characteristic)
-
+4. [Mi primer modelo de aprendizaje](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/ejemplo_modelo.pdf) y como saber si mi modelo está bien usando diferentes métricas como [coeficiente de determinación](https://en.wikipedia.org/wiki/Coefficient_of_determination), [matrices de confusión](https://en.wikipedia.org/wiki/Confusion_matrix) o [la curva ROC](https://en.wikipedia.org/wiki/Receiver_operating_characteristic)
 
 5. [Presentación sobre generación de características (del curso de IA de Stanford)](https://github.com/IA-UNISON/material/raw/master/presentaciones/non-linear-features.pdf)
 

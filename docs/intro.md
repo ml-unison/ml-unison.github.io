@@ -18,7 +18,7 @@ show_sidebar: false
 
 4. [¿En que sentido el aprendizaje supervisado es posible?](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/generalizacion.pdf)
 
-5. [El dilema de sesgo y varianza en modelos de aprendizaje (del curso de Caltech)](https://home.work.caltech.edu/slides/slides08.pdf) 
+5. [El dilema de sesgo y varianza en modelos de aprendizaje (del curso de Caltech)](https://home.work.caltech.edu/slides/slides08.pdf) y una [libretita que lo ilustra](https://github.com/ml-unison/ml-unison.github.io/blob/main/ejemplos/biasvariance.ipynb) 
 
 6. [Presentación sobre generación de características (del curso de IA de Stanford)](https://github.com/IA-UNISON/material/raw/master/presentaciones/non-linear-features.pdf)
 

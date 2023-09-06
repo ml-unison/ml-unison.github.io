@@ -32,18 +32,6 @@ show_sidebar: false
 4. Unas libretas de ejemplo para ejecutar en Kaggle. Un [tutorial de SVM para clasificación](https://www.kaggle.com/prashant111/svm-classifier-tutorial), [otro de múltiples clases, usando búsqueda exhaustiva sobre los valores de los parámetros](https://www.kaggle.com/pranathichunduru/svm-for-multiclass-classification/notebook). Por último [otro tutorial](https://www.kaggle.com/faressayah/support-vector-machine-pca-tutorial-for-beginner/notebook) que usa algunas de las bases de datos más usadas en los tutoriales y cursos de aprendizaje automático.
 
 
-## Libretas *jupyter*
-
-1. [Regresión lineal](https://colab.research.google.com/github/mcd-unison/aaa-curso/blob/main/ejemplos/reg_lineal.ipynb)
-
-2. [Regresión logística](https://colab.research.google.com/github/mcd-unison/aaa-curso/blob/main/ejemplos/reg_logistica.ipynb)
-
-3. [Regularización](https://colab.research.google.com/github/mcd-unison/aaa-curso/blob/main/ejemplos/regularizacion_logistica.ipynb)
-
-4. [Una libreta sobre Naive Bayes](https://colab.research.google.com/github/jakevdp/PythonDataScienceHandbook/blob/master/notebooks/05.05-Naive-Bayes.ipynb).
-
-
-
 
 
 

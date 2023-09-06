@@ -1,7 +1,7 @@
 - name: Temas
   link: /#
   dropdown:
-    - name: Introducción 
+    - name: Aspectos básicos 
       link: /intro/
     - name: Modelos lineales de aprendizaje supervisado
       link: /lineales/
@@ -16,12 +16,12 @@
 - name: Tareas
   link: /#
   dropdown:
-  - name: Teoría
+  - name: Básicos
     link: /t_teoria/
   - name: Lineales
     link: /#
   - name: No Lineales
-    link: /#
+    link: /t_lineales/
   - name: RN
     link: /#
   - name: No supervisado

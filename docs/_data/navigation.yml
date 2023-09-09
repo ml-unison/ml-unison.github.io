@@ -19,9 +19,9 @@
   - name: Básicos
     link: /t_teoria/
   - name: Lineales
-    link: /#
-  - name: No Lineales
     link: /t_lineales/
+  - name: No Lineales
+    link: /#
   - name: RN
     link: /#
   - name: No supervisado

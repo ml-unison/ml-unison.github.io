@@ -11,6 +11,8 @@ show_sidebar: false
 
 ## Cursos
 
+1. [Supervised Learning with scikit-learn](https://www.datacamp.com/courses/supervised-learning-with-scikit-learn). urso de DataCamp para completar el track de Aprendizaje automático.
+
 1. [Linear Classifiers in Python](https://www.datacamp.com/courses/linear-classifiers-in-python). Curso de DataCamp para completar el track de Aprendizaje automático.
 
 

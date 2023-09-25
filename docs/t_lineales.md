@@ -20,5 +20,6 @@ show_sidebar: false
 
 1. [Regresión lineal](https://github.com/ml-unison/ml-unison.github.io/blob/main/ejemplos/reg_lineal.ipynb)
 
-1. [Regresión logística](https://github.com/ml-unison/ml-unison.github.io/blob/main/ejemplos/reg_logistica.ipynb)
+2. [Regresión logística](https://github.com/ml-unison/ml-unison.github.io/blob/main/ejemplos/reg_logistica.ipynb)
 
+3. [Regularización en regresión logística](https://github.com/ml-unison/ml-unison.github.io/blob/main/ejemplos/reg_logistica_regu.ipynb)

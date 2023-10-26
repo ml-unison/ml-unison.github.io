@@ -8,7 +8,7 @@
     - name: Modelos no lineales de aprendizaje supervisado
       link: /nolineales/
     - name: MLOps
-            /mlops/
+      link: /mlops/
     - name: Redes neuronales
       link: /rn/
     - name: Aprendizaje no supervisado
@@ -33,11 +33,9 @@
 - name: Proyecto
   link: /#
   dropdown:
-    - name: Recopilación y limpieza de datos
-      link: /limpieza/
-    - name: Análisis exploratorio y definición de problema
-      link: /definiciones/
-    - name: Modelos de aprendizaje
-      link: /solucion/
-    - name: El proyecto completo
-      link: /reporte/
+    - name: Spaceship Titanic
+      link: /titanic/
+    - name: Binary Prediction of Smoker Status using Bio-Signals
+      link: /biosignals/
+    - name: Estrés hídrico en Sonora
+      link: /presas/

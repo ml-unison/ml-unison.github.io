@@ -1,0 +1,91 @@
+\documentclass[11pt]{article}
+
+%% LaTeX Preamble - Common packages
+
+\usepackage[utf8]{inputenc}
+\usepackage[spanish]{babel}
+\usepackage{graphicx}
+\usepackage{amsmath,amssymb}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+
+\spanishdecimal{.}
+
+\title{Examen rápido No. 7}
+\author{Reconocimiento de Patrones (2023-2)}
+\date{Julio Waissman Vilanova} % delete this line to display the current date
+
+%%% BEGIN DOCUMENT
+\begin{document}
+
+\maketitle
+
+%\vspace{5mm}
+
+\textbf{Nombre}: \line(1,0){400}
+
+%\vspace{9mm}
+
+
+\begin{enumerate}
+
+\item Sea un nodo $\mathbf{A}$ en un árbol de decisión el cual tiene 35 ejemplos de la clase 1 y 43 ejemplos de la clase 2. El nodo tiene dos nodos hijos. El nodo hijo de la izquierda (nodo $\mathbf{B}$) consta de 5 ejemplos de la clase 1 y 25 ejemplos de la clase 2, mientras que el nodo hijo de la derecha (nodo $\mathbf{C}$) tiene 30 ejemplos de la clase 1 y 18 ejemplos de la clase 2. Calcular la entropía de cada nodo y la ganancia de información que se obtiene.
+
+    \begin{center}
+    \begin{tabular}{|c||p{5cm}|}
+    \hline
+    Entropía nodo $\mathbf{A}$ & \\
+    \hline
+    Entropía nodo $\mathbf{B}$ & \\
+    \hline
+    Entropía nodo $\mathbf{C}$ & \\
+    \hline
+    Ganancia de información & \\
+    \hline
+    \end{tabular}
+    \end{center}
+    
+    \item Encierre en un circulo los que sean métodos de prepoda de árboles de decisión:
+
+    \begin{center}
+    \begin{tabular}{|p{8cm}|p{8cm}|}
+    \hline
+    Pocos ejemplos en el nodo padre  & Todos los ejemplos son de la misma clase en el nodo padre \\
+    \hline
+    La ganancia de información es negativa & La ganancia de información es un valor pequeño positivo \\
+    \hline
+    La mayoría de los ejemplos en el nodo padre pertenecen a la misma clase & Existe igual número de ejemplos de cada clase en el nodo padre\\
+    \hline
+    Los nodos hijos clasifican mal el conjunto de prueba & Un nodo hijo tiene mucho más ejemplos que los otros nodos hijos\\
+    \hline
+    La ganancia de información es nula & Un nodo hijo no tiene ejemplos\\  
+    \hline
+    \end{tabular}
+    \end{center}
+    
+    \item (10 puntos) En 4 lineas de texto como máximo, indique cual es la idea del \emph{Bagging}
+
+    \begin{center}
+    \begin{tabular}{l p{16cm}}
+    1 & \\
+    \hline
+    2 & \\
+    \hline
+    3 & \\
+    \hline
+    4 & \\
+    \hline
+    \end{tabular}
+    \end{center}
+    
+    \item (10 puntos) Indique cual es la principal diferencia entre \emph{Bagging} y \emph{Boosting} en una sola línea (dos si tienes la letra grande).
+    
+    \begin{center}
+    \begin{tabular}{l p{16cm}}
+    1 & \\
+    \hline
+    2 & \\
+    \hline
+    \end{tabular}
+    \end{center}
+\end{enumerate}
+\end{document}

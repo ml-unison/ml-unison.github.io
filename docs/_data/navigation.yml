@@ -7,6 +7,8 @@
       link: /lineales/
     - name: Modelos no lineales de aprendizaje supervisado
       link: /nolineales/
+    - name: MLOps
+            /mlops/
     - name: Redes neuronales
       link: /rn/
     - name: Aprendizaje no supervisado

@@ -15,7 +15,7 @@ El problema a resolver se basa en datos sintéticos, en los cuales se ofrecen un
 
 La competencia se puede acceder aquí: 
 
-[https://www.kaggle.com/competitions/playground-series-s3e24/data](https://www.kaggle.com/competitions/spaceship-titanic)
+[https://www.kaggle.com/competitions/playground-series-s3e24/](https://www.kaggle.com/competitions/playground-series-s3e24/)
 
 Recuerda que tienes un tiempo limitado para participar, ya que al cerrarse la convocatoria no vas a poder someter. Este requisito de trabajar en tiempos limitados es muy formativo para el mundo profesional, en donde es importante aprender a hacer compromisos de calidad en función de las limitantes temporales o de equipamiento a las que se enfrente uno.
 

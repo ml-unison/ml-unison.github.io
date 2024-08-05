@@ -10,7 +10,7 @@ show_sidebar: false
 
 | **Profesor**    | Julio Waissman (julio.waissman@unison.mx)  |
 | **Horarios**    | Lunes a viernes de 9:00 a 10:00 hrs        |
-| **Lugar**       | Salón 104, edificio 3K-4                   |
+| **Lugar**       | Salón 203, edificio 3K-4                   |
 
 ## Objetivos del curso
 
@@ -26,71 +26,59 @@ Los objetivos de este curso son:
 
 Las competencias que queremos ayudar a desarrollar en los estudiantes a lo largo del semestre son las siguientes:
 
-1. Utilizar las herramientas más populares en python para el desarrollo de modelos de aprendizaje supervisado en Ciencia de Datos.
+1. Utilizar las herramientas más populares en python para el desarrollo de modelos de aprendizaje supervisado.
 2. Saber decidir cual modelo de aprendizaje supervisado es el más adaptado para diferentes problemas y medir la calidad de éste.
 3. Entender y saber utilizar métodos de aprendizaje no supervisado para un proceso de minería de datos.
 
 ## Temario
 
-1. **Introducción** 
+1. **Introducción** (2 semanas)
    1. ¿Que es el aprendizaje automático?
-   2. ¿El aprendizaje supervisado es posible? 
-   3. Un ejemplo: regresión lineal y logística
-   4. El dilema de sesgo *versus* varianza
-   5. Regularización 
-   6. Validación 
-   7. Medición de error
-   8. Curvas de aprendizaje
-   9. MLOps y DataOps ¿Para qué utilizarlas?
-   10. Experimentos, métricas y funciones de costo
-2. **Modelos lineales de aprendizaje supervisado** 
-   1. Modelos lineales generalizados
-   2. Máquinas de vectores de soporte
-3. **Modelos no lineales de aprendizaje supervisado** 
-   1. Modelos por árboles de decisión
-   2. Modelos de *ensamble*
-4. **Redes neuronales, una introducción** 
-   1. Conceptos teóricos sobre ejemplos sencillos
-   2. El perceptrón multicapa (MLP)
-   3. Redes Convolucionales (CNN)
-5. **Aprendizaje no supervisado** 
+   2. El proceso de desarrollo de un modelo
+   3. Consideraciones éticas
+   4. Ingesta y procesamiento de datos con pandas
+   5. Introducción a la ingeniería de características
+2. **Aprendizaje no supervisado** (2 semanas)
    1. Reagrupamiento aglomerativo
    2. Reagrupamiento jerárquico
    3. Reducción de la dimensionalidad
-6. **Sistemas de Recomendación** 
-   1. Nociones básicas
-   2. Métodos basados en matriz *Elementos/Usuarios*
-   3. Métodos que utilizan metadatos 
-   4. Métricas para sistemas de recomendación
+3. **Bases de aprendizaje supervisado** (2 semanas)
+   1. ¿En que sentido el aprendizaje supervisado es posible?
+   2. Primeros modelos: regresión lineal y logística
+   3. El dilema de sesgo *versus* varianza
+   4. Regularización y validación 
+   5. Medición de error y curvas de aprendizaje
+4. **Modelos lineales de aprendizaje supervisado** (2 semanas)
+   1. Modelos lineales generalizados
+   2. Máquinas de vectores de soporte
+5. **Modelos no lineales de aprendizaje supervisado** (2 semanas)
+   1. Modelos por árboles de decisión
+   2. Modelos de *ensamble*
+6. **Redes neuronales, una introducción** (3 semanas)
+   1. Conceptos teóricos sobre ejemplos sencillos
+   2. Redes Convolucionales (CNN)
+   3. Transferencia del aprendizaje y modelos preentrenados
+7. **Tópicos selectos** (3 semanas)
+   1. A determinar en grupo, siempre que se pueda llegar con tiempo.
 
 
 ## Herramientas de enseñanza
 
 Para este curso vamos a contar con diversas herramientas de enseñanza
-que complementen las técnicas vistas en clases presenciales a distancia, 
-y al mismo tiempo se generen una serie de evidencias de las competencias
-desarrolladas a lo largo del curso.
+que complementen las técnicas vistas en clases presenciales a distancia, y al mismo tiempo se generen una serie de evidencias de las competencias desarrolladas a lo largo del curso.
 
 
 ![](https://github.com/ml-unison/ml-unison.github.io/raw/main/docs/img/datacamp.jpg)
 
 
 Este curso tiene el soporte de [DataCamp](https://www.datacamp.com/) , una plataforma intuitiva para el aprendizaje de competencias para ciencia de datos.
-DataCamp cuenta con cursos, proyectos, tutoriales y rutas de aprendizaje para aprender desde los conceptos básicos hasta los temas avanzados de
-ciencia de datos usando R, python y SQL. DataCamp ofrece 350+ cursos por instructores expertos en tópicos como importación de datos, visualización 
-y aprendizaje automático entre otros.
 
-Vamos a utilizar *DataCamp for the Classroom* este semestre. DataCamp apoya la educación alrededor del muno con esta iniciativa libre. Puedes encontrar más información al respecto en
-[datacamp.com/groups/education](datacamp.com/groups/education)
+DataCamp cuenta con cursos, proyectos, tutoriales y rutas de aprendizaje para aprender desde los conceptos básicos hasta los temas avanzados de ciencia de datos usando R, python y SQL. DataCamp ofrece 350+ cursos por instructores expertos en tópicos como importación de datos, visualización y aprendizaje automático entre otros.
 
-![](https://github.com/ml-unison/ml-unison.github.io/raw/main/docs/img/edx.png)
-
-[*Online Campus Essentials*](https://campus.edx.org/es/essentials) proporciona acceso ilimitado a determinados cursos de tecnología, informática, negocios y otras temáticas. La plataforma de aprendizaje activo de edX motiva e involucra a los estudiantes para apoyar su progreso y dominio de una materia. Los estudiantes obtienen certificados verificados al completar el curso con éxito.
-
-*Online Campus Essentials* Enriquece el aprendizaje de los estudiantes con módulos y tareas del curso con actividades de aprendizaje asíncronas y a ritmo propio en cualquier dispositivo. Las herramientas de la plataforma de edX permiten al profesorado y a los administradores hacer seguimiento de las inscripciones, la participación y medir el rendimiento.
+Vamos a utilizar *DataCamp for the Classroom* este semestre. DataCamp apoya la educación alrededor del muno con esta iniciativa libre. Puedes encontrar más información al respecto en [datacamp.com/groups/education](datacamp.com/groups/education). Agradecemos a *DataCamp* por el apoyo para este curso y ofrecerte esta gran herramienta de formación complementaria a los estudiantes del curso sin costo para los estudiantes.
 
 
 ![](https://www.nvidia.com/content/dam/en-zz/Solutions/about-nvidia/logo-and-brand/01-nvidia-logo-vert-500x200-2c50-p.png)
 
-[*NVIDIA Deep Learning Institute (DLI)*](https://www.nvidia.com/en-us/training/). Cursos en línea principalmente sobre redes neuronales profundas. Una certificación con una buena introducción al uso de modelos de aprendizaje profundo.
+[*NVIDIA Deep Learning Institute (DLI)*](https://www.nvidia.com/en-us/training/). Cursos en línea principalmente sobre redes neuronales profundas. Una certificación con una buena introducción al uso de modelos de aprendizaje profundo. Agradecemos a NVIDIA por el apoyo y permitirnos ofrecer sus cursos de formación sin costo para los estudiantes para este curso.
 

@@ -34,7 +34,7 @@ show_sidebar: false
 ## La librerías para Aprendizaje automático que vamos a usar
 
 1. [*Sci-Kit Learn*](https://scikit-learn.org/), la librería más utilizada (por mucho). Para grandes cantidades de datos [pyspark](https://spark.apache.org/docs/latest/api/python/index.html) incluye el módulo `MLlib` para flujos de aprendizaje automático. Y por último, el nuevo muchacho en el barrio: [pycaret](https://pycaret.org), que ha tenido un crecimiento importante recientemente. 
-   
+2. [Introducción a `pandas`](https://github.com/ml-unison/ml-unison.github.io/raw/main/ejemplos/intro-pandas.ipynb)
 
 ## Lecturas y enlaces recomendados
 

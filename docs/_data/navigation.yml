@@ -1,41 +1,26 @@
 - name: Temas
   link: /#
   dropdown:
-    - name: Aspectos básicos 
+    - name: Introducción 
       link: /intro/
-    - name: Modelos lineales de aprendizaje supervisado
-      link: /lineales/
-    - name: Modelos no lineales de aprendizaje supervisado
-      link: /nolineales/
-    - name: MLOps
-      link: /mlops/
-    - name: Redes neuronales
-      link: /rn/
     - name: Aprendizaje no supervisado
       link: /nosupervisado/
-    - name: Sistemas recomendadores
-      link: /recsys/
-- name: Tareas
-  link: /#
-  dropdown:
-  - name: Básicos
-    link: /t_teoria/
-  - name: Lineales
-    link: /t_lineales/
-  - name: No Lineales
-    link: /#
-  - name: RN
-    link: /#
-  - name: No supervisado
-    link: /#
-  - name: Recsys
-    link: /#
+    - name: Aprendizaje supervisado
+      link: /supervisado/
+    - name: Modelos lineales
+      link: /lineales/
+    - name: Modelos no lineales
+      link: /nolineales/
+    - name: Redes neuronales
+      link: /rn/
+    - name: Topicos selectos
+      link: /topicos/
 - name: Proyecto
   link: /#
   dropdown:
-    - name: Spaceship Titanic
-      link: /titanic/
-    - name: Binary Prediction of Smoker Status using Bio-Signals
-      link: /biosignals/
-    - name: Estrés hídrico en Sonora
-      link: /presas/
+    - name: Parte1, Datos y exploración
+      link: /proyecto1/
+    - name: Parte2, Modelos de base
+      link: /proyecto2/
+    - name: Parte3, Modelos avanzados
+      link: /proyecto3/

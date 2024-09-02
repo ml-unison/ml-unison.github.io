@@ -7,11 +7,11 @@ backgroundImage: url('https://marp.app/assets/hero-background.svg')
 marp: true
 ---
 
-![bg left:40% 40%](logo_mcd.png)
-
 # **Modelos sencillitos de aprendizaje**
 
-Curso Aprendizaje Automático Aplicado
+### Curso Reconocimiento de Patrones 
+
+**LCC/UNISON**
 
 Julio Waissman
 

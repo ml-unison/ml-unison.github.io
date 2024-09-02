@@ -7,11 +7,13 @@ backgroundImage: url('https://marp.app/assets/hero-background.svg')
 marp: false
 ---
 
-![bg left:35% 35%](logo.jpg)
 
 # **¿Que es el aprendizaje supervisado?**
 
-Curso Reconocimiento de Patrones LCC/UNISON
+### Curso Reconocimiento de Patrones 
+
+**LCC/UNISON**
+
 Julio Waissman
 
 ---

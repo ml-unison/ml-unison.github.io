@@ -29,6 +29,6 @@ Este concurso te desafía a desarrollar un modelo predictivo capaz de analizar d
    3. Preprocesamiento de los datos, y su codificación para usarlos como entrada a un modelo. Hay que tener en cuenta que este preprocesamiento debe poder integrarse mediante *pipelines* al modelo final.
    4. Decidir si es un problema de clasificación o de regresión (ambos podrían aplicar) y justificar porqué.
    5. Utilizar un modelo inicial simple que permita establecer un *baseline* del problema.
-   6. Usar algun metodo de busqueda de hiperparámetros y seleccionar el modelo de aprendizaje que consideres más adecuado. Justificar la selección.
+   6. Usar algún método de búsqueda de hiperparámetros y seleccionar el modelo de aprendizaje que consideres más adecuado. Justificar la selección.
    7. Revisar y mostrar la calidad del modelo retenido usando métodos (los que consideren mejor adaptados) como *k-cross-fold-validation*, curvas de aprendizaje, curvas RoC, matrices de confusión o métricas de entrenamiento y validación.
 3. Anexar el enlace del *leaderboard* con su evaluación final como equipo. Recuerden que pueden someter varias modelos, pero al final tendrán que escoger uno solo para su evaluación final.

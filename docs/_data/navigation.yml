@@ -18,9 +18,6 @@
 - name: Proyecto
   link: /#
   dropdown:
-    - name: Parte1, Datos y exploración
+    - name: Proyecto
       link: /proyecto1/
-    - name: Parte2, Modelos de base
-      link: /proyecto2/
-    - name: Parte3, Modelos avanzados
-      link: /proyecto3/
+

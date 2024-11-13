@@ -82,3 +82,8 @@ Vamos a utilizar *DataCamp for the Classroom* este semestre. DataCamp apoya la e
 
 [*NVIDIA Deep Learning Institute (DLI)*](https://www.nvidia.com/en-us/training/). Cursos en línea principalmente sobre redes neuronales profundas. Una certificación con una buena introducción al uso de modelos de aprendizaje profundo. Agradecemos a NVIDIA por el apoyo y permitirnos ofrecer sus cursos de formación sin costo para los estudiantes para este curso.
 
+
+## Exámenes
+
+- [Primer examen](https://github.com/ml-unison/ml-unison.github.io/raw/main/docs/examenes/e1-2024-2.pdf)
+- [Segundo examen](https://github.com/ml-unison/ml-unison.github.io/raw/main/docs/examenes/e2-2024-2.pdf)

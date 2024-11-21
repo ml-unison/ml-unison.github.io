@@ -24,6 +24,11 @@ show_sidebar: false
 
 3. Una presentación sobre [transferencia del aprendizaje](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/transfer_learning.pptx) (tambien [en pdf](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/transfer_learning.pdf)).
 
+## Redes recurrentes
+
+1. [Una presentción general](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/RNN-slides.pdf)
+
+2. [Una libreta para hacer una RNN a pie](https://colab.research.google.com/github/ml-unison/ml-unison-github.io/blob/main/ejemplos/Estados-ocultos.ipynb)
 
 ## Algunas libretas con ejemplos en pyTorch
 

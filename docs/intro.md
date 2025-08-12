@@ -12,6 +12,13 @@ show_sidebar: false
 
 1. [Bienvenida al curso](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/intro-curso-2025.pptx) 
 
+## La importancia de tomar notas
+
+1. [*Paper Notebooks vs. Mobile Devices: Brain Activation Differences During Memory Retrieval*](https://www.frontiersin.org/journals/behavioral-neuroscience/articles/10.3389/fnbeh.2021.634158/full), con un [artículo asociado en *Neurosciences News*](https://neurosciencenews.com/hand-writing-brain-activity-18069/).
+2. El artículo [*Handwriting but not typewriting leads to widespread brain connectivity: a high-density EEG study with implications for the classroom*](https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2023.1219945/full) y una [explicación a modo de divulgación científica de *Scientific American*](https://www.scientificamerican.com/article/why-writing-by-hand-is-better-for-memory-and-learning/#:~:text=A%20recent%20study%20in%20Frontiers,vision%2C%20sensory%20processing%20and%20memory.) 
+3. [Una entrada de la Universidad de Chicago](https://teaching.uic.edu/cate-teaching-guides/inclusive-equity-minded-teaching-practices/note-taking/) y una [entradita en LinkedIn](https://www.linkedin.com/pulse/power-note-taking-enhancing-thinking-learning-rawda-eada-56qkf/) con ideas y técnicas para tomar notas.
+
+
 ## Libretas
 
 1. [Introducción a `pandas`](https://colab.research.google.com/github/ml-unison/ml-unison.github.io/blob/main/ejemplos/intro-pandas.ipynb)

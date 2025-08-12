@@ -10,7 +10,7 @@ show_sidebar: false
 
 ## Presentaciones
 
-1. [¿Qué es el aprendizaje automático?](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/intro-curso-2025.pptx) 
+1. [Bienvenida al curso](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/intro-curso-2025.pptx) 
 
 ## Libretas
 

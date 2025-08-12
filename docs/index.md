@@ -9,8 +9,9 @@ show_sidebar: false
 
 
 | **Profesor**    | Julio Waissman (julio.waissman@unison.mx)  |
-| **Horarios**    | Lunes a viernes de 9:00 a 10:00 hrs        |
-| **Lugar**       | Salón 203, edificio 3K-4                   |
+| **Horarios**    | Martes y viernes de 8:00 a 10:00 hrs       |
+|                 | Miércoles de 9:00 a 10:00 hrs              |
+| **Lugar**       | Salón 102, edificio 3K-4                   |
 
 ## Objetivos del curso
 
@@ -62,28 +63,8 @@ Las competencias que queremos ayudar a desarrollar en los estudiantes a lo largo
    1. A determinar en grupo, siempre que se pueda llegar con tiempo.
 
 
-## Herramientas de enseñanza
+## Evaluación
 
-Para este curso vamos a contar con diversas herramientas de enseñanza
-que complementen las técnicas vistas en clases presenciales a distancia, y al mismo tiempo se generen una serie de evidencias de las competencias desarrolladas a lo largo del curso.
-
-
-![](https://github.com/ml-unison/ml-unison.github.io/raw/main/docs/img/datacamp.jpg)
-
-
-Este curso tiene el soporte de [DataCamp](https://www.datacamp.com/) , una plataforma intuitiva para el aprendizaje de competencias para ciencia de datos.
-
-DataCamp cuenta con cursos, proyectos, tutoriales y rutas de aprendizaje para aprender desde los conceptos básicos hasta los temas avanzados de ciencia de datos usando R, python y SQL. DataCamp ofrece 350+ cursos por instructores expertos en tópicos como importación de datos, visualización y aprendizaje automático entre otros.
-
-Vamos a utilizar *DataCamp for the Classroom* este semestre. DataCamp apoya la educación alrededor del muno con esta iniciativa libre. Puedes encontrar más información al respecto en [datacamp.com/groups/education](datacamp.com/groups/education). Agradecemos a *DataCamp* por el apoyo para este curso y ofrecerte esta gran herramienta de formación complementaria a los estudiantes del curso sin costo para los estudiantes.
-
-
-![](https://www.nvidia.com/content/dam/en-zz/Solutions/about-nvidia/logo-and-brand/01-nvidia-logo-vert-500x200-2c50-p.png)
-
-[*NVIDIA Deep Learning Institute (DLI)*](https://www.nvidia.com/en-us/training/). Cursos en línea principalmente sobre redes neuronales profundas. Una certificación con una buena introducción al uso de modelos de aprendizaje profundo. Agradecemos a NVIDIA por el apoyo y permitirnos ofrecer sus cursos de formación sin costo para los estudiantes para este curso.
-
-
-## Exámenes
-
-- [Primer examen](https://github.com/ml-unison/ml-unison.github.io/raw/main/docs/examenes/e1-2024-2.pdf)
-- [Segundo examen](https://github.com/ml-unison/ml-unison.github.io/raw/main/docs/examenes/e2-2024-2.pdf)
+- Actividades de aprendizaje (35%)
+- Exámenes (35%)
+- Proyecto final (30%)

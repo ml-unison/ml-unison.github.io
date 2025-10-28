@@ -68,3 +68,9 @@ Las competencias que queremos ayudar a desarrollar en los estudiantes a lo largo
 - Actividades de aprendizaje (35%)
 - Exámenes (35%)
 - Proyecto final (30%)
+
+## Ejemplo de exámenes
+
+- [Examen para realizar en clase](https://github.com/ml-unison/ml-unison.github.io/raw/main/docs/examenes/e1-2024-2.pdf)
+
+- [Examen para llevar](https://github.com/ml-unison/ml-unison.github.io/raw/main/docs/examenes/e2-2024-2.pdf)

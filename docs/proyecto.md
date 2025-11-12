@@ -8,6 +8,7 @@ show_sidebar: false
 ---
 
 
+
 Este proyecto integrador de basa en dos competencias de Kaggle, en la que deberán competir en equipos de mínimo 1 y máximo 3 integrantes, y entregar lo que se describe en la sección de *Entregables*. 
 
 ## Predict the Introverts from the Extroverts

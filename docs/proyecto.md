@@ -7,20 +7,38 @@ hero_darken: true
 show_sidebar: false
 ---
 
-## Child Mind Institute — Problematic Internet Use
 
-Este proyecto integrador de basa en una competencia de Kaggle, en la que deberán competir en equipos de mínimo 1 y máximo 3 integrantes, y entregar lo que se describe en la sección de *Entregables*. La competencia de puede acceder [**en este enlace**](https://www.kaggle.com/competitions/child-mind-institute-problematic-internet-use/overview) 
+Este proyecto integrador de basa en dos competencias de Kaggle, en la que deberán competir en equipos de mínimo 1 y máximo 3 integrantes, y entregar lo que se describe en la sección de *Entregables*. 
 
-En la era digital actual, el uso problemático de internet entre niños y adolescentes es una preocupación creciente. Comprender mejor este problema es crucial para abordar problemas de salud mental como la depresión y la ansiedad.
+## Predict the Introverts from the Extroverts
 
-Los métodos actuales para medir el uso problemático de internet en niños y adolescentes suelen ser complejos y requieren evaluaciones profesionales. Esto crea barreras de acceso, culturales y lingüísticas para muchas familias. Debido a estas limitaciones, el uso problemático de internet a menudo no se mide directamente, sino que se asocia con problemas como la depresión y la ansiedad en los jóvenes.
+La competencia de puede acceder [**en este enlace**](https://www.kaggle.com/competitions/playground-series-s5e7) 
 
-Por el contrario, las mediciones de condición física son extremadamente accesibles y están ampliamente disponibles con una intervención mínima o sin necesidad de experiencia clínica. Los cambios en los hábitos físicos, como una peor postura, una dieta irregular y una actividad física reducida, son comunes en los usuarios excesivos de tecnología. Proponemos usar estos indicadores de condición física, que son fáciles de obtener, como proxies para identificar el uso problemático de internet, especialmente en contextos donde falta experiencia clínica o herramientas de evaluación adecuadas.
+¡Bienvenidos a la Serie de Desafíos de Kaggle 2025! Planeamos continuar con el espíritu de las ediciones anteriores, ofreciendo conjuntos de datos interesantes y accesibles para que nuestra comunidad practique sus habilidades de aprendizaje automático, y anticipamos una competencia cada mes.
 
-Este concurso te desafía a desarrollar un modelo predictivo capaz de analizar datos de actividad física de los niños para detectar indicadores tempranos de uso problemático de internet y tecnología. Esto permitirá intervenciones tempranas destinadas a promover hábitos digitales más saludables.
+Tu objetivo: Predecir si una persona es introvertida o extrovertida, considerando su comportamiento social y rasgos de personalidad.
+
+El objetivo de la serie *Tabular Playground* es ofrecer a la comunidad de Kaggle una variedad de desafíos relativamente sencillos que permitan aprender y perfeccionar habilidades en diferentes aspectos del aprendizaje automático y la ciencia de datos. Estos desafíos utilizan conjuntos de datos relativamente sencillos, generados sintéticamente a partir de datos reales, y brindan la oportunidad de experimentar rápidamente con diversas ideas de modelado y diseño de características, crear visualizaciones, etc.
+
+El uso de datos sintéticos para las competiciones de Playground nos permite encontrar un equilibrio entre disponer de datos del mundo real (con características identificadas) y garantizar que las etiquetas de prueba no sean de acceso público. Esto nos permite organizar competiciones con conjuntos de datos más interesantes que antes. 
 
 
-## Entregables
+
+## CSIRO - Image2Biomass Prediction
+
+La competencia de puede acceder [**en este enlace**](https://www.kaggle.com/competitions/csiro-biomass) 
+
+Los ganaderos suelen entrar en un potrero y hacerse una pregunta: "¿Hay suficiente pasto para el ganado?". Parece sencillo, pero la respuesta dista mucho de serlo. La biomasa del pasto —la cantidad de alimento disponible— determina cuándo pueden pastar los animales, cuándo los campos necesitan un descanso y cómo mantener la productividad de los pastos temporada tras temporada.
+
+Si la estimación es incorrecta, la tierra sufre; el alimento se desperdicia y los animales tienen dificultades. Si es correcta, todos ganan: mayor bienestar animal, producción más constante y suelos más sanos.
+
+Los métodos actuales dificultan esta evaluación innecesariamente. El método tradicional de "cortar y pesar" es preciso, pero lento e inviable a gran escala. Los medidores de placa y los capacitivos ofrecen lecturas más rápidas, pero no son fiables en condiciones variables. La teledetección permite una monitorización a gran escala, pero aún requiere validación manual y no puede diferenciar la biomasa por especies.
+
+Este concurso te reta a aportar soluciones más sostenibles al campo: crea un modelo que prediga la biomasa del pasto a partir de imágenes, mediciones de campo y conjuntos de datos disponibles públicamente. Trabajarás con un conjunto de datos anotados profesionalmente que abarca los pastos australianos en diferentes estaciones, regiones y combinaciones de especies, junto con valores NDVI para mejorar tus modelos.
+
+Si tienes éxito, no solo mejorarás los métodos de estimación, sino que también ayudarás a los ganaderos a tomar decisiones de pastoreo más acertadas, permitirás a los investigadores realizar un seguimiento más preciso de la salud de los pastos e impulsarás al sector agrícola hacia sistemas más sostenibles y productivos.
+
+## Entregables (por competencia)
 
 1. Cada equipo deberá estar registrado en *Kaggle* con las cuentas de cada uno de ustedes. 
 2. Ya sea en un repositorio de *GitHub* o dentro del mismo espacio de *Kaggle* (asociado con la competencia), subir una o varias libretas *públicas* con todo el proceso que siguieron. Lo que deberá tener como mínimo la, o las libretas es lo siguiente:

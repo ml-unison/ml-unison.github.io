@@ -9,6 +9,7 @@ show_sidebar: false
 
 ## Objetivo
 
+
 Este miniproyecto se encuentra dentro del conjunto de *playground* de los proyectos de *Kaggle*. Este proyecto tiene fecha de término, y hay una evaluación contra otros equipos. Los equipos con mejores resultados ganan merca de *Kaggle* a escoger. 
 
 El problema a resolver se basa en datos sintéticos, en los cuales se ofrecen una serie de biomarcadores de diferentes personas, y la tarea es poder predecir si la persona es fumadora o no. Los datos se generaron sintéticamente a partir de [este conjunto de datos reales](https://www.kaggle.com/datasets/gauravduttakiit/smoker-status-prediction-using-biosignals). La temática es relevante, y este es un ejemplo muy paradigmático de un tipo sencillo de problemas que resolver en aprendizaje automático.

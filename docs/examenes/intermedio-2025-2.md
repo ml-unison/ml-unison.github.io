@@ -1,7 +1,6 @@
 ---
 title: Preguntas Abiertas y de Investigación
-author: Examen intermedio de Reconocimiento de Patrones, parte 2
-date: 2025-2
+author: Examen intermedio de Reconocimiento de Patrones, parte 2 (2025-2)
 ---
 
 ## Pregunta 1: Regularización Adaptativa Híbrida 

@@ -7,8 +7,6 @@ hero_darken: true
 show_sidebar: false
 ---
 
-
-
 Este proyecto integrador de basa en dos competencias de Kaggle, en la que deberán competir en equipos de mínimo 1 y máximo 3 integrantes, y entregar lo que se describe en la sección de *Entregables*. 
 
 ## Predict the Introverts from the Extroverts
@@ -21,7 +19,7 @@ Tu objetivo: Predecir si una persona es introvertida o extrovertida, considerand
 
 El objetivo de la serie *Tabular Playground* es ofrecer a la comunidad de Kaggle una variedad de desafíos relativamente sencillos que permitan aprender y perfeccionar habilidades en diferentes aspectos del aprendizaje automático y la ciencia de datos. Estos desafíos utilizan conjuntos de datos relativamente sencillos, generados sintéticamente a partir de datos reales, y brindan la oportunidad de experimentar rápidamente con diversas ideas de modelado y diseño de características, crear visualizaciones, etc.
 
-El uso de datos sintéticos para las competiciones de Playground nos permite encontrar un equilibrio entre disponer de datos del mundo real (con características identificadas) y garantizar que las etiquetas de prueba no sean de acceso público. Esto nos permite organizar competiciones con conjuntos de datos más interesantes que antes. 
+El uso de datos sintéticos para las competiciones de *Playground* nos permite encontrar un equilibrio entre disponer de datos del mundo real (con características identificadas) y garantizar que las etiquetas de prueba no sean de acceso público. Esto nos permite organizar competiciones con conjuntos de datos más interesantes que antes. 
 
 
 
@@ -39,7 +37,9 @@ Este concurso te reta a aportar soluciones más sostenibles al campo: crea un mo
 
 Si tienes éxito, no solo mejorarás los métodos de estimación, sino que también ayudarás a los ganaderos a tomar decisiones de pastoreo más acertadas, permitirás a los investigadores realizar un seguimiento más preciso de la salud de los pastos e impulsarás al sector agrícola hacia sistemas más sostenibles y productivos.
 
-## Entregables (por competencia)
+## Entregables
+
+Por cada una de los dos competencias se deberá entregar lo siguiente:
 
 1. Cada equipo deberá estar registrado en *Kaggle* con las cuentas de cada uno de ustedes. 
 2. Ya sea en un repositorio de *GitHub* o dentro del mismo espacio de *Kaggle* (asociado con la competencia), subir una o varias libretas *públicas* con todo el proceso que siguieron. Lo que deberá tener como mínimo la, o las libretas es lo siguiente:

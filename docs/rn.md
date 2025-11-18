@@ -24,6 +24,8 @@ show_sidebar: false
 
 3. Una presentación sobre [transferencia del aprendizaje](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/transfer_learning.pptx) (tambien [en pdf](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/transfer_learning.pdf)).
 
+4. [¿Y que podemos hacer con redes convolucionales?](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/CNN_aplications.pdf) 
+
 ## Redes recurrentes
 
 1. [Una presentción general](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/RNN-slides.pdf)

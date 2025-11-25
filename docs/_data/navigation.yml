@@ -13,8 +13,8 @@
       link: /nolineales/
     - name: Redes neuronales
       link: /rn/
-    - name: Topicos selectos
-      link: /topicos/
+    - name: Operaciones de ML
+      link: /mlops/
 - name: Proyecto
   link: /#
   dropdown:

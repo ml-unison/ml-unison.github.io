@@ -9,8 +9,8 @@ show_sidebar: false
 
 ## Presentaciones
 
-1. [Una presentación inicial](https://github.com/mcd-unison/aaa-curso/raw/main/slides/mlops_intro.pdf)
-2. [Una presentación breve de MLFlow y su uso básico](https://github.com/mcd-unison/aaa-curso/raw/main/slides/mlflow_recortes.pdf)
+1. [Una presentación inicial](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/mlops_intro.pdf)
+2. [Una presentación breve de MLFlow y su uso básico](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/mlflow_recortes.pdf)
 
 
 ## Herramientas básicos

@@ -9,9 +9,8 @@ show_sidebar: false
 
 
 | **Profesor**    | Julio Waissman (julio.waissman@unison.mx)  |
-| **Horarios**    | Martes y viernes de 8:00 a 10:00 hrs       |
-|                 | Miércoles de 9:00 a 10:00 hrs              |
-| **Lugar**       | Salón 102, edificio 3K-4                   |
+| **Horarios**    | Lunes a viernes de 13:00 a 14:00 hrs       |
+| **Lugar**       | Salón 101, edificio 3K-4                   |
 
 ## Objetivos del curso
 
@@ -52,6 +51,7 @@ Las competencias que queremos ayudar a desarrollar en los estudiantes a lo largo
 4. **Modelos lineales de aprendizaje supervisado** (2 semanas)
    1. Modelos lineales generalizados
    2. Máquinas de vectores de soporte
+   3. Uso de MLOps para diseño de experimentos
 5. **Modelos no lineales de aprendizaje supervisado** (2 semanas)
    1. Modelos por árboles de decisión
    2. Modelos de *ensamble*
@@ -59,14 +59,17 @@ Las competencias que queremos ayudar a desarrollar en los estudiantes a lo largo
    1. Conceptos teóricos sobre ejemplos sencillos
    2. Redes Convolucionales (CNN)
    3. Transferencia del aprendizaje y modelos preentrenados
-7. **Tópicos selectos** (3 semanas)
-   1. A determinar en grupo, siempre que se pueda llegar con tiempo.
+7. **Series de tiempo** (2 semanas)
+   1. Modelos autoregresivos
+   2. Modelos neuronales para series de tiempo
+8. **Despliegue de modelos** (1 semana)
+   1. Despliegue usando MLOps
 
 
 ## Evaluación
 
 - Actividades de aprendizaje (35%)
-- Exámenes (35%)
+- Exámenes rápidos e intermedio (35%)
 - Proyecto final (30%)
 
 ## Ejemplo de exámenes
@@ -74,3 +77,6 @@ Las competencias que queremos ayudar a desarrollar en los estudiantes a lo largo
 - [Examen para realizar en clase](https://github.com/ml-unison/ml-unison.github.io/raw/main/docs/examenes/e1-2024-2.pdf)
 
 - [Examen para llevar](https://github.com/ml-unison/ml-unison.github.io/raw/main/docs/examenes/e2-2024-2.pdf)
+
+- [Examen intermedio para llevar](https://github.com/ml-unison/ml-unison.github.io/raw/main/docs/examenes/intermedio-2025-2.pdf)
+

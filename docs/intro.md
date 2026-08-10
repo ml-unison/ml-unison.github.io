@@ -18,6 +18,12 @@ show_sidebar: false
 2. El artículo [*Handwriting but not typewriting leads to widespread brain connectivity: a high-density EEG study with implications for the classroom*](https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2023.1219945/full) y una [explicación a modo de divulgación científica de *Scientific American*](https://www.scientificamerican.com/article/why-writing-by-hand-is-better-for-memory-and-learning/#:~:text=A%20recent%20study%20in%20Frontiers,vision%2C%20sensory%20processing%20and%20memory.) 
 3. [Una entrada de la Universidad de Chicago](https://teaching.uic.edu/cate-teaching-guides/inclusive-equity-minded-teaching-practices/note-taking/) y una [entradita en LinkedIn](https://www.linkedin.com/pulse/power-note-taking-enhancing-thinking-learning-rawda-eada-56qkf/) con ideas y técnicas para tomar notas.
 
+## DataCamp
+
+Como complemento del curso vamos a utilizar la plataforma de aprendizaje en linea [DataCamp](https://www.datacamp.com/). Esta plataforma tiene cursos de diferentes niveles y sobre diferentes temas, incluyendo Aprendizaje Automático. Les recomiendo que, ademñas de los cursos que les pda, aprovechen la oportunidd de explorar otros cursos que les puedan interesar.
+
+[Este es el enlace para registrarse en el curso deDataCamp](https://www.datacamp.com/groups/shared_links/3eb75dc4c6ecf58c393e257e42c989145bbd57a3e914e60c087b8c6a078d2dae). Antes de agregarse hay que crear una cuenta con su crreo aXXXXXXXXX@unison.mx. Asegurate que venga tu nombre porque de ahí vamos a sacar las calificaciones de las actividades a realizar en DataCamp.
+
 
 ## Libretas
 

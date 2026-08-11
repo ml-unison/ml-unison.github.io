@@ -24,6 +24,9 @@ Como complemento del curso vamos a utilizar la plataforma de aprendizaje en line
 
 [Este es el enlace para registrarse en el curso deDataCamp](https://www.datacamp.com/groups/shared_links/3eb75dc4c6ecf58c393e257e42c989145bbd57a3e914e60c087b8c6a078d2dae). Antes de agregarse hay que crear una cuenta con su crreo aXXXXXXXXX@unison.mx. Asegurate que venga tu nombre porque de ahí vamos a sacar las calificaciones de las actividades a realizar en DataCamp.
 
+## Teams
+
+Vamos a usar [este equipo de Teams](https://teams.microsoft.com/l/team/19%3AmYnjUQkQGfqdufNO-LPWtnJFtuxzdIVkc9Z1lvZcPfw1%40thread.tacv2/conversations?groupId=9d83dd53-1f22-4de8-8bc5-2be8dfc5ac86&tenantId=67553645-0db3-4480-b127-6f819a79e367) para exámenes rápidos y tareas. Por favor, únanse al equipo y activen las notificaciones para no perderse de nada.
 
 ## Libretas
 

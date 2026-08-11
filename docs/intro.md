@@ -20,9 +20,9 @@ show_sidebar: false
 
 ## DataCamp
 
-Como complemento del curso vamos a utilizar la plataforma de aprendizaje en linea [DataCamp](https://www.datacamp.com/). Esta plataforma tiene cursos de diferentes niveles y sobre diferentes temas, incluyendo Aprendizaje Automático. Les recomiendo que, ademñas de los cursos que les pda, aprovechen la oportunidd de explorar otros cursos que les puedan interesar.
+Como complemento del curso vamos a utilizar la plataforma de aprendizaje en linea [DataCamp](https://www.datacamp.com/). Esta plataforma tiene cursos de diferentes niveles y sobre diferentes temas, incluyendo Aprendizaje Automático. Les recomiendo que, además de los cursos que les pida, aprovechen la oportunidd de explorar otros cursos que les puedan interesar.
 
-[Este es el enlace para registrarse en el curso deDataCamp](https://www.datacamp.com/groups/shared_links/3eb75dc4c6ecf58c393e257e42c989145bbd57a3e914e60c087b8c6a078d2dae). Antes de agregarse hay que crear una cuenta con su crreo aXXXXXXXXX@unison.mx. Asegurate que venga tu nombre porque de ahí vamos a sacar las calificaciones de las actividades a realizar en DataCamp.
+[Este es el enlace para registrarse en el curso deDataCamp](https://www.datacamp.com/groups/shared_links/3eb75dc4c6ecf58c393e257e42c989145bbd57a3e914e60c087b8c6a078d2dae). Antes de agregarse hay que crear una cuenta con su crreo aXXXXXXXXX@unison.mx. Asegúrate que venga tu nombre porque de ahí vamos a sacar las calificaciones de las actividades a realizar en DataCamp.
 
 
 ## Libretas
@@ -51,7 +51,7 @@ Como complemento del curso vamos a utilizar la plataforma de aprendizaje en line
   
 2. El [curso de Machine Learning en Coursera](https://www.coursera.org/learn/machine-learning) de [Andrew Ng](https://www.andrewng.org) es posiblemente el curso en linea más popular en Aprendizaje Automático. El profesor es magistral y explica los métodos sin requerir conocimientos en matemáticas, lo que hace que el curso sea a un nivel bastante superficial, pero muy recomendable.
 
-3. [The Elements of Statistical Learning](https://hastie.su.domains/ElemStatLearn/) el cual se encuentra en la biblioteca de la DCEN y la biblioteca digital. Muy teórico, para quien quiera profundizar mas en las bases del Aprendizaje Automñatico.
+3. [The Elements of Statistical Learning](https://hastie.su.domains/ElemStatLearn/) el cual se encuentra en la biblioteca de la DCEN y la biblioteca digital. Muy teórico, para quien quiera profundizar más en las bases del Aprendizaje Automático.
 
 4. [An Introduction to Statistical Learning](https://www.statlearning.com) de los mismos autores del libro de *Elements* pero a un nivel mas *undergraduate*, está la versión del libro con ejemplos en R y la versión con ejemplos en python.
 

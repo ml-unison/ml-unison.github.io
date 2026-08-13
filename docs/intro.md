@@ -12,21 +12,6 @@ show_sidebar: false
 
 1. [Bienvenida al curso](https://github.com/ml-unison/ml-unison.github.io/raw/main/slides/intro-curso-2026.pptx) 
 
-## La importancia de tomar notas
-
-1. [*Paper Notebooks vs. Mobile Devices: Brain Activation Differences During Memory Retrieval*](https://www.frontiersin.org/journals/behavioral-neuroscience/articles/10.3389/fnbeh.2021.634158/full), con un [artículo asociado en *Neurosciences News*](https://neurosciencenews.com/hand-writing-brain-activity-18069/).
-2. El artículo [*Handwriting but not typewriting leads to widespread brain connectivity: a high-density EEG study with implications for the classroom*](https://www.frontiersin.org/journals/psychology/articles/10.3389/fpsyg.2023.1219945/full) y una [explicación a modo de divulgación científica de *Scientific American*](https://www.scientificamerican.com/article/why-writing-by-hand-is-better-for-memory-and-learning/#:~:text=A%20recent%20study%20in%20Frontiers,vision%2C%20sensory%20processing%20and%20memory.) 
-3. [Una entrada de la Universidad de Chicago](https://teaching.uic.edu/cate-teaching-guides/inclusive-equity-minded-teaching-practices/note-taking/) y una [entradita en LinkedIn](https://www.linkedin.com/pulse/power-note-taking-enhancing-thinking-learning-rawda-eada-56qkf/) con ideas y técnicas para tomar notas.
-
-## DataCamp
-
-Como complemento del curso vamos a utilizar la plataforma de aprendizaje en linea [DataCamp](https://www.datacamp.com/). Esta plataforma tiene cursos de diferentes niveles y sobre diferentes temas, incluyendo Aprendizaje Automático. Les recomiendo que, ademñas de los cursos que les pda, aprovechen la oportunidd de explorar otros cursos que les puedan interesar.
-
-[Este es el enlace para registrarse en el curso deDataCamp](https://www.datacamp.com/groups/shared_links/3eb75dc4c6ecf58c393e257e42c989145bbd57a3e914e60c087b8c6a078d2dae). Antes de agregarse hay que crear una cuenta con su crreo aXXXXXXXXX@unison.mx. Asegurate que venga tu nombre porque de ahí vamos a sacar las calificaciones de las actividades a realizar en DataCamp.
-
-## Teams
-
-Vamos a usar [este equipo de Teams](https://teams.microsoft.com/l/team/19%3AmYnjUQkQGfqdufNO-LPWtnJFtuxzdIVkc9Z1lvZcPfw1%40thread.tacv2/conversations?groupId=9d83dd53-1f22-4de8-8bc5-2be8dfc5ac86&tenantId=67553645-0db3-4480-b127-6f819a79e367) para exámenes rápidos y tareas. Por favor, únanse al equipo y activen las notificaciones para no perderse de nada.
 
 ## Libretas
 

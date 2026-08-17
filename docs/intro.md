@@ -27,7 +27,7 @@ show_sidebar: false
 
 1. [*Sci-Kit Learn*](https://scikit-learn.org/), la librería más utilizada (por mucho). 
 2. Para grandes cantidades de datos [pyspark](https://spark.apache.org/docs/latest/api/python/index.html) incluye el módulo `MLlib` para flujos de aprendizaje automático. 
-3. Y por último, el nuevo muchacho en el barrio: [pycaret](https://pycaret.org), que ha tenido un crecimiento importante recientemente. 
+3. [pyTorch](https://pytorch.org), más que una librería es una plataforma para desarrollo de modelos que sean altamente escalables, basado en la idea de grafos de operaciones en tensores y diferenciación automática. En particular lo usaremos con aprendizaje profundo.
 
 ## Lecturas y enlaces recomendados
 

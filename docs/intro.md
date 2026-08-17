@@ -17,7 +17,11 @@ show_sidebar: false
 
 1. [Introducción a `pandas`](https://colab.research.google.com/github/ml-unison/ml-unison.github.io/blob/main/ejemplos/intro-pandas.ipynb)
 
-2. [Preprocesamiento de características con Scikit-learn](https://colab.research.google.com/github/ml-unison/ml-unison.github.io/blob/main/ejemplos/preprocesamiento.ipynb)
+2. [Uso de *pipelines* para el preprocesamiento de características con Scikit-learn](https://colab.research.google.com/github/ml-unison/ml-unison.github.io/blob/main/ejemplos/preprocesamiento.ipynb)
+
+3. [Efecto de la normalización en variables numéricas con *outliers*](https://colab.research.google.com/github/ml-unison/ml-unison.github.io/blob/main/ejemplos/plot_all_scaling.ipynb)
+
+4. [Efecto del preprocesamiento de variables cualitativas](https://colab.research.google.com/github/ml-unison/ml-unison.github.io/blob/main/ejemplos/catnum.ipynb) 
 
 ## La librerías para Aprendizaje automático que vamos a usar
 

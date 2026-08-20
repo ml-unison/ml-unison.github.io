@@ -26,7 +26,9 @@ show_sidebar: false
 ## La librerías para Aprendizaje automático que vamos a usar
 
 1. [*Sci-Kit Learn*](https://scikit-learn.org/), la librería más utilizada (por mucho). 
+
 2. Para grandes cantidades de datos [pyspark](https://spark.apache.org/docs/latest/api/python/index.html) incluye el módulo `MLlib` para flujos de aprendizaje automático. 
+
 3. [pyTorch](https://pytorch.org), más que una librería es una plataforma para desarrollo de modelos que sean altamente escalables, basado en la idea de grafos de operaciones en tensores y diferenciación automática. En particular lo usaremos con aprendizaje profundo.
 
 ## Lecturas y enlaces recomendados
@@ -66,4 +68,4 @@ show_sidebar: false
     5. Ejemplos de libretas útiles
     
 2. [UCI database repository](https://archive.ics.uci.edu/ml/index.php) Es el sitio más clásico (venerable y feo, por cierto) de conjuntos de datos para tareas de Aprendizaje Automático. Es un poco complicada la navegación y entender la organización de los datos, pero es realmente un muy buen sitio para escoger problemas a resolver.
-
+    

@@ -24,7 +24,7 @@ jobs:
       - name: Pruebas (marca, quizzes, libretas)
         run: uv run pytest -q
       - name: Ejecutar libretas de principio a fin
-        run: uv run pytest --nbmake unidades/ -q
+        run: uv run pytest --nbmake unidades/*/ejemplos -q
       - name: Datos de las presentaciones y quizzes exportados
         run: |
           uv run python herramientas/datos_presentaciones.py

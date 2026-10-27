@@ -376,3 +376,12 @@
 .grande { font-size: 30px; line-height: 1.4; }
 .centrado { text-align: center; }
 .figura-centro { display: flex; justify-content: center; align-items: center; flex: 1; }
+
+/* Comparación de dos cifras grandes */
+.comparacion { display: flex; flex-direction: column; gap: 18px; }
+.comparacion > div { display: flex; flex-direction: column; }
+.comparacion__etiqueta { font: 650 15px var(--f-titulo); letter-spacing: .1em; text-transform: uppercase; color: var(--suave); }
+.comparacion__cifra { font: 700 84px/1 var(--f-titulo); letter-spacing: -0.03em; color: var(--azul); }
+.comparacion__cifra.tenue { color: var(--azul-tenue); }
+.comparacion__nota { font-size: 22px; color: var(--tenue); }
+.comparacion__nota b { color: #3F7F2E; }

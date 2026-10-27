@@ -27,7 +27,9 @@ export const materiales: Record<string, Material> = {
       { ruta: 'unidades/01-introduccion/ejemplos/u01-e02-preprocesamiento.ipynb', titulo: 'Preprocesamiento: preparar datos reales para un modelo', descripcion: 'Faltantes, categorías con y sin orden, logaritmos, fechas, escalas y atípicos, con las casas de Ames.' },
       { ruta: 'unidades/01-introduccion/ejemplos/u01-e03-pipeline-titanic.ipynb', titulo: 'Un primer pipeline sin trampas: el Titanic', descripcion: 'Qué información es legítima, línea base, Pipeline, una fuga de información real y la evaluación final.' },
     ],
-    laboratorios: [],
+    laboratorios: [
+      { ruta: 'unidades/01-introduccion/laboratorios/u01-lab01-pipeline-censo.ipynb', titulo: 'Laboratorio 1 · Un pipeline completo, de los datos crudos a la evaluación', descripcion: 'Con el censo de EE. UU. de 1994: faltantes disfrazados, columnas redundantes, ColumnTransformer, línea base y evaluación final. Se verifica automáticamente.' },
+    ],
     lecturas: [
       { obra: 'Abu-Mostafa, Magdon-Ismail y Lin (2012). Learning From Data.', detalle: 'Capítulo 1, The Learning Problem.' },
       { obra: 'James, Witten, Hastie, Tibshirani y Taylor (2023). An Introduction to Statistical Learning with Applications in Python.', detalle: 'Capítulo 2, Statistical Learning.' },

@@ -14,7 +14,9 @@ Este script, para cada fuente:
   1. fuerza la configuración de Colab (pruebas en archivos descargados de este repo),
   2. ejecuta `otter assign`, que verifica que la solución pase todas las pruebas,
   3. copia la libreta del estudiante y sus pruebas públicas a unidades/<unidad>/laboratorios/,
-  4. agrega la celda inicial del curso (RAMA, instalación de rdp).
+  4. agrega la celda inicial del curso (RAMA, instalación de rdp),
+  5. verifica que ninguna línea de solución llegue a la versión del estudiante,
+  6. guarda el paquete del autocalificador en <soluciones>/autocalificador/ (para `otter grade`).
 
 Las respuestas y las pruebas ocultas nunca se copian a este repositorio.
 
@@ -27,6 +29,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import os
 import re
 import shutil
 import subprocess
@@ -41,7 +44,7 @@ import yaml
 
 RAIZ = Path(__file__).resolve().parents[1]
 REPO = "ml-unison/ml-unison.github.io"
-OTTER = ["uvx", "--python", "3.12", "--with", "ipykernel", "--from", "otter-grader", "otter"]
+OTTER = [sys.executable, "-m", "otter"]  # otter-grader del grupo dev, con las dependencias del curso
 
 CELDA_INICIAL = '''import os, sys
 
@@ -72,11 +75,52 @@ def configurar(nb: nbformat.NotebookNode, url_pruebas: str) -> None:
         raise ValueError("falta la celda raw '# ASSIGNMENT CONFIG'")
     cuerpo = celda.source.split("\n", 1)[1] if "\n" in celda.source else ""
     config = yaml.safe_load(cuerpo) or {}
-    config.update({"runs_on": "colab", "export_cell": False, "generate": False, "solutions_pdf": False})
+    # generate=True arma el paquete del autocalificador, que otter usa para correr las pruebas
+    # contra la solución; strip_solutions_from_all_cells aplica las marcas "# SOLUTION" en cualquier celda.
+    config.update({"runs_on": "colab", "export_cell": False, "generate": True, "solutions_pdf": False,
+                   "strip_solutions_from_all_cells": True, "run_tests": True})
     config.setdefault("check_all_cell", True)
     config["tests"] = {**config.get("tests", {}), "files": True, "url_prefix": url_pruebas}
     celda.source = "# ASSIGNMENT CONFIG\n" + yaml.safe_dump(config, allow_unicode=True, sort_keys=False)
     nb.metadata["kernelspec"] = {"display_name": "Python 3", "language": "python", "name": "python3"}
+
+
+def lineas_de_solucion(nb: nbformat.NotebookNode) -> set[str]:
+    """Líneas de código que son solución (marcadas con # SOLUTION o dentro de BEGIN/END SOLUTION)."""
+    lineas, enunciado, dentro, prompt = set(), set(), False, False
+    for c in nb.cells:
+        if c.cell_type != "code":
+            continue
+        for ln in c.source.splitlines():
+            t = ln.strip()
+            # las líneas del enunciado (bloques BEGIN/END PROMPT) sí las ve el estudiante
+            if t.endswith("# BEGIN PROMPT"):
+                prompt = True
+                continue
+            if t.endswith("# END PROMPT"):
+                prompt = False
+                continue
+            if prompt:
+                enunciado.add(t)
+                continue
+            if t.startswith("# BEGIN SOLUTION"):
+                dentro = True
+                continue
+            if t.startswith("# END SOLUTION"):
+                dentro = False
+                continue
+            if t.endswith("# SOLUTION"):
+                lineas.add(t.removesuffix("# SOLUTION").strip())
+            elif dentro and len(t) > 12:
+                lineas.add(t)
+    return {ln for ln in lineas if len(ln) > 12 and ln not in enunciado}
+
+
+def verificar_sin_soluciones(fuente: nbformat.NotebookNode, alumno: nbformat.NotebookNode, nombre: str) -> None:
+    codigo = "\n".join(c.source for c in alumno.cells if c.cell_type == "code")
+    filtradas = [ln for ln in lineas_de_solucion(fuente) if ln in codigo]
+    if filtradas:
+        raise RuntimeError(f"{nombre}: la versión del estudiante contiene soluciones:\n  " + "\n  ".join(filtradas[:5]))
 
 
 def procesar(fuente: Path, base_soluciones: Path, rama: str) -> Path:
@@ -92,19 +136,26 @@ def procesar(fuente: Path, base_soluciones: Path, rama: str) -> Path:
         entrada = tmp / f"{fuente.stem}.ipynb"
         nbformat.write(nb, entrada)
         # otter assign ejecuta la solución y verifica que pase todas las pruebas
-        r = subprocess.run([*OTTER, "assign", str(entrada), str(tmp / "dist"), "-v"], capture_output=True, text=True)
+        entorno = {**os.environ, "RDP_DATOS": str(RAIZ / "datos"), "RDP_RAMA": rama}
+        r = subprocess.run([*OTTER, "assign", str(entrada), str(tmp / "dist"), "-v"],
+                           capture_output=True, text=True, env=entorno)
         estudiante = tmp / "dist" / "student" / entrada.name
-        if r.returncode != 0 and not estudiante.exists():
+        if r.returncode != 0 or not estudiante.exists():
             print(r.stdout[-3000:], r.stderr[-3000:], file=sys.stderr)
-            raise RuntimeError(f"otter assign falló para {fuente.name}")
+            raise RuntimeError(f"otter assign falló para {fuente.name} (¿la solución no pasa sus pruebas?)")
 
         alumno = nbformat.read(estudiante, as_version=4)
         nbformat.validator.normalize(alumno)
         texto = json.dumps(alumno)
         if "# BEGIN SOLUTION" in texto or "hidden: true" in texto:
             raise RuntimeError(f"{fuente.name}: la versión del estudiante conserva marcas de solución")
+        verificar_sin_soluciones(nb, alumno, fuente.name)
         inicial = nbformat.v4.new_code_cell(CELDA_INICIAL.format(rama=rama, repo=REPO))
         alumno.cells.insert(0, inicial)
+        # el encabezado del curso va primero, antes de las celdas de instalación
+        k = next((i for i, c in enumerate(alumno.cells) if c.cell_type == "markdown" and "Universidad de Sonora" in c.source), None)
+        if k:
+            alumno.cells.insert(0, alumno.cells.pop(k))
         for c in alumno.cells:
             if c.cell_type == "code":
                 c.outputs, c.execution_count = [], None
@@ -118,6 +169,11 @@ def procesar(fuente: Path, base_soluciones: Path, rama: str) -> Path:
         pruebas.mkdir(parents=True)
         for t in (tmp / "dist" / "student" / "tests").glob("*.py"):
             shutil.copy(t, pruebas / t.name)
+        # El paquete del autocalificador (con pruebas ocultas) se queda en el repo privado
+        paquete = next((tmp / "dist" / "autograder").glob("*.zip"), None)
+        if paquete:
+            (base_soluciones / "autocalificador").mkdir(exist_ok=True)
+            shutil.copy(paquete, base_soluciones / "autocalificador" / f"{fuente.stem}.zip")
     return destino / entrada.name
 
 

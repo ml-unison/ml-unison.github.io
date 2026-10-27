@@ -27,6 +27,11 @@ def url(archivo: str, rama: str | None = None) -> str:
 
 
 def _local(archivo: str) -> Path | None:
+    # RDP_DATOS permite indicar explícitamente una carpeta local de datos
+    if os.environ.get("RDP_DATOS"):
+        p = Path(os.environ["RDP_DATOS"]) / archivo
+        if p.exists():
+            return p
     for base in (Path.cwd(), *Path.cwd().parents):
         p = base / "datos" / archivo
         if p.exists():

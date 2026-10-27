@@ -30,6 +30,7 @@ dev = [
     "nbmake>=1.5",
     "python-docx>=1.1",
     "jupytext>=1.19.6",
+    "otter-grader>=7.0.0",
 ]
 
 [tool.uv]

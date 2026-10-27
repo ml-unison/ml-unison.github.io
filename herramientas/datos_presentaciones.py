@@ -54,7 +54,7 @@ def u01() -> dict:
         "ein": r(ein, 5), "eout": r(eout, 5),
         "xnu": r(x_nu), "ynu": r(y_nu), "enu": r(enu, 5),
         "pred_tr": pred_tr, "pred_nu": pred_nu,
-    }, "digitos": digitos(), "presas": presas()}
+    }, "digitos": digitos(), "presas": presas(), "casas": casas()}
 
 
 def presas() -> dict:
@@ -102,6 +102,33 @@ def presas() -> dict:
         "muestra": [{"clave": f.clave, "fecha": f.fecha.strftime("%Y-%m-%d"), "alm": round(f.almacenamiento, 1),
                      "presa": f.presa, "cap": int(f.cap_namo), "llenado": round(f.llenado, 1)} for f in muestra.itertuples()],
         "n_registros": int(len(reg)),
+    }
+
+
+def casas() -> dict:
+    """Casas de Ames (De Cock, 2011) para la presentación de atributos y pipelines.
+
+    Usa la misma separación y los mismos resultados que la libreta u01-e02.
+    """
+    import pandas as pd
+    from sklearn.model_selection import train_test_split
+
+    d = pd.read_csv(DESTINO.parents[1] / "datos" / "casas_ames.csv")
+    tr, _ = train_test_split(d, test_size=0.2, random_state=2011)
+    precio = tr["SalePrice"]
+    h1, b1 = np.histogram(precio / 1000, bins=np.arange(0, 780, 20))
+    h2, b2 = np.histogram(np.log10(precio), bins=np.arange(4.5, 5.95, 0.04))
+    orden = ["Fa", "TA", "Gd", "Ex"]
+    cocina = tr.groupby("KitchenQual")["SalePrice"].median().reindex(orden) / 1000
+    dos = tr[["GrLivArea", "OverallQual", "SalePrice"]].iloc[:3]
+    return {
+        "hist_precio": {"cuentas": h1.tolist(), "bordes": r(b1, 2)},
+        "hist_log": {"cuentas": h2.tolist(), "bordes": r(b2, 3)},
+        "cocina": {"niveles": orden, "mediana": r(cocina, 1)},
+        "dispersion": {"area": tr["GrLivArea"].tolist(), "precio": r(precio / 1000, 1)},
+        "ejemplo_distancia": dos.to_dict(orient="records"),
+        "area_media": round(float(tr["GrLivArea"].mean()), 1), "area_sd": round(float(tr["GrLivArea"].std()), 1),
+        "calidad_media": round(float(tr["OverallQual"].mean()), 2), "calidad_sd": round(float(tr["OverallQual"].std()), 2),
     }
 
 

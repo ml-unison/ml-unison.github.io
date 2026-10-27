@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import datos from '../datos/u01.json'
 
+withDefaults(defineProps<{ errores?: boolean, diagnostico?: boolean }>(), { errores: false, diagnostico: false })
+
 const P = datos.polinomios
 const fmt = (v: number) => {
   if (v < 100) return v.toFixed(2)
@@ -8,9 +10,9 @@ const fmt = (v: number) => {
   return `${m} × 10<sup>${e}</sup>`
 }
 const paneles = [
-  { g: 1, diag: 'subajuste', clase: 'mal' },
-  { g: 4, diag: 'buen compromiso', clase: 'bien' },
-  { g: 12, diag: 'sobreajuste', clase: 'mal' },
+  { g: 1, diag: 'demasiado simple', clase: 'mal' },
+  { g: 4, diag: 'adecuado', clase: 'bien' },
+  { g: 12, diag: 'demasiado complejo', clase: 'mal' },
 ]
 </script>
 
@@ -19,19 +21,18 @@ const paneles = [
     <div v-for="(p, k) in paneles" :key="p.g" class="tres__panel">
       <div class="tres__cab">
         <span class="tres__grado">Grado {{ p.g }}</span>
-        <span class="tres__diag" :class="p.clase">{{ p.diag }}</span>
+        <span v-if="diagnostico" class="tres__diag" :class="p.clase">{{ p.diag }}</span>
       </div>
       <PanelPolinomio :grado="p.g" :eje-y="k === 0" :ancho="k === 0 ? 392 : 360" />
-      <div class="tres__err">
+      <div v-if="errores" class="tres__err">
         <span>E<sub>in</sub> = <b v-html="fmt(P.ein[p.g])" /></span>
         <span>E<sub>out</sub> = <b :class="{ alto: P.eout[p.g] > 1 }" v-html="fmt(P.eout[p.g])" /></span>
       </div>
     </div>
   </div>
   <div class="tres__leyenda">
-    <span><i class="sw-punto" /> datos <b>𝒟</b> (n = 15)</span>
-    <span><i class="sw-linea gris" /> función desconocida f</span>
-    <span><i class="sw-linea azul" /> hipótesis ajustada g</span>
+    <span><i class="sw-punto" /> 15 observaciones</span>
+    <span><i class="sw-linea azul" /> polinomio ajustado</span>
   </div>
 </template>
 

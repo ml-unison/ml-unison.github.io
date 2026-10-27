@@ -3,7 +3,7 @@ theme: none
 title: ¿Qué significa aprender de datos?
 unidad: Unidad 1
 layout: portada
-subtitulo: Paradigmas, riesgo empírico, generalización y el flujo de trabajo de un proyecto
+subtitulo: Ejemplos, generalización, la navaja de Occam y lo que puede salir mal
 fecha: 2027-1
 canvasWidth: 1280
 aspectRatio: 16/9
@@ -29,20 +29,20 @@ info: |
 
 ---
 
-# Plan de la sesión
+# Las preguntas de hoy
 
 <div class="cols cols-6-4 cols-centro" style="flex:1">
-<div>
+<div class="grande">
 
-1. El problema de aprender: qué es y qué no es aprendizaje automático
-2. Una formalización mínima: datos, hipótesis, pérdida y riesgo
-3. Aprender no es memorizar: la generalización
-4. El flujo de trabajo de un proyecto
-5. Responsabilidad: datos, sesgos y decisiones
+1. ¿Qué significa **aprender**?
+2. ¿Cuándo conviene que una computadora aprenda en lugar de programarla?
+3. ¿Por qué aprender **no es memorizar**?
+4. ¿Cómo evitamos **engañarnos** al medir?
+5. ¿Qué puede **salir mal**?
 
 </div>
 <div class="lema">
-La pregunta central del curso no es <em>cómo ajustar</em> un modelo, sino <em>cuándo podemos confiar</em> en lo que aprendió.
+Al final de la clase deberían poder explicar por qué un modelo que acierta en <em>todos</em> sus datos puede ser un mal modelo.
 </div>
 </div>
 
@@ -51,62 +51,119 @@ layout: seccion
 numero: 1
 ---
 
-# El problema de aprender
+# ¿Qué significa aprender?
 
-¿Cuándo tiene sentido que un programa aprenda en lugar de que lo programemos?
+Empecemos por lo que hacemos las personas.
+
+---
+layout: pregunta
+---
+
+# ¿Cómo aprendió usted a reconocer el número siete?
+
+<v-click>
+
+Nadie le dio una definición formal del «siete». Vio muchos ejemplos, todos distintos, y alguien le dijo cuál era cuál.
+
+</v-click>
+
+<!--
+Dejar que respondan. Lo que buscamos: aprendimos de ejemplos, no de una regla. Nadie sabe escribir "la regla del siete".
+-->
 
 ---
 
-# Programar *vs.* aprender
+# Mismo número, mil formas de escribirlo
 
-<DiagramaProgramar />
+<div class="figura-centro"><MosaicoDigitos :tam="66" /></div>
 
-<div class="abajo">
-<Caja tipo="idea">
+<div class="nota">
 
-Aprendemos de datos cuando **no sabemos escribir las reglas**, pero sí tenemos **ejemplos** del comportamiento que queremos.
-
-</Caja>
-</div>
-
----
-
-# Una definición operativa
-
-<Caja tipo="definicion" nombre="Mitchell (1997)">
-
-Un programa **aprende** de la experiencia $E$, respecto a una clase de tareas $T$ y una medida de desempeño $P$, si su desempeño en $T$, medido por $P$, **mejora con la experiencia** $E$.
-
-</Caja>
-
-<div v-click>
-
-| | Tarea $T$ | Experiencia $E$ | Desempeño $P$ |
-|---|---|---|---|
-| Filtro de *spam* | clasificar correos | correos etiquetados | falsos positivos y negativos |
-| Presas de Sonora | pronosticar el almacenamiento | series históricas | error absoluto medio |
-| Segmentar clientes | agrupar perfiles | compras sin etiquetar | cohesión de los grupos |
+Dígitos escritos a mano por 13 personas, digitalizados en 8 × 8 pixeles (*UCI Optical Recognition of Handwritten Digits*, incluido en scikit-learn).
 
 </div>
 
 ---
 
-# Tres condiciones para que tenga sentido aprender
+# Actividad: escriban la regla
 
-<div class="cols cols-6-4">
+<div class="cols" style="gap: 70px; margin-top: 4px">
 <div>
 
-1. **Existe un patrón.** Hay alguna relación entre entradas y salidas, aunque sea ruidosa.
-2. **No lo sabemos describir analíticamente.** Si tuviéramos la fórmula, la usaríamos.
-3. **Tenemos datos** que reflejan ese patrón y que representan el uso futuro.
+### Esto es un 7
+
+<MosaicoDigitos conjunto="sietes" :tam="82" :columnas="4" />
+
+</div>
+<div>
+
+### Esto es un 1
+
+<MosaicoDigitos conjunto="unos" :tam="82" :columnas="4" />
+
+</div>
+</div>
+
+<div v-click class="nota">
+
+En parejas, 3 minutos: escriban una regla con pixeles («si el renglón de arriba…») que separe los sietes de los unos. Luego busquemos un ejemplo donde falle.
+
+</div>
+
+<!--
+Casi todas las reglas fallan con algún ejemplo: hay unos con "sombrero" y sietes muy inclinados. La conclusión es que escribir la regla a mano es frágil.
+-->
+
+---
+layout: center
+---
+
+<div class="lema" style="font-size: 44px; max-width: 1000px; text-align: center; line-height: 1.3">
+
+Aprender es construir, a partir de <em>ejemplos</em>, una regla que funcione en casos que <em>nunca hemos visto</em>.
+
+</div>
+
+---
+
+# Programar o aprender
+
+<DosCaminos />
+
+---
+
+# ¿Aprender o programar?
+
+<p class="tenue" style="margin-bottom: 26px">Para cada problema: ¿escribirían el programa o dejarían que la computadora aprenda de ejemplos?</p>
+
+<ul class="casos grande">
+  <li>Calcular el IVA de una factura <Veredicto v-click /></li>
+  <li>Detectar correos fraudulentos <Veredicto v-click si /></li>
+  <li>Ordenar una lista de calificaciones <Veredicto v-click /></li>
+  <li>Pronosticar el almacenamiento de la presa El Novillo <Veredicto v-click si /></li>
+  <li>Reconocer quién habla en una grabación <Veredicto v-click si /></li>
+</ul>
+
+<!--
+Ir caso por caso y pedir que justifiquen. El IVA y el ordenamiento tienen una regla exacta y conocida: aprender sería absurdo.
+-->
+
+---
+
+# Cuándo tiene sentido aprender
+
+<div class="cols cols-6-4">
+<div class="grande">
+
+1. **Hay un patrón**: las entradas dicen algo sobre la salida.
+2. **No sabemos escribirlo**: si conociéramos la fórmula, la programaríamos.
+3. **Tenemos datos** que muestran ese patrón y se parecen a los casos futuros.
 
 </div>
 <div v-click>
 <Caja tipo="cuidado">
 
-Si falla la tercera condición, el modelo puede ser excelente en el laboratorio y **fallar en producción**.
-
-<span class="pequeno tenue">Lo retomamos en la Unidad 3 (generalización) y en la Unidad 8 (*drift*).</span>
+La tercera condición es la que más se olvida. Un modelo entrenado con datos que no se parecen a su uso real **falla en silencio**.
 
 </Caja>
 </div>
@@ -114,118 +171,255 @@ Si falla la tercera condición, el modelo puede ser excelente en el laboratorio 
 
 ---
 
-# Paradigmas de aprendizaje
+# Ahora sí, una definición
 
-| Paradigma | Observamos | Buscamos | En el curso |
-|---|---|---|---|
-| Supervisado | pares $(\vx_i, y_i)$ | $h(\vx) \approx y$ | Unidades 3 a 7 |
-| No supervisado | solo $\vx_i$ | estructura de $P(\vx)$ | Unidad 2 |
-| Autosupervisado | $\vx_i$, con etiquetas sacadas de los propios datos | representaciones útiles | Unidad 6 |
-| Por refuerzo | estados, acciones y recompensas | una política $\pi(a \mid s)$ | fuera del alcance |
+<Caja tipo="definicion" nombre="Tom Mitchell (1997)">
 
-<div class="nota">
+<div class="grande">
 
-Este curso se concentra en el aprendizaje supervisado, y usa el no supervisado para explorar y representar datos.
+Un programa **aprende** de la experiencia $E$, en una tarea $T$, con una medida de desempeño $P$, si su desempeño en $T$, medido con $P$, **mejora con la experiencia** $E$.
 
 </div>
+
+</Caja>
+
+<div v-click class="cols" style="margin-top: 22px; gap: 56px">
+<div>
+
+### En los dígitos
+
+- **Tarea:** decir qué número es una imagen.
+- **Experiencia:** 1,797 imágenes ya etiquetadas.
+- **Desempeño:** porcentaje de aciertos en imágenes **nuevas**.
+
+</div>
+<div>
+
+### En la presa
+
+- **Tarea:** pronosticar el almacenamiento del próximo mes.
+- **Experiencia:** años de registros de lluvia y almacenamiento.
+- **Desempeño:** error promedio en meses que el modelo no vio.
+
+</div>
+</div>
+
+---
+
+# Tres formas de aprender
+
+<Paradigmas />
 
 ---
 layout: seccion
 numero: 2
 ---
 
-# Una formalización mínima
+# Aprender no es memorizar
 
-El vocabulario que usaremos todo el semestre.
+Un experimento con quince puntos.
+
+---
+layout: pregunta
+---
+
+# Un estudiante memoriza las respuestas de los exámenes de años anteriores.
+
+<v-click>
+
+Saca 10 en todos esos exámenes. ¿Aprendió? ¿Qué calificación esperan que saque en el examen de este año?
+
+</v-click>
 
 ---
 
-# Los ingredientes del aprendizaje supervisado
+# El memorizador
 
-<div style="margin: 6px 0 34px"><DiagramaIngredientes /></div>
+<div class="cols cols-4-6 cols-centro" style="flex:1; gap: 70px">
+<Memorizador />
+<div class="grande">
 
-<div class="cols" style="gap: 40px">
-<div>
+Un programa que **guarda todos los ejemplos** en una tabla y, ante una imagen, busca si ya la vio:
 
-- Nunca conocemos $f$ ni $P$: **solo vemos la muestra** $\Dat$, obtenida i.i.d. de $P$.
-- El algoritmo elige $g \in \Hyp$ usando únicamente $\Dat$.
+- en los datos de entrenamiento acierta el **100 %**;
+- ante una imagen nueva **no tiene nada que decir**.
+
+<div v-click class="lema" style="margin-top: 28px">
+
+Memorizar es fácil. Lo difícil, y lo valioso, es <em>generalizar</em>.
 
 </div>
-<div>
-
-- $\X$: espacio de entradas, típicamente $\R^d$.
-- $\Y$: salidas; $\R$ en regresión, $\{1,\dots,K\}$ en clasificación.
-
 </div>
 </div>
 
 ---
 
-# Pérdida y riesgo
+# Quince observaciones
 
-<div class="cols cols-estirar">
-<Caja tipo="definicion" nombre="riesgo (error fuera de muestra)">
+<p class="tenue">Una variable x y una respuesta y medida con ruido. Queremos una curva que prediga y a partir de x.</p>
 
-Para una pérdida $\ell : \Y \times \Y \to \R_{\ge 0}$,
+<div class="figura-centro"><EscenaPolinomio :ancho="1100" :alto="420" /></div>
 
-$$
-\Eout(h) = \E_{(\vx, y) \sim P}\big[\, \ell(h(\vx), y) \,\big]
-$$
+<div class="pequeno tenue">¿Qué curva dibujarían ustedes? Tracen una en su cuaderno.</div>
 
-</Caja>
-<Caja tipo="definicion" nombre="riesgo empírico (error en muestra)">
+---
 
-Sobre los $n$ ejemplos de $\Dat$,
+# Tres propuestas
 
-$$
-\Ein(h) = \frac{1}{n} \sum_{i=1}^{n} \ell(h(\vx_i), y_i)
-$$
+<p class="tenue" style="margin-bottom: 8px">Ajustamos polinomios de grado 1, 4 y 12 por mínimos cuadrados.</p>
 
-</Caja>
-</div>
-
-<div v-click>
-<Caja tipo="algoritmo" nombre="minimización del riesgo empírico (ERM)">
-
-Elegir $\; g = \argmin_{h \in \Hyp} \Ein(h) \;$ y **esperar** que $\Eout(g) \approx \Ein(g)$.
-
-</Caja>
-</div>
+<PolinomiosTres />
 
 <div v-click class="nota">
 
-Todo el curso gira alrededor de esa palabra: **esperar**. ¿Cuándo está justificado?
+El de grado 12 pasa por casi todos los puntos. ¿Es el mejor?
 
 </div>
 
 ---
 
-# Funciones de pérdida usuales
+# La prueba de fuego: datos nuevos
 
-<div class="cols cols-4-6 cols-centro" style="flex:1">
+<p class="tenue" style="margin-bottom: 10px">Llegan quince observaciones nuevas del mismo fenómeno.</p>
+
+<div class="cols" style="gap: 36px">
 <div>
 
-- **Cuadrática** (regresión)<br>$\ell(\hat y, y) = (\hat y - y)^2$
-- **0–1** (clasificación)<br>$\ell(\hat y, y) = \ind{\hat y \neq y}$
-- **Logística**, $y \in \{-1, 1\}$<br>$\ell = \log_2\!\big(1 + e^{-y s}\big)$
-- **Bisagra** (SVM)<br>$\ell = \max(0,\, 1 - y s)$
+### Grado 4
 
-<div class="pequeno tenue">
-
-Margen: $y\,s$, con $s = \vw\T\vx$.
-
-</div>
+<EscenaPolinomio :grado="4" nuevos :ancho="560" :alto="360" />
 
 </div>
 <div>
-<GraficaPerdidas />
+
+### Grado 12
+
+<EscenaPolinomio :grado="12" nuevos :ancho="560" :alto="360" />
+
 </div>
 </div>
+
+<LeyendaPolinomio nuevos ajuste />
+
+---
+
+# Para comparar, necesitamos medir el error
+
+<div class="cols cols-6-4 cols-centro">
+<div><EscenaPolinomio :grado="4" residuos="tr" :ancho="700" :alto="420" /></div>
+<div>
+
+En cada punto, la curva se equivoca por la distancia vertical <span style="color:#D5433C; font-weight:650">en rojo</span>.
+
+<v-click>
+
+Elevamos al cuadrado (para que no importe el signo y pesen más los errores grandes) y promediamos:
+
+$$
+\frac{1}{n}\sum_{i=1}^{n}\big(\,\text{predicción}_i - y_i\,\big)^2
+$$
+
+</v-click>
+<v-click>
+
+Esa forma de medir qué tan mal lo hace un modelo en un ejemplo es una **función de pérdida**.
+
+</v-click>
+</div>
+</div>
+
+<!--
+Aquí aparece por primera vez la función de pérdida, como respuesta a una necesidad: comparar curvas con un número. Mencionar que la elección de la pérdida depende del problema (no es lo mismo equivocarse por arriba que por abajo en una presa).
+-->
+
+---
+
+# Dos errores distintos
+
+<div class="cols" style="gap: 56px; margin-top: 8px">
+<Caja tipo="definicion" nombre="error en la muestra">
+
+El promedio de la pérdida en los datos que **vio** el modelo:
+
+$$
+\Ein(h) = \frac{1}{n}\sum_{i=1}^{n} \ell\big(h(\vx_i),\, y_i\big)
+$$
+
+<span class="tenue">Lo podemos calcular.</span>
+
+</Caja>
+<Caja tipo="definicion" nombre="error fuera de la muestra">
+
+La pérdida esperada en datos **nuevos** del mismo fenómeno:
+
+$$
+\Eout(h) = \E\big[\, \ell\big(h(\vx),\, y\big) \,\big]
+$$
+
+<span class="tenue">Es lo que nos importa, y no lo conocemos.</span>
+
+</Caja>
+</div>
+
+<div v-click class="lema" style="margin-top: 20px">
+
+Aprender bien es lograr un $\Ein$ pequeño <em>y</em> que $\Eout$ se parezca a $\Ein$.
+
+</div>
+
+---
+
+# Explórenlo: el grado del polinomio
+
+<PolinomioInteractivo />
 
 <div class="nota">
 
-La 0–1 es la que importa, pero no es diferenciable: optimizamos **sustitutos convexos** que la acotan por arriba.
+Punteada: la regla verdadera, que en la práctica nunca conocemos. $\Ein$ siempre baja; $\Eout$ baja y luego se dispara.
 
+</div>
+
+<!--
+Mover el control en clase: grado 0, 1, 3, 9, 12. Preguntar antes de mover: ¿qué creen que pasará con E_out?
+-->
+
+---
+layout: pregunta
+---
+
+# Si dos explicaciones se ajustan igual de bien a los datos, ¿con cuál se quedan?
+
+---
+layout: cita
+autor: Guillermo de Ockham (c. 1287–1347)
+nota: «No hay que multiplicar las entidades sin necesidad.» Entre explicaciones que dan cuenta igual de bien de lo observado, conviene preferir la más simple.
+---
+
+*Pluralitas non est ponenda sine necessitate.*
+
+---
+
+# La navaja de Occam en la historia de la ciencia
+
+<Epiciclos />
+
+---
+
+# Occam en el aprendizaje automático
+
+<PolinomiosTres diagnostico />
+
+<div class="cols" style="gap: 48px; margin-top: 14px">
+<div class="pequeno">
+
+**Por qué funciona.** Un modelo simple no puede ajustarse al ruido; si aun así se ajusta a los datos, probablemente encontró el patrón.
+
+</div>
+<div class="pequeno">
+
+**Su límite.** «Simple» no es «simplista»: el grado 1 tampoco sirve. En la Unidad 3 convertiremos esta idea en herramientas: regularización y validación.
+
+</div>
 </div>
 
 ---
@@ -233,102 +427,61 @@ layout: seccion
 numero: 3
 ---
 
-# Aprender no es memorizar
+# Cómo no engañarnos
 
-Un experimento con 15 puntos y polinomios de distinto grado.
-
----
-
-# Un experimento: ajustar polinomios
-
-<div class="tenue" style="margin-bottom: 8px">
-
-Quince puntos de $y = \sin(2\pi x) + \varepsilon$, con $\varepsilon \sim \mathcal N(0,\, 0.25^2)$, ajustados por mínimos cuadrados.
-
-</div>
-
-<PolinomiosTres />
-
----
-
-# Explóralo: el grado del polinomio
-
-<PolinomioInteractivo />
-
-<div class="nota">
-
-$\Ein$ siempre baja al aumentar el grado; $\Eout$ baja y después se dispara. Pasa el ratón sobre la curva de error o mueve el control.
-
-</div>
-
----
-
-# ¿Por qué no basta con minimizar $\Ein$?
-
-<div class="cols cols-centro">
-<div>
-<Caja tipo="teorema" nombre="desigualdad de Hoeffding">
-
-Para $h$ fija **antes** de ver los datos y $\ell \in [0,1]$,
-
-$$
-\Prob\big[\, |\Ein(h) - \Eout(h)| > \epsilon \,\big] \le 2\, e^{-2 \epsilon^2 n}
-$$
-
-</Caja>
-
-<div v-click>
-
-- Pero el algoritmo **elige** $g$ mirando los datos, entre muchas hipótesis.
-- Cuanto más rico es $\Hyp$, más fácil es ajustar el **ruido**.
-
-</div>
-</div>
-<div>
-<CotaHoeffding />
-</div>
-</div>
-
-<div v-click class="nota">
-
-En la Unidad 3: $\;\Eout(g) \le \Ein(g) + \Omega(\Hyp, n, \delta)$. Aprender es un compromiso entre un $\Hyp$ **expresivo** y uno **restringido**.
-
-</div>
-
----
-layout: seccion
-numero: 4
----
-
-# El flujo de trabajo
-
-Lo que hace creíbles nuestros números.
+El flujo de trabajo que hace creíbles nuestros números.
 
 ---
 
 # El ciclo de vida de un modelo
 
-<div style="margin-top: 8px"><CicloVida /></div>
+<div class="figura-centro"><CicloAnillo /></div>
 
-<div class="cols" style="gap: 40px; margin-top: 10px">
+<div class="nota">
+
+En dorado, los pasos que protegen la evaluación: **separar** antes de tocar los datos y **evaluar en prueba una sola vez**.
+
+</div>
+
+---
+layout: pregunta
+---
+
+# ¿Qué pasa si el profesor deja ver el examen el día anterior?
+
+<v-click>
+
+La calificación deja de medir lo que aprendieron. Con los datos de prueba pasa exactamente lo mismo: si el modelo los «vio», su desempeño en ellos ya no dice nada.
+
+</v-click>
+
+---
+
+# Una trampa real: la columna «bote»
+
+<p class="tenue" style="margin-bottom: 20px">Exactitud (validación cruzada) al predecir quién sobrevivió al Titanic.</p>
+
+<BarrasFuga />
+
+<div v-click class="cols" style="gap: 48px; margin-top: 10px">
 <div class="pequeno">
 
-**La separación va primero**, antes de cualquier transformación que aprenda algo de los datos.
+**Qué pasó.** La columna `boat` dice en qué bote salvavidas subió cada pasajero. Se registró **después** del naufragio: quien subió a un bote casi siempre sobrevivió.
 
 </div>
 <div class="pequeno">
 
-**El conjunto de prueba se usa una sola vez**, al final. Para elegir modelos se usa validación.
+**La lección.** Un resultado demasiado bueno es una señal de alarma. Esa información no existiría al momento de predecir: es una **fuga de información**.
 
 </div>
 </div>
 
 ---
 
-# Fuga de información: un error frecuente
+# La fuga más común es más sutil
 
-<div class="cols codigo-chico" style="gap: 28px">
-<Caja tipo="cuidado" etiqueta="Incorrecto">
+<div class="cols codigo-chico" style="gap: 32px">
+<Caja tipo="cuidado" etiqueta="Así no">
 
 ```python
 X = StandardScaler().fit_transform(X)  # ve todo
@@ -338,7 +491,7 @@ modelo.score(X_te, y_te)      # optimista
 ```
 
 </Caja>
-<Caja tipo="correcto" etiqueta="Correcto · un Pipeline">
+<Caja tipo="correcto" etiqueta="Así sí">
 
 ```python
 X_tr, X_te, y_tr, y_te = train_test_split(X, y)
@@ -351,69 +504,133 @@ modelo.score(X_te, y_te)      # honesto
 </Caja>
 </div>
 
-Todo paso que **aprende parámetros de los datos** (escalar, imputar, codificar, seleccionar atributos) se ajusta **solo con el entrenamiento**. Los `Pipeline` de scikit-learn lo garantizan.
+<div class="grande" style="margin-top: 10px">
+
+Escalar con la media de **todos** los datos le pasa al modelo información de la prueba. Regla: **primero se separa, después se transforma**. Los `Pipeline` de scikit-learn lo garantizan.
+
+</div>
 
 ---
 layout: seccion
-numero: 5
+numero: 4
 ---
 
-# Responsabilidad
+# Lo que puede salir mal
 
-Un modelo hereda las decisiones de quien lo construye.
+Un modelo hereda los datos, la métrica y las decisiones de quien lo construye.
 
 ---
+layout: pregunta
+---
 
-# Datos, sesgos y decisiones
+# Un modelo aprende de datos históricos. ¿Qué aprende si la historia fue injusta?
 
-<div class="cols cols-6-4">
-<div>
+---
+layout: caso
+caso: Caso 1 · Justicia penal
+cifra: 45 % <small>vs.</small> 23 %
+cifraNota: de las personas que no volvieron a delinquir fueron marcadas como de «alto riesgo», según fueran afroamericanas o blancas.
+fuente: J. Angwin et al., «Machine Bias», ProPublica (2016).
+---
 
-- El modelo aprende la $P(\vx, y)$ **de los datos que le damos**, con sus sesgos históricos.
-- La métrica que optimizamos **es** una decisión de valores: ¿qué cuesta más, un falso positivo o un falso negativo, y **a quién** le cuesta?
-- Quitar un atributo sensible no basta: puede estar **codificado en otras variables**, como el código postal o la escuela de procedencia.
+# Puntajes de riesgo de reincidencia
+
+Jueces de Estados Unidos usan un puntaje (COMPAS) para decidir fianzas y sentencias. ProPublica analizó más de 7,000 casos de un condado de Florida.
+
+La exactitud era parecida en ambos grupos, pero **los errores no se repartían igual**: unos cargaban con los falsos positivos y otros con los falsos negativos.
+
+<span class="falla">Dónde falló</span> en qué significa «ser justo». Hay definiciones razonables de equidad que no se pueden cumplir todas a la vez.
+
+---
+layout: caso
+caso: Caso 2 · Contratación
+cifra: 10 años
+cifraNota: de currículums recibidos, en su mayoría de hombres, sirvieron para entrenar el modelo.
+fuente: J. Dastin, Reuters (2018).
+---
+
+# Un filtro automático de currículums
+
+Amazon desarrolló un sistema para calificar candidatos a puestos técnicos imitando las contrataciones pasadas.
+
+El modelo aprendió a **penalizar** los currículums que incluían la palabra *women's* (por ejemplo, «capitana del club de ajedrez femenil»). La empresa abandonó el proyecto.
+
+<span class="falla">Dónde falló</span> en los datos: el modelo reprodujo con fidelidad un patrón histórico injusto.
+
+---
+layout: caso
+caso: Caso 3 · Salud
+cifra: 17.7 % → 46.5 %
+cifraNota: proporción de pacientes afroamericanos que recibirían atención adicional si se corrige el sesgo del algoritmo.
+fuente: Z. Obermeyer et al., Science 366 (2019).
+---
+
+# ¿Quién necesita más atención médica?
+
+Un algoritmo usado en hospitales de Estados Unidos decidía qué pacientes entraban a programas de cuidado especial. En lugar de qué tan enfermo estaba alguien, predecía **cuánto gastaría** en salud.
+
+Como históricamente se ha gastado menos en pacientes afroamericanos, con el mismo puntaje estaban **más enfermos**.
+
+<span class="falla">Dónde falló</span> en la variable objetivo: el gasto era un mal sustituto de la necesidad.
+
+---
+layout: caso
+caso: Caso 4 · Visión por computadora
+cifra: 34.7 % <small>vs.</small> 0.8 %
+cifraNota: error al clasificar el género de mujeres de piel oscura y de hombres de piel clara.
+fuente: J. Buolamwini y T. Gebru, «Gender Shades», FAT* (2018).
+---
+
+# Reconocimiento facial comercial
+
+Se evaluaron sistemas comerciales de análisis facial con un conjunto de fotografías **balanceado** por género y tono de piel.
+
+Los sistemas eran excelentes con los grupos bien representados en sus datos de entrenamiento y malos con los demás.
+
+<span class="falla">Dónde falló</span> en datos no representativos, y en evaluar con datos que tampoco lo eran.
+
+---
+layout: pregunta
+etiqueta: Antes de entrenar cualquier modelo
+---
+
+# Preguntas que siempre hay que hacerse
+
+<div class="grande" style="max-width: 980px">
+
+- ¿Quién generó estos datos, y a quién **no** representan?
+- ¿La variable que predigo mide lo que realmente me importa?
+- ¿Qué cuesta más, un falso positivo o un falso negativo, y **a quién** le cuesta?
+- ¿Quién se ve afectado por las decisiones del modelo, y cómo puede impugnarlas?
 
 </div>
-<Caja tipo="pregunta">
-
-Antes de entrenar:
-
-- ¿Quién generó los datos?
-- ¿A quién representa la muestra, y a quién no?
-- ¿A quién afectan las decisiones del modelo, y cómo podría impugnarlas?
-
-</Caja>
-</div>
 
 ---
 
-# Para cerrar
+# Para llevarse
 
 <div class="cols cols-6-4" style="flex:1">
-<div>
+<div class="grande">
 
-1. Aprender es elegir $g \in \Hyp$ con $\Ein$ pequeño **y** con garantías de que $\Eout$ también lo sea.
-2. El problema central del curso es la **generalización**, no el ajuste.
-3. Un flujo disciplinado (separar, validar y probar una sola vez) es lo que hace creíbles los resultados.
+1. Aprender es **generalizar** a partir de ejemplos, no memorizarlos.
+2. Lo que importa es el error en **datos nuevos**; el error en los datos de entrenamiento engaña.
+3. Entre modelos que explican igual, conviene el **más simple** (Occam).
+4. Se separan los datos **antes** de tocarlos y la prueba se usa **una vez**.
+5. Los datos y la métrica son **decisiones**, con consecuencias para personas.
 
 </div>
 <div>
 
-### Lecturas
+### Para la próxima clase
 
 <div class="pequeno">
 
-Abu-Mostafa, Magdon-Ismail y Lin (2012), *Learning From Data*, cap. 1.
+**Libreta:** *Un primer flujo de trabajo completo* (Unidad 1, ejemplo 1), con la fuga del Titanic.
 
-James *et al.* (2023), *An Introduction to Statistical Learning with Python*, cap. 2.
+**Lectura:** Abu-Mostafa, Magdon-Ismail y Lin (2012), *Learning From Data*, cap. 1.
 
-Barocas, Hardt y Narayanan (2023), *Fairness and Machine Learning*, cap. 1.
+**Para profundizar:** Barocas, Hardt y Narayanan (2023), *Fairness and Machine Learning*, cap. 1.
 
 </div>
-
-### Libreta
-
-<p class="pequeno">Un primer flujo de trabajo completo con scikit-learn (Unidad 1, ejemplo 1).</p>
-
 </div>
 </div>

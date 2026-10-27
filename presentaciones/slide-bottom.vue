@@ -5,7 +5,8 @@ import { useNav, useSlideContext } from '@slidev/client'
 const { $frontmatter, $page } = useSlideContext()
 const { total } = useNav()
 const { $slidev } = useSlideContext()
-const visible = computed(() => !['portada', 'seccion'].includes($frontmatter.value?.layout ?? (($page.value === 1) ? 'portada' : 'default')))
+// $frontmatter es un objeto reactivo (no un ref)
+const visible = computed(() => !['portada', 'seccion', 'caso', 'cita'].includes(($frontmatter as any)?.layout ?? (($page.value === 1) ? 'portada' : 'default')))
 const info = computed(() => $slidev.configs as Record<string, any>)
 </script>
 

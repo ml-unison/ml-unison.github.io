@@ -1,5 +1,5 @@
 ---
-pagetitle: "Reconocimiento de Patrones · LCC · UNISON"
+pagetitle: "Inicio"
 toc: false
 page-layout: full
 title-block-banner: false

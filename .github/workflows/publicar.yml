@@ -27,12 +27,14 @@ jobs:
           python-version: "3.12"
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - run: |
           uv sync --group dev
           npm ci
-      - run: uv run python herramientas/exportar_quizzes.py
+      - run: |
+          uv run python herramientas/datos_presentaciones.py
+          uv run python herramientas/exportar_quizzes.py
       - name: Construir (producción)
         env:
           BASE: /

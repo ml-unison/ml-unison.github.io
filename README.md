@@ -20,7 +20,7 @@ Sitio y material del curso de aprendizaje automático de la Licenciatura en Cien
 
 ## Trabajo local
 
-Requisitos: [uv](https://docs.astral.sh/uv/) y Node.js ≥ 22.
+Requisitos: [uv](https://docs.astral.sh/uv/) y Node.js ≥ 24.
 
 ```bash
 uv sync --group dev && npm install

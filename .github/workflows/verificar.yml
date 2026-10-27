@@ -15,7 +15,7 @@ jobs:
           python-version: "3.12"
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - name: Instalar dependencias
         run: |
@@ -28,7 +28,6 @@ jobs:
       - name: Datos de las presentaciones y quizzes exportados
         run: |
           uv run python herramientas/datos_presentaciones.py
-          git diff --exit-code presentaciones/datos || (echo "::error::presentaciones/datos no está actualizado; corre herramientas/datos_presentaciones.py" && exit 1)
           uv run python herramientas/exportar_quizzes.py
       - name: Construir sitio y presentaciones
         run: node herramientas/construir.mjs

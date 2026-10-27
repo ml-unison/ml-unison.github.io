@@ -3,7 +3,7 @@
 Las libretas se escriben en formato *percent* (`.py`, más fácil de revisar en git)
 y se generan como `.ipynb` sin salidas para Colab.
 
-    uv run python herramientas/libretas.py sincronizar      # .py → .ipynb
+    uv run python herramientas/libretas.py sincronizar [u02-e01 …]  # .py → .ipynb
     uv run python herramientas/libretas.py limpiar          # quita salidas de los .ipynb
     uv run python herramientas/libretas.py rama main        # fija RAMA = "main" (antes del merge)
 """
@@ -11,6 +11,7 @@ y se generan como `.ipynb` sin salidas para Colab.
 from __future__ import annotations
 
 import argparse
+import hashlib
 import re
 import sys
 from pathlib import Path
@@ -41,14 +42,22 @@ def limpiar(nb: nbformat.NotebookNode) -> nbformat.NotebookNode:
     nb.metadata["colab"] = {"provenance": [], "toc_visible": True}
     nb.metadata["kernelspec"] = {"display_name": "Python 3", "language": "python", "name": "python3"}
     nb.metadata.pop("jupytext", None)
+    # ids estables: no cambian si la celda no cambia (evita ruido en git)
+    for i, c in enumerate(nb.cells):
+        c["id"] = hashlib.sha1(f"{i}:{c.cell_type}:{c.source}".encode()).hexdigest()[:8]
     return nb
 
 
-def cmd_sincronizar() -> None:
+def cmd_sincronizar(filtro: list[str]) -> None:
     for py in _fuentes_py():
+        if filtro and not any(f in py.name for f in filtro):
+            continue
         nb = limpiar(jupytext.read(py, fmt="py:percent"))
         destino = py.with_suffix(".ipynb")
-        nbformat.write(nb, destino)
+        nuevo = nbformat.writes(nb) + "\n"
+        if destino.exists() and destino.read_text(encoding="utf-8") == nuevo:
+            continue
+        destino.write_text(nuevo, encoding="utf-8")
         print(f"✓ {destino.relative_to(RAIZ)}")
 
 
@@ -74,13 +83,14 @@ def cmd_rama(rama: str) -> None:
 def main(argv: list[str] | None = None) -> int:
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = ap.add_subparsers(dest="cmd", required=True)
-    sub.add_parser("sincronizar", help=".py (percent) → .ipynb sin salidas")
+    s = sub.add_parser("sincronizar", help=".py (percent) → .ipynb sin salidas")
+    s.add_argument("filtro", nargs="*", help="solo las libretas cuyo nombre contenga alguno de estos textos")
     sub.add_parser("limpiar", help="quita salidas de todos los .ipynb")
     r = sub.add_parser("rama", help="cambia la rama usada por las libretas")
     r.add_argument("rama")
     args = ap.parse_args(argv)
     if args.cmd == "sincronizar":
-        cmd_sincronizar()
+        cmd_sincronizar(args.filtro)
     elif args.cmd == "limpiar":
         cmd_limpiar()
     else:

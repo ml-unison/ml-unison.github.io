@@ -8,10 +8,10 @@ import { SERIE } from './colores'
 const props = withDefaults(defineProps<{
   x: (string | number)[], series: Record<string, number[]>, fechas?: boolean,
   yDominio?: [number, number], yTicks?: number[], xTicks?: (string | number)[], xEtiquetas?: string[],
-  yTitulo?: string, referencia?: { y: number, texto: string, x?: number }, ancho?: number, alto?: number, marcadores?: boolean,
-}>(), { fechas: false, ancho: 1000, alto: 400, marcadores: false })
+  yTitulo?: string, referencia?: { y: number, texto: string, x?: number }, ancho?: number, alto?: number, marcadores?: boolean, sinEtiquetas?: boolean,
+}>(), { sinEtiquetas: false, fechas: false, ancho: 1000, alto: 400, marcadores: false })
 
-const m = { l: 56, r: 150, t: 34, b: 40 }
+const m = { l: 56, r: props.sinEtiquetas ? 20 : 150, t: 34, b: 40 }
 const xs = computed(() => props.x.map(v => props.fechas ? new Date(v as string) : (v as number)))
 const x = computed(() => {
   const d = xs.value
@@ -52,7 +52,7 @@ const etiquetas = computed(() => {
         <circle v-for="(v, i) in series[n]" :key="i" :cx="x(xs[i])" :cy="y(v)" r="5" :fill="SERIE[k]" stroke="#fff" stroke-width="1.5" />
       </template>
     </g>
-    <g v-for="e in etiquetas" :key="`e${e.n}`">
+    <g v-for="e in (sinEtiquetas ? [] : etiquetas)" :key="`e${e.n}`">
       <line :x1="ancho - m.r + 10" :x2="ancho - m.r + 26" :y1="e.y" :y2="e.y" :stroke="SERIE[e.k]" stroke-width="3.2" />
       <text :x="ancho - m.r + 32" :y="e.y + 6" style="fill: #1A2133; font-weight: 600">{{ e.n }}</text>
     </g>

@@ -35,7 +35,7 @@ export const unidades: Unidad[] = [
     num: 2, slug: '02-no-supervisado', titulo: 'Aprendizaje no supervisado', semanas: '2',
     resumen: 'Encontrar estructura sin etiquetas: agrupamiento, mezclas y reducción de dimensión.',
     temas: ['k-medias', 'Agrupamiento jerárquico', 'DBSCAN', 'Mezclas gaussianas y EM', 'PCA', 't-SNE y UMAP'],
-    disponible: false,
+    disponible: true,
   },
   {
     num: 3, slug: '03-fundamentos', titulo: 'Fundamentos del aprendizaje supervisado', semanas: '2.5',

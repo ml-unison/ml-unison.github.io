@@ -37,4 +37,33 @@ export const materiales: Record<string, Material> = {
     ],
     quiz: 'u01',
   },
+  '02-no-supervisado': {
+    objetivos: [
+      'Formular el agrupamiento como un problema de optimización y explicar por qué k-medias converge a un mínimo local.',
+      'Elegir entre k-medias, agrupamiento jerárquico, DBSCAN y mezclas gaussianas según la forma de los grupos y el tamaño de los datos.',
+      'Derivar el algoritmo EM para mezclas gaussianas y relacionarlo con k-medias.',
+      'Calcular PCA con la SVD e interpretar varianza explicada, componentes y reconstrucciones.',
+      'Usar t-SNE y UMAP para explorar datos sin sobreinterpretar tamaños ni distancias.',
+      'Evaluar un agrupamiento sin etiquetas y reconocer los riesgos de segmentar personas.',
+    ],
+    presentaciones: [
+      { id: 'u02-01-agrupamiento', titulo: 'Agrupamiento', descripcion: 'k-medias paso a paso, mínimos locales, cómo elegir k, jerárquico con las presas de Sonora, DBSCAN y evaluación sin etiquetas.' },
+      { id: 'u02-02-mezclas', titulo: 'Mezclas gaussianas y el algoritmo EM', descripcion: 'Modelos generativos, responsabilidades, EM y por qué funciona, tipos de covarianza y BIC.' },
+      { id: 'u02-03-dimension', titulo: 'Reducción de dimensión', descripcion: 'La maldición de la dimensión, PCA con la SVD, t-SNE y UMAP, y cómo no leer sus mapas.' },
+    ],
+    libretas: [
+      { ruta: 'unidades/02-no-supervisado/ejemplos/u02-e01-segmentacion-clientes.ipynb', titulo: 'Segmentar clientes con k-medias, jerárquico y DBSCAN', descripcion: 'De 25,900 facturas a una tabla RFM, k-medias programado a mano, elección de k, segmentos interpretables y atípicos.' },
+      { ruta: 'unidades/02-no-supervisado/ejemplos/u02-e02-mezclas-pinguinos.ipynb', titulo: 'Mezclas gaussianas y el algoritmo EM', descripcion: 'Los pingüinos de Palmer: por qué falla k-medias, EM en 30 líneas de NumPy, responsabilidades, BIC y atípicos.' },
+      { ruta: 'unidades/02-no-supervisado/ejemplos/u02-e03-reduccion-dimension.ipynb', titulo: 'Reducir dimensión: PCA, t-SNE y UMAP', descripcion: 'PCA desde cero con dígitos escritos a mano, componentes como imágenes, reconstrucciones y mapas no lineales.' },
+    ],
+    laboratorios: [
+      { ruta: 'unidades/02-no-supervisado/laboratorios/u02-lab02-kmedias-pca.ipynb', titulo: 'Laboratorio 2 · k-medias y PCA desde cero', descripcion: 'Programar con NumPy el algoritmo de Lloyd y PCA con la SVD, verificarlos contra scikit-learn y cuantizar los colores de una foto. Se verifica automáticamente.' },
+    ],
+    lecturas: [
+      { obra: 'James, Witten, Hastie, Tibshirani y Taylor (2023). An Introduction to Statistical Learning with Applications in Python.', detalle: 'Capítulo 12, Unsupervised Learning.' },
+      { obra: 'Bishop (2006). Pattern Recognition and Machine Learning.', detalle: 'Capítulo 9, Mixture Models and EM; secciones 12.1 y 12.2, PCA.' },
+      { obra: 'Wattenberg, Viégas y Johnson (2016). How to Use t-SNE Effectively. Distill.', detalle: 'Artículo interactivo completo.' },
+    ],
+    quiz: 'u02',
+  },
 }

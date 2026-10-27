@@ -1,0 +1,158 @@
+titulo: "Unidad 2 · Aprendizaje no supervisado"
+unidad: 2
+preguntas:
+  - id: u02-p01
+    tipo: opcion
+    enunciado: |
+      En el algoritmo de Lloyd (k-medias), con la asignación de los puntos fija, ¿qué valor de $\mu_j$ minimiza $\sum_{c(i)=j} \lVert \mathbf{x}_i - \mu_j \rVert^2$?
+    opciones:
+      - texto: La media de los puntos asignados al grupo $j$.
+        correcta: true
+        retro: Al igualar el gradiente a cero se obtiene $\mu_j = \bar{\mathbf{x}}_j$.
+      - texto: La mediana, coordenada por coordenada, de los puntos del grupo $j$.
+        retro: La mediana minimiza la suma de distancias absolutas ($\ell_1$), no la de cuadrados. Eso da el algoritmo de k-medianas.
+      - texto: El punto del grupo $j$ más cercano al centro anterior.
+        retro: Restringir el centro a ser un dato da k-medoides, que no minimiza la suma de cuadrados.
+      - texto: El centro anterior, porque el paso de asignación ya minimizó $J$.
+        retro: La asignación minimiza $J$ con los centros fijos; mover los centros puede bajar $J$ todavía más.
+    explicacion: |
+      $\nabla_{\mu_j} \sum_{c(i)=j} \lVert \mathbf{x}_i - \mu_j \rVert^2 = -2 \sum_{c(i)=j} (\mathbf{x}_i - \mu_j) = 0 \Rightarrow \mu_j = \frac{1}{n_j}\sum_{c(i)=j} \mathbf{x}_i$.
+
+  - id: u02-p02
+    tipo: vf
+    enunciado: |
+      Si se corre k-medias hasta que converja, el resultado es el agrupamiento con la menor suma de distancias al cuadrado $J$ entre todos los posibles.
+    respuesta: false
+    explicacion: |
+      Falso. k-medias converge a un **mínimo local**: un punto donde ni reasignar ni mover centros mejora $J$. Con nueve grupos en rejilla, 50 de 60 inicios al azar quedaron atrapados. Por eso se usan k-medias++ y varias inicializaciones (`n_init`).
+
+  - id: u02-p03
+    tipo: opcion
+    enunciado: |
+      Graficas la inercia $J$ de k-medias para $k = 1, 2, \dots, 10$. ¿Por qué no basta con elegir el $k$ de menor $J$?
+    opciones:
+      - texto: Porque $J$ nunca aumenta al aumentar $k$; con $k = n$ vale cero.
+        correcta: true
+      - texto: Porque $J$ depende de la inicialización y cambia en cada corrida.
+        retro: Es cierto que depende del inicio, pero con varias corridas eso se controla. El problema de fondo es otro.
+      - texto: Porque $J$ solo se puede calcular cuando se conocen las etiquetas verdaderas.
+        retro: $J$ es un criterio interno; solo usa los datos y los centros.
+      - texto: Porque $J$ crece con $k$ y el mínimo siempre está en $k = 1$.
+        retro: Es al revés, $J$ baja al aumentar $k$.
+    explicacion: |
+      Más centros siempre permiten acercarse más a los datos. Para elegir $k$ se buscan criterios que castiguen la complejidad (el «codo», la silueta, o BIC en mezclas) y, sobre todo, se piensa para qué se quieren los grupos.
+
+  - id: u02-p04
+    tipo: numerica
+    enunciado: |
+      Un punto tiene distancia media $a = 2$ a los demás puntos de su grupo y distancia media $b = 5$ a los puntos del grupo vecino más cercano. ¿Cuánto vale su silueta $s = (b - a)/\max(a, b)$?
+    respuesta: 0.6
+    tolerancia: 0.001
+    explicacion: |
+      $s = (5 - 2)/5 = 0.6$. Un valor cercano a 1 indica que el punto está bien dentro de su grupo; cerca de 0, que está en la frontera; negativo, que quizá está en el grupo equivocado.
+
+  - id: u02-p05
+    tipo: opcion
+    enunciado: |
+      Tienes dos medias lunas entrelazadas (como en la presentación). ¿Qué método tiene más posibilidades de separarlas bien?
+    opciones:
+      - texto: DBSCAN con un radio $\varepsilon$ adecuado.
+        correcta: true
+        retro: DBSCAN une regiones densas en cadena, sin importar su forma.
+      - texto: k-medias con $k = 2$ y muchas inicializaciones.
+        retro: Más inicializaciones no cambian la forma de las fronteras de k-medias, que siempre son rectas (regiones de Voronoi).
+      - texto: Una mezcla gaussiana de dos componentes con covarianza completa.
+        retro: Cada componente es una elipse; una media luna no es una elipse.
+      - texto: Jerárquico con enlace de Ward.
+        retro: Ward minimiza la misma suma de cuadrados que k-medias y prefiere grupos compactos y redondos.
+    explicacion: |
+      Las formas no convexas son el caso favorable de DBSCAN (y del enlace simple, que también encadena). Los métodos basados en centros o en elipses suponen grupos compactos.
+
+  - id: u02-p06
+    tipo: opcion
+    enunciado: |
+      En agrupamiento jerárquico aglomerativo, ¿qué criterio de enlace tiende a producir el efecto de **encadenamiento**, en el que dos grupos lejanos se unen por una fila de puntos intermedios?
+    opciones:
+      - texto: Simple (distancia entre el par de puntos más cercano).
+        correcta: true
+      - texto: Completo (distancia entre el par más lejano).
+        retro: "El enlace completo hace lo contrario: penaliza los grupos extendidos."
+      - texto: Promedio.
+        retro: El promedio de todos los pares es un punto intermedio; encadena mucho menos que el simple.
+      - texto: Ward.
+        retro: Ward prefiere grupos compactos, como k-medias.
+    explicacion: |
+      Con el enlace simple basta **un** par de puntos cercanos para unir dos grupos. En la libreta 1, con los clientes, el enlace simple deja casi todo en un solo grupo.
+
+  - id: u02-p07
+    tipo: vf
+    enunciado: |
+      En una mezcla gaussiana, la responsabilidad $\gamma_{ik}$ es la probabilidad de que el punto $\mathbf{x}_i$ haya sido generado por la componente $k$, dado el valor observado de $\mathbf{x}_i$.
+    respuesta: true
+    explicacion: |
+      Verdadero. Por la regla de Bayes, $\gamma_{ik} = \pi_k \mathcal{N}(\mathbf{x}_i \mid \mu_k, \Sigma_k) / \sum_j \pi_j \mathcal{N}(\mathbf{x}_i \mid \mu_j, \Sigma_j)$. Para cada punto, las responsabilidades suman 1.
+
+  - id: u02-p08
+    tipo: opcion
+    enunciado: |
+      ¿Qué garantiza el algoritmo EM en cada iteración?
+    opciones:
+      - texto: Que la log-verosimilitud de los datos no disminuye.
+        correcta: true
+        retro: El paso E hace exacta una cota inferior y el paso M la maximiza; por eso la log-verosimilitud no baja.
+      - texto: Que alcanza el máximo global de la verosimilitud.
+        retro: Solo garantiza no bajar; puede terminar en un máximo local. Con otro inicio, los pingüinos terminan en $\ell = -862$ en vez de $-822$.
+      - texto: Que la suma de distancias al cuadrado $J$ disminuye estrictamente.
+        retro: $J$ es el criterio de k-medias; EM optimiza la verosimilitud de la mezcla.
+      - texto: Que las responsabilidades se vuelven 0 o 1.
+        retro: Eso pasa solo en el caso límite $\Sigma_k = \sigma^2 I$ con $\sigma \to 0$, que da k-medias.
+
+  - id: u02-p09
+    tipo: numerica
+    enunciado: |
+      ¿Cuántos parámetros libres tiene **una** matriz de covarianza completa en $d = 4$ dimensiones?
+    respuesta: 10
+    tolerancia: 0
+    explicacion: |
+      Una covarianza es simétrica: $d(d+1)/2 = 4 \cdot 5/2 = 10$ parámetros. Con $d = 100$ serían 5,050 por componente; por eso a veces se prefieren covarianzas diagonales o compartidas.
+
+  - id: u02-p10
+    tipo: opcion
+    enunciado: |
+      Aplicas PCA a los pingüinos con el pico y la aleta en milímetros y la masa en gramos, **sin estandarizar**. La primera componente explica el 99.99 % de la varianza. ¿Qué concluyes?
+    opciones:
+      - texto: La primera componente es prácticamente la masa, porque en gramos su varianza es enorme comparada con las demás.
+        correcta: true
+      - texto: Los datos son casi unidimensionales y basta una componente.
+        retro: La conclusión depende de las unidades. Estandarizadas, la primera componente explica 69 %.
+      - texto: Las cuatro medidas están casi perfectamente correlacionadas.
+        retro: "No se puede concluir eso: una sola variable de gran varianza domina aunque no esté correlacionada con las otras."
+      - texto: PCA falló porque los datos no están centrados.
+        retro: PCA siempre centra los datos; el problema es la escala, no la media.
+    explicacion: |
+      PCA busca direcciones de máxima varianza, y la varianza depende de las unidades. Si las variables están en escalas distintas y no hay una razón para preferir unas, se estandarizan.
+
+  - id: u02-p11
+    tipo: numerica
+    enunciado: |
+      En los dígitos de $8 \times 8$ (64 dimensiones), ¿cuántas componentes principales se necesitan como mínimo para conservar el 90 % de la varianza?
+    respuesta: 21
+    tolerancia: 0
+    explicacion: |
+      Con 20 componentes se conserva el 89.4 % y con 21, el 90.3 %. Lo calculas en la libreta 3 y en el Laboratorio 2.
+
+  - id: u02-p12
+    tipo: opcion
+    enunciado: |
+      En una proyección t-SNE, el grupo de los ceros aparece el doble de grande y muy lejos del grupo de los unos. ¿Qué puedes concluir?
+    opciones:
+      - texto: Casi nada sobre tamaños ni distancias; t-SNE conserva vecindarios locales, no escalas globales.
+        correcta: true
+      - texto: Que en el espacio original los ceros son más variables que los unos.
+        retro: t-SNE tiende a igualar el tamaño de los grupos; dos nubes con dispersión 8 veces distinta salen casi iguales.
+      - texto: Que los ceros y los unos son los dígitos más distintos entre sí.
+        retro: Las distancias entre grupos en t-SNE no tienen una interpretación fiable.
+      - texto: Que la perplejidad es demasiado baja.
+        retro: La perplejidad cambia el dibujo, pero esta observación no permite diagnosticarla.
+    explicacion: |
+      Ver Wattenberg, Viégas y Johnson, «How to Use t-SNE Effectively» (Distill, 2016). Lo que sí es razonable leer en un t-SNE es qué puntos quedan juntos.

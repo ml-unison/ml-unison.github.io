@@ -47,7 +47,7 @@ export const unidades: Unidad[] = [
     num: 4, slug: '04-lineales', titulo: 'Modelos lineales', semanas: '2',
     resumen: 'La familia de modelos más útil y mejor entendida, desde mínimos cuadrados hasta los kernels.',
     temas: ['Regresión lineal', 'Regresión logística', 'GLM', 'LDA y Bayes ingenuo', 'SVM y kernels'],
-    disponible: false,
+    disponible: true,
   },
   {
     num: 5, slug: '05-arboles-ensambles', titulo: 'Árboles y ensambles', semanas: '2',

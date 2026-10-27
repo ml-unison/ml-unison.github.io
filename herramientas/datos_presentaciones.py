@@ -544,9 +544,251 @@ def u03() -> dict:
     return out
 
 
+def _franjas(etiq, xs, ys):
+    """Comprime una malla de clases en franjas horizontales [fila, x0, x1, clase] para dibujar regiones."""
+    out = []
+    for i in range(etiq.shape[0]):
+        j = 0
+        while j < etiq.shape[1]:
+            k = j
+            while k + 1 < etiq.shape[1] and etiq[i, k + 1] == etiq[i, j]:
+                k += 1
+            out.append([i, j, k, int(etiq[i, j])])
+            j = k + 1
+    return {"x": r(xs, 3), "y": r(ys, 3), "franjas": out}
+
+
+def u04() -> dict:
+    import pandas as pd
+    from sklearn.compose import make_column_transformer
+    from sklearn.datasets import load_digits, make_circles, make_moons
+    from sklearn.discriminant_analysis import LinearDiscriminantAnalysis, QuadraticDiscriminantAnalysis
+    from sklearn.decomposition import PCA
+    from sklearn.feature_extraction.text import CountVectorizer
+    from sklearn.linear_model import LinearRegression, LogisticRegression, Perceptron, PoissonRegressor
+    from sklearn.metrics import accuracy_score, mean_poisson_deviance, root_mean_squared_error
+    from sklearn.model_selection import GridSearchCV, StratifiedKFold, train_test_split
+    from sklearn.naive_bayes import MultinomialNB
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import OneHotEncoder, StandardScaler
+    from sklearn.svm import SVC
+
+    raiz = DESTINO.parents[1] / "datos"
+    out: dict = {}
+    rng = np.random.default_rng(2027)
+
+    # ===== bicicletas: definiciones comunes con las libretas u04-e01 y u04-e02
+    b = pd.read_csv(raiz / "bicis_washington.csv", parse_dates=["fecha"])
+    b["anio"] = b.fecha.dt.year - 2011
+    b["clima"] = b.clima.clip(upper=3)
+    b["hora_lab"] = b.hora.astype(str) + "_" + b.laboral.astype(str)
+    tr, te = b[b.fecha.dt.day <= 19], b[b.fecha.dt.day >= 20]
+    num = ["temp", "humedad", "viento"]
+    perfil = b.groupby(["laboral", "hora"]).total.mean().unstack(0)
+    out["perfil"] = {"hora": list(range(24)), "laboral": r(perfil[1], 1), "descanso": r(perfil[0], 1)}
+
+    specs = {"M1": ([], ["temp"]), "M2": ([], ["temp", "hora"]), "M3": (["hora", "clima", "anio", "laboral"], num),
+             "M4": (["hora_lab", "clima", "anio"], num)}
+    def modelo(nombre, est):
+        cat, nu = specs[nombre]
+        partes = ([(OneHotEncoder(drop="first"), cat)] if cat else []) + [(StandardScaler(), nu)]
+        return make_pipeline(make_column_transformer(*partes), est).fit(tr, tr.total)
+    lineales = {n: modelo(n, LinearRegression()) for n in specs}
+    poisson = {n: modelo(n, PoissonRegressor(alpha=0, max_iter=3000)) for n in ("M3", "M4")}
+    tabla = []
+    for n in specs:
+        yl = lineales[n].predict(te)
+        fila = {"modelo": n, "recm": round(root_mean_squared_error(te.total, yl), 1), "neg": round(100 * float(np.mean(yl < 0)), 1),
+                "dev": round(mean_poisson_deviance(te.total, np.clip(yl, 0.5, None)), 1)}
+        if n in poisson:
+            yp = poisson[n].predict(te)
+            fila |= {"recm_p": round(root_mean_squared_error(te.total, yp), 1), "dev_p": round(mean_poisson_deviance(te.total, yp), 1)}
+        tabla.append(fila)
+    out["escalera"] = tabla
+    lab = te[te.laboral == 1]
+    out["perfil_modelos"] = {"real": r(lab.groupby("hora").total.mean(), 1),
+                             **{n: r(pd.Series(lineales[n].predict(lab), index=lab.index).groupby(lab.hora).mean(), 1) for n in ("M2", "M3", "M4")}}
+    # un día laboral de prueba, hora por hora
+    fecha = "2011-03-29"  # martes de prueba; el mismo día que la libreta u04-e02
+    d = te[te.fecha == fecha].sort_values("hora")
+    out["dia"] = {"fecha": str(pd.Timestamp(fecha).date()), "hora": d.hora.tolist(), "real": d.total.tolist(),
+                  "lineal": r(lineales["M4"].predict(d), 1), "poisson": r(poisson["M4"].predict(d), 1)}
+    # factores multiplicativos de Poisson M4
+    ohe = poisson["M4"][0]; coef = pd.Series(poisson["M4"][-1].coef_, index=ohe.get_feature_names_out())
+    out["factores"] = {k.split("__")[-1]: round(float(np.exp(v)), 3) for k, v in coef.items() if "clima" in k or "anio" in k}
+    # residuos de M4 lineal (muestra de prueba)
+    idx = rng.choice(len(te), 1800, replace=False)
+    yl = lineales["M4"].predict(te)
+    out["residuos"] = {"ajustado": r(yl[idx], 1), "residuo": r((te.total.values - yl)[idx], 1), "neg": round(100 * float(np.mean(yl < 0)), 1)}
+
+    # dispersión total contra temperatura con la recta de M1
+    idx = rng.choice(len(tr), 1500, replace=False)
+    m1 = LinearRegression().fit(tr[["temp"]], tr.total)
+    out["temp"] = {"x": r(tr.temp.values[idx], 1), "y": tr.total.values[idx].tolist(), "w0": round(float(m1.intercept_), 2), "w1": round(float(m1.coef_[0]), 3)}
+
+    # descenso por gradiente en (w0, w1) para total ~ temp, sin centrar y estandarizada
+    def descenso(x, y, eta_rel, pasos=4000, tol=1e-6):
+        X = np.c_[np.ones_like(x), x]; N = len(y)
+        H = 2 / N * X.T @ X; lam = np.linalg.eigvalsh(H); eta = eta_rel / lam[-1]
+        wopt = np.linalg.solve(X.T @ X, X.T @ y); E = lambda w: np.mean((X @ w - y) ** 2)
+        w = np.array([0.0, 0.0]); camino = [w.copy()]; e0 = E(w) - E(wopt)
+        it = None; marcas = set(np.unique(np.round(np.logspace(0, 4.3, 60))).astype(int)); hist = [[0, 1.0]]
+        for t in range(1, 200000):
+            w = w - eta * (2 / N * X.T @ (X @ w - y))
+            if t <= pasos: camino.append(w.copy())
+            if t in marcas: hist.append([t, float(f"{max((E(w) - E(wopt)) / e0, 1e-12):.3g}")])
+            if it is None and (E(w) - E(wopt)) < tol * E(wopt): it = t  # exceso relativo al mínimo, como u04-e01
+            if t > 20000: break
+        # curvas de nivel: E(w) - E* = c  ->  (w - w*)^T (H/2) (w - w*) = c
+        base = E(camino[1]) - E(wopt)
+        base = base if base > 1e-9 * e0 else e0
+        niveles = [base * f for f in (1.0, 0.4, 0.12, 0.02)]
+        val, vec = np.linalg.eigh(H / 2); t_ = np.linspace(0, 2 * np.pi, 200)
+        elipses = [r((vec @ (np.sqrt(c / val)[:, None] * np.vstack([np.cos(t_), np.sin(t_)]))).T + wopt, 3) for c in niveles]
+        return {"camino": r(np.array(camino)[: min(len(camino), 400)], 3), "opt": r(wopt, 3), "elipses": elipses,
+                "kappa": round(float(lam[-1] / lam[0]), 1), "iter": it, "hist": hist, "eta": float(f"{eta:.3g}")}
+    xt, yt = tr.temp.values.astype(float), tr.total.values.astype(float)
+    out["descenso"] = {"crudo": descenso(xt, yt, 1.8), "estandar": descenso((xt - xt.mean()) / xt.std(), yt, 1.8)}  # η = 0.9·2/λmax, como la figura de u04-e01
+
+    # colinealidad: bootstrap de los coeficientes de temp y sensacion
+    pares, solo = [], []
+    for _ in range(200):
+        s = tr.sample(len(tr), replace=True, random_state=int(rng.integers(1 << 31)))
+        pares.append(LinearRegression().fit(s[["temp", "sensacion"]], s.total).coef_)
+        solo.append(LinearRegression().fit(s[["temp"]], s.total).coef_[0])
+    pares = np.array(pares)
+    out["colineal"] = {"temp": r(pares[:, 0], 3), "sens": r(pares[:, 1], 3), "solo": r(solo, 3),
+                       "corr": round(float(tr[["temp", "sensacion"]].corr().iloc[0, 1]), 3),
+                       "de_par": r(pares.std(0), 3), "de_solo": round(float(np.std(solo)), 3)}
+
+    # ===== Challenger: Newton/IRLS desde w = 0
+    c = pd.read_csv(raiz / "challenger.csv"); yc = (c.danadas > 0).astype(float).values
+    Xc = np.c_[np.ones(len(c)), c.temp_f.values]
+    w = np.zeros(2); iters = []
+    for k in range(8):
+        p = 1 / (1 + np.exp(-Xc @ w)); ll = float(np.sum(yc * np.log(p) + (1 - yc) * np.log(1 - p)))
+        iters.append({"k": k, "w0": round(float(w[0]), 3), "w1": round(float(w[1]), 4), "ll": round(ll, 4)})
+        S = p * (1 - p); w = w + np.linalg.solve(Xc.T @ (S[:, None] * Xc), Xc.T @ (yc - p))
+    tg = np.arange(30, 86, 1.0)
+    curva = 1 / (1 + np.exp(-(w[0] + w[1] * tg)))
+    boot = []
+    for _ in range(1000):
+        i = rng.integers(0, len(c), len(c))
+        if yc[i].min() == yc[i].max(): continue
+        mb = LogisticRegression(C=np.inf, max_iter=5000).fit(Xc[i, 1:], yc[i])
+        boot.append(mb.predict_proba(tg[:, None])[:, 1])
+    boot = np.array(boot)
+    out["challenger"] = {"temp": c.temp_f.tolist(), "danadas": c.danadas.tolist(), "iter": iters, "w": r(w, 4),
+                         "t": tg.tolist(), "p": r(curva, 4), "p05": r(np.quantile(boot, 0.05, axis=0), 4), "p95": r(np.quantile(boot, 0.95, axis=0), 4),
+                         "p31": round(float(1 / (1 + np.exp(-(w[0] + 31 * w[1])))), 4), "p31_q": r(np.quantile(boot[:, 1], [0.05, 0.5, 0.95]), 3)}
+    # separabilidad: sin los vuelos con daño a 70, 70 y 75 °F (como en la libreta u04-e02) los datos se separan
+    quita = (c.danadas > 0) & c.temp_f.isin([70, 75])
+    Xs, ys_ = Xc[~quita.values], yc[~quita.values]
+    w = np.zeros(2); normas = []
+    for t in range(1, 26):
+        p = np.clip(1 / (1 + np.exp(-Xs @ w)), 1e-15, 1 - 1e-15); S = p * (1 - p)
+        w = w + np.linalg.lstsq(Xs.T @ (S[:, None] * Xs), Xs.T @ (ys_ - p), rcond=None)[0]
+        normas.append([t, round(float(np.linalg.norm(w)), 1)])
+    out["separable"] = normas
+
+    # ===== pingüinos: LDA y QDA con las dos medidas del pico
+    pg = pd.read_csv(raiz / "pinguinos.csv").dropna(subset=["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"])
+    especies = ["Adelie", "Chinstrap", "Gentoo"]; ye = pg.species.map({e: i for i, e in enumerate(especies)}).values
+    X2 = pg[["bill_length_mm", "bill_depth_mm"]].values
+    gx, gy = np.linspace(31, 61, 121), np.linspace(12.5, 22, 77)
+    G = np.array(np.meshgrid(gx, gy)).reshape(2, -1).T
+    lda, qda = LinearDiscriminantAnalysis(store_covariance=True).fit(X2, ye), QuadraticDiscriminantAnalysis(store_covariance=True).fit(X2, ye)
+    Sp = lda.covariance_
+    cv = StratifiedKFold(5, shuffle=True, random_state=2011)  # como la libreta u04-e03
+    from sklearn.model_selection import cross_val_score
+    out["pinguinos"] = {"x": r(X2[:, 0], 1), "y": r(X2[:, 1], 1), "g": ye.tolist(), "especies": especies,
+                        "lda": _franjas(lda.predict(G).reshape(len(gy), len(gx)), gx, gy),
+                        "qda": _franjas(qda.predict(G).reshape(len(gy), len(gx)), gx, gy),
+                        "elipses_lda": [_elipse(lda.means_[k], Sp) for k in range(3)],
+                        "elipses_qda": [_elipse(qda.means_[k], qda.covariance_[k]) for k in range(3)],
+                        "cv": {n: round(float(cross_val_score(m, X2, ye, cv=cv).mean()), 3) for n, m in
+                               [("lda", LinearDiscriminantAnalysis()), ("qda", QuadraticDiscriminantAnalysis()),
+                                ("logistica", make_pipeline(StandardScaler(), LogisticRegression(max_iter=2000)))]}}
+    X4 = StandardScaler().fit_transform(pg[["bill_length_mm", "bill_depth_mm", "flipper_length_mm", "body_mass_g"]])
+    Zl = LinearDiscriminantAnalysis(n_components=2).fit_transform(X4, ye); Zp = PCA(2).fit_transform(X4)
+    out["fisher"] = {"lda": [r(Zl[:, 0], 2), r(Zl[:, 1], 2)], "pca": [r(Zp[:, 0], 2), r(Zp[:, 1], 2)], "g": ye.tolist()}
+
+    # ===== SMS: Bayes ingenuo y logística
+    m = pd.read_csv(raiz / "sms_spam.csv")
+    mtr, mte = train_test_split(m, test_size=0.25, stratify=m.spam, random_state=2011)
+    vec = CountVectorizer(); Xtr, Xte = vec.fit_transform(mtr.texto), vec.transform(mte.texto)
+    nb = MultinomialNB(alpha=1.0).fit(Xtr, mtr.spam)
+    lr = nb.feature_log_prob_[1] - nb.feature_log_prob_[0]; pal = vec.get_feature_names_out(); o = np.argsort(lr)
+    out["sms"] = {"spam": [[str(pal[i]), round(float(lr[i]), 2)] for i in o[::-1][:12]],
+                  "normal": [[str(pal[i]), round(float(lr[i]), 2)] for i in o[:12]],
+                  "vocabulario": len(pal), "n_entrena": len(mtr), "n_prueba": len(mte), "prevalencia": round(float(m.spam.mean()), 3)}
+    from sklearn.metrics import precision_score, recall_score
+    for nombre, est in [("nb", nb), ("logistica", LogisticRegression(C=10, max_iter=3000).fit(Xtr, mtr.spam))]:
+        pr = est.predict(Xte)
+        out["sms"][nombre] = {"exactitud": round(float(accuracy_score(mte.spam, pr)), 4), "precision": round(float(precision_score(mte.spam, pr)), 3),
+                              "exhaustividad": round(float(recall_score(mte.spam, pr)), 3)}
+    rr = np.random.default_rng(0); ns = [20, 50, 100, 200, 500, 1000, 2000, 4180]; e_nb, e_lr = [], []
+    for n in ns:
+        a, bb = [], []
+        for _ in range(20 if n < len(mtr) else 1):
+            ii = rr.choice(len(mtr), n, replace=False) if n < len(mtr) else np.arange(len(mtr))
+            if mtr.spam.iloc[ii].nunique() < 2: continue
+            v = CountVectorizer().fit(mtr.texto.iloc[ii]); Xa, Xb = v.transform(mtr.texto.iloc[ii]), v.transform(mte.texto)
+            a.append(1 - accuracy_score(mte.spam, MultinomialNB().fit(Xa, mtr.spam.iloc[ii]).predict(Xb)))
+            bb.append(1 - accuracy_score(mte.spam, LogisticRegression(C=10, max_iter=3000).fit(Xa, mtr.spam.iloc[ii]).predict(Xb)))
+        e_nb.append(float(np.mean(a))); e_lr.append(float(np.mean(bb)))
+    out["aprendizaje"] = {"n": ns, "nb": r(e_nb, 4), "logistica": r(e_lr, 4)}
+
+    # ===== SVM con pingüinos
+    def svm_lineal(e1, e2, cols, C):
+        s = pg[pg.species.isin([e1, e2])]
+        esc = StandardScaler().fit(s[cols]); Z = esc.transform(s[cols]); yy = np.where(s.species == e2, 1, -1)
+        mod = SVC(kernel="linear", C=C).fit(Z, yy)
+        wv, b0 = mod.coef_[0], float(mod.intercept_[0])
+        marg = yy * (Z @ wv + b0)
+        return Z, yy, {"w": r(wv, 4), "b": round(b0, 4), "vs": mod.support_.tolist(), "ancho": round(float(2 / np.linalg.norm(wv)), 3),
+                       "n_vs": int(len(mod.support_)), "errores": int(np.sum(marg < 0)),
+                       "cv": round(float(cross_val_score(SVC(kernel="linear", C=C), Z, yy, cv=StratifiedKFold(5, shuffle=True, random_state=2011)).mean()), 3)}
+    Z, yy, duro = svm_lineal("Adelie", "Gentoo", ["bill_depth_mm", "flipper_length_mm"], 1e6)
+    otras = []
+    for sem in (1, 4, 7):
+        pc = Perceptron(random_state=sem, shuffle=True, max_iter=1000, tol=None).fit(Z, yy)
+        otras.append({"w": r(pc.coef_[0], 4), "b": round(float(pc.intercept_[0]), 4)})
+    out["svm_duro"] = {"x": r(Z[:, 0], 3), "y": r(Z[:, 1], 3), "g": ((yy + 1) // 2).tolist(), **duro, "otras": otras}
+    suaves = {}
+    for C in (0.01, 0.1, 1, 100):
+        Z2, y2, sv = svm_lineal("Adelie", "Chinstrap", ["bill_length_mm", "bill_depth_mm"], C)
+        suaves[str(C)] = sv
+    out["svm_suave"] = {"x": r(Z2[:, 0], 3), "y": r(Z2[:, 1], 3), "g": ((y2 + 1) // 2).tolist(), "C": suaves}
+
+    # círculos (levantar con r^2) y lunas con RBF
+    Xc2, yc2 = make_circles(200, factor=0.45, noise=0.1, random_state=1)
+    out["circulos"] = {"x": r(Xc2[:, 0], 3), "y": r(Xc2[:, 1], 3), "g": yc2.tolist(), "r2": r((Xc2**2).sum(1), 3)}
+    Xm, ym = make_moons(200, noise=0.25, random_state=1)
+    gx, gy = np.linspace(-1.6, 2.6, 106), np.linspace(-1.2, 1.7, 73); G = np.array(np.meshgrid(gx, gy)).reshape(2, -1).T
+    rbf = {}
+    for gam in (0.1, 2, 100):
+        mod = SVC(kernel="rbf", C=1, gamma=gam).fit(Xm, ym)
+        rbf[str(gam)] = {**_franjas(mod.predict(G).reshape(len(gy), len(gx)), gx, gy), "n_vs": int(len(mod.support_)),
+                         "cv": round(float(cross_val_score(SVC(kernel="rbf", C=1, gamma=gam), Xm, ym, cv=StratifiedKFold(5, shuffle=True, random_state=0)).mean()), 3)}
+    out["lunas"] = {"x": r(Xm[:, 0], 3), "y": r(Xm[:, 1], 3), "g": ym.tolist(), "rbf": rbf}
+
+    # dígitos: malla C x gamma
+    dg = load_digits(); Xd, yd = dg.data / 16, dg.target
+    Xa, Xb, ya, yb = train_test_split(Xd, yd, test_size=0.25, stratify=yd, random_state=2011)
+    Cs, gs = [0.1, 1, 10, 100, 1000], [0.0001, 0.001, 0.01, 0.1, 1]
+    gs_cv = GridSearchCV(SVC(kernel="rbf"), {"C": Cs, "gamma": gs}, cv=StratifiedKFold(5, shuffle=True, random_state=0), n_jobs=-1).fit(Xa, ya)
+    malla = np.array(gs_cv.cv_results_["mean_test_score"]).reshape(len(Cs), len(gs))
+    best = gs_cv.best_estimator_
+    out["digitos_svm"] = {"C": Cs, "gamma": gs, "exactitud": r(malla, 4), "mejor": gs_cv.best_params_,
+                          "prueba": round(float(best.score(Xb, yb)), 4), "n_vs": int(len(best.support_)), "n": len(ya),
+                          "logistica": round(float(LogisticRegression(C=10, max_iter=5000).fit(Xa, ya).score(Xb, yb)), 4)}
+    return out
+
+
 if __name__ == "__main__":
     DESTINO.mkdir(parents=True, exist_ok=True)
-    for nombre, fn in {"u01": u01, "u02": u02, "u03": u03}.items():
+    for nombre, fn in {"u01": u01, "u02": u02, "u03": u03, "u04": u04}.items():
         if len(sys.argv) > 1 and nombre not in sys.argv[1:]:
             continue
         ruta = DESTINO / f"{nombre}.json"

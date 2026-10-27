@@ -1,0 +1,182 @@
+titulo: "Unidad 4 · Modelos lineales"
+unidad: 4
+preguntas:
+  - id: u04-p01
+    tipo: opcion
+    enunciado: |
+      En mínimos cuadrados, $\hat{\mathbf{y}} = X\mathbf{w}_{\text{lin}}$. ¿Qué propiedad tiene el vector de residuos $\mathbf{y} - \hat{\mathbf{y}}$?
+    opciones:
+      - texto: Es ortogonal a cada columna de $X$.
+        correcta: true
+      - texto: Tiene todas sus entradas iguales a cero.
+        retro: Eso solo pasa si $\mathbf{y}$ está en el espacio columna de $X$, es decir, si el ajuste es perfecto.
+      - texto: Es paralelo a $\hat{\mathbf{y}}$.
+        retro: Es al revés; el residuo es perpendicular a $\hat{\mathbf{y}}$, que vive en el espacio columna.
+      - texto: Su norma es igual a la de $\mathbf{y}$.
+        retro: "Por Pitágoras, $\\lVert\\mathbf{y}\\rVert^2 = \\lVert\\hat{\\mathbf{y}}\\rVert^2 + \\lVert\\mathbf{y}-\\hat{\\mathbf{y}}\\rVert^2$."
+    explicacion: |
+      Las ecuaciones normales son $X^\top(\mathbf{y} - X\mathbf{w}) = 0$: $\hat{\mathbf{y}}$ es la proyección ortogonal de $\mathbf{y}$ sobre el espacio columna de $X$.
+
+  - id: u04-p02
+    tipo: numerica
+    enunciado: |
+      La matriz sombrero $H = X(X^\top X)^{-1}X^\top$ de un modelo con intersección y 5 atributos, ajustado con 200 datos, ¿qué traza tiene?
+    respuesta: 6
+    tolerancia: 0
+    explicacion: |
+      $\operatorname{tr} H = \operatorname{tr}\big((X^\top X)^{-1}X^\top X\big) = \operatorname{tr} I_{d+1} = d + 1 = 6$.
+
+  - id: u04-p03
+    tipo: opcion
+    enunciado: |
+      Si $\kappa(X) = 1000$, ¿cuál es el número de condición de $X^\top X$?
+    opciones:
+      - texto: "$10^6$"
+        correcta: true
+      - texto: "$1000$"
+        retro: Los valores singulares de $X^\top X$ son los cuadrados de los de $X$.
+      - texto: "$\\sqrt{1000}$"
+        retro: Formar $X^\top X$ empeora el condicionamiento, no lo mejora.
+      - texto: Depende de $N$.
+        retro: Depende solo de los valores singulares de $X$.
+    explicacion: |
+      $\kappa(X^\top X) = \kappa(X)^2$. Por eso se prefiere resolver con QR o SVD de $X$ en lugar de las ecuaciones normales.
+
+  - id: u04-p04
+    tipo: vf
+    enunciado: |
+      Estandarizar los atributos cambia las predicciones de la regresión lineal por mínimos cuadrados (con intersección y sin regularización).
+    respuesta: false
+    explicacion: |
+      Falso. Es una reparametrización afín: el espacio columna no cambia y $\hat{\mathbf{y}}$ tampoco. Lo que cambia es el número de condición y, con él, la velocidad del descenso por gradiente.
+
+  - id: u04-p05
+    tipo: opcion
+    enunciado: |
+      Para predecir rentas de bicicletas por hora, ¿por qué conviene codificar la hora del día con *one-hot* en lugar de usarla como un número?
+    opciones:
+      - texto: Porque el efecto de la hora no es lineal; con one-hot cada hora tiene su propio nivel.
+        correcta: true
+      - texto: Porque one-hot reduce el número de parámetros.
+        retro: Al contrario, pasa de 1 a 23 columnas.
+      - texto: Porque la regresión lineal no acepta enteros.
+        retro: Los acepta; el problema es que impone una relación lineal con la hora.
+      - texto: Porque así el modelo deja de ser lineal.
+        retro: Sigue siendo lineal en los parámetros; lo que cambia es la transformación de los datos.
+
+  - id: u04-p06
+    tipo: numerica
+    enunciado: |
+      En una regresión logística, el coeficiente de una variable es $w_j = 0.7$. ¿Por cuánto se multiplican los momios cuando la variable sube una unidad? (dos decimales)
+    respuesta: 2.01
+    tolerancia: 0.01
+    explicacion: |
+      La razón de momios es $e^{0.7} \approx 2.01$: los momios casi se duplican.
+
+  - id: u04-p07
+    tipo: opcion
+    enunciado: |
+      ¿Qué pasa al ajustar una regresión logística **sin regularización** a datos linealmente separables?
+    opciones:
+      - texto: El estimador de máxima verosimilitud no existe y $\lVert\mathbf{w}\rVert$ crece sin límite.
+        correcta: true
+      - texto: Se obtiene la frontera de margen máximo.
+        retro: Esa es la SVM; la logística sin regularizar no converge a un punto.
+      - texto: El método de Newton converge en una iteración.
+        retro: Newton sigue iterando y $\lVert\mathbf{w}\rVert$ crece en cada paso.
+      - texto: La entropía cruzada alcanza exactamente cero.
+        retro: Tiende a cero, pero no lo alcanza con ningún $\mathbf{w}$ finito.
+
+  - id: u04-p08
+    tipo: opcion
+    enunciado: |
+      Para un modelo lineal generalizado con liga canónica, ¿cuál es el gradiente de la log-verosimilitud?
+    opciones:
+      - texto: "$X^\\top(\\mathbf{y} - \\boldsymbol\\mu)$"
+        correcta: true
+      - texto: "$X^\\top X\\mathbf{w} - X^\\top\\mathbf{y}$"
+        retro: Ese es el caso particular (con el signo de la pérdida) de la regresión lineal, donde $\boldsymbol\mu = X\mathbf{w}$.
+      - texto: "$(\\mathbf{y} - \\boldsymbol\\mu)^\\top(\\mathbf{y} - \\boldsymbol\\mu)$"
+        retro: Eso es un escalar, la suma de cuadrados.
+      - texto: "$X^\\top \\operatorname{diag}(\\boldsymbol\\mu) X$"
+        retro: Eso se parece a la hessiana (con signo negativo) de la regresión de Poisson.
+    explicacion: |
+      Con $\ell = \sum_n [y_n \eta_n - A(\eta_n)]$ y $A'(\eta) = \mu$, la regla de la cadena da $X^\top(\mathbf{y} - \boldsymbol\mu)$ para normal, Bernoulli y Poisson.
+
+  - id: u04-p09
+    tipo: opcion
+    enunciado: |
+      ¿Por qué la regresión de Poisson es más adecuada que la lineal para conteos como las rentas de bicicletas por hora?
+    opciones:
+      - texto: Predice medias positivas y su varianza crece con la media.
+        correcta: true
+      - texto: Tiene solución en forma cerrada.
+        retro: No la tiene; se ajusta con Newton (IRLS).
+      - texto: Usa menos parámetros.
+        retro: Con los mismos atributos usa los mismos parámetros.
+      - texto: Siempre tiene menor error cuadrático en entrenamiento.
+        retro: Mínimos cuadrados minimiza justamente el error cuadrático en entrenamiento.
+
+  - id: u04-p10
+    tipo: opcion
+    enunciado: |
+      En el análisis discriminante lineal (LDA), ¿qué supuesto hace que la frontera entre clases sea lineal?
+    opciones:
+      - texto: Que todas las clases comparten la misma matriz de covarianza.
+        correcta: true
+      - texto: Que las clases tienen la misma probabilidad previa.
+        retro: Las previas solo desplazan la frontera; no la curvan.
+      - texto: Que los atributos son independientes dentro de cada clase.
+        retro: Ese es el supuesto de Bayes ingenuo.
+      - texto: Que los datos son linealmente separables.
+        retro: LDA no necesita datos separables.
+    explicacion: |
+      Con $\Sigma$ común, el término $\mathbf{x}^\top\Sigma^{-1}\mathbf{x}$ es el mismo para todas las clases y se cancela al comparar. Con covarianzas distintas (QDA) no se cancela y la frontera es cuadrática.
+
+  - id: u04-p11
+    tipo: opcion
+    enunciado: |
+      En Bayes ingenuo multinomial para texto, una palabra aparece 50 veces en mensajes normales y nunca en spam. Sin suavizado, ¿qué pasa con un mensaje nuevo que la contiene?
+    opciones:
+      - texto: Su probabilidad de ser spam es exactamente cero, sin importar las demás palabras.
+        correcta: true
+      - texto: La palabra se ignora.
+        retro: Al contrario, domina todo el producto.
+      - texto: El modelo lo clasifica como spam.
+        retro: Con $\hat\theta_{\text{spam}} = 0$, el producto para spam se anula.
+      - texto: El logaritmo vale cero y no afecta.
+        retro: El logaritmo de cero es $-\infty$.
+    explicacion: |
+      El suavizado de Laplace, $\hat\theta_{yj} = (N_{yj} + \alpha)/(N_y + \alpha V)$, evita que un solo cero vete una clase.
+
+  - id: u04-p12
+    tipo: vf
+    enunciado: |
+      La razón de log-posteriores de Bayes ingenuo multinomial es una función lineal de los conteos de palabras, la misma forma que la regresión logística.
+    respuesta: true
+    explicacion: |
+      Verdadero: $\ln\frac{P(1\mid\mathbf{x})}{P(0\mid\mathbf{x})} = b + \sum_j x_j w_j$ con $w_j = \ln(\hat\theta_{1j}/\hat\theta_{0j})$. Cambia la forma de estimar los pesos: por conteo en Bayes ingenuo y conjuntamente en la logística.
+
+  - id: u04-p13
+    tipo: numerica
+    enunciado: |
+      Una SVM de margen duro entrenada con 400 datos tiene 12 vectores de soporte. ¿Cuál es la cota superior del error de dejar-uno-fuera? (decimal)
+    respuesta: 0.03
+    tolerancia: 0.0001
+    explicacion: |
+      $E_{\text{cv}} \le \#\text{VS}/N = 12/400 = 0.03$. Quitar un punto que no es vector de soporte no cambia la solución, y ese punto queda bien clasificado.
+
+  - id: u04-p14
+    tipo: opcion
+    enunciado: |
+      Con una SVM de kernel gaussiano $K(\mathbf{x},\mathbf{x}') = e^{-\gamma\lVert\mathbf{x}-\mathbf{x}'\rVert^2}$, el error de validación cruzada es mucho mayor que el de entrenamiento y casi todos los puntos son vectores de soporte. ¿Qué conviene probar?
+    opciones:
+      - texto: Reducir $\gamma$.
+        correcta: true
+        retro: "Con $\\gamma$ grande cada vector de soporte influye solo en su vecindad: sobreajuste."
+      - texto: Aumentar $\gamma$.
+        retro: Eso hace la frontera todavía más local.
+      - texto: Aumentar $C$.
+        retro: Un $C$ mayor castiga más los errores de entrenamiento; agrava el sobreajuste.
+      - texto: Quitar la estandarización de los atributos.
+        retro: El kernel gaussiano depende de distancias; sin escalar, un atributo domina.

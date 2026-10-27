@@ -97,4 +97,36 @@ export const materiales: Record<string, Material> = {
     ],
     quiz: 'u03',
   },
+  '04-lineales': {
+    objetivos: [
+      'Derivar las ecuaciones normales e interpretar mínimos cuadrados como proyección y como máxima verosimilitud.',
+      'Elegir cómo calcular un ajuste lineal (QR, SVD, descenso por gradiente) según el condicionamiento del problema.',
+      'Construir atributos (one-hot, interacciones) y diagnosticar un modelo lineal con sus residuos.',
+      'Derivar la regresión logística, ajustarla con Newton (IRLS) e interpretar razones de momios.',
+      'Reconocer la estructura común de los modelos lineales generalizados y usar la regresión de Poisson para conteos.',
+      'Comparar clasificadores generativos (LDA, QDA, Bayes ingenuo) con discriminativos.',
+      'Formular la SVM de margen máximo, su dual y el truco del kernel, y elegir $C$ y $\\gamma$ con validación cruzada.',
+    ],
+    presentaciones: [
+      { id: 'u04-01-regresion-lineal', titulo: 'Regresión lineal', descripcion: 'Ecuaciones normales, proyección, Gauss–Markov, condicionamiento, descenso por gradiente, atributos y colinealidad.' },
+      { id: 'u04-02-logistica-glm', titulo: 'Regresión logística y modelos lineales generalizados', descripcion: 'El Challenger, entropía cruzada, Newton como IRLS, separabilidad, softmax, familia exponencial y regresión de Poisson.' },
+      { id: 'u04-03-generativos', titulo: 'Modelos generativos', descripcion: 'LDA, QDA y Fisher con los pingüinos; Bayes ingenuo para spam; generativo contra discriminativo.' },
+      { id: 'u04-04-svm-kernels', titulo: 'Máquinas de vectores de soporte y kernels', descripcion: 'Margen máximo, dual y vectores de soporte, margen suave y pérdida bisagra, kernels polinomial y gaussiano.' },
+    ],
+    libretas: [
+      { ruta: 'unidades/04-lineales/ejemplos/u04-e01-regresion-lineal.ipynb', titulo: 'Regresión lineal: cuántas bicicletas se rentarán', descripcion: 'Mínimos cuadrados desde cero, matriz sombrero, número de condición, descenso por gradiente, interacciones, colinealidad y residuos.' },
+      { ruta: 'unidades/04-lineales/ejemplos/u04-e02-logistica-glm.ipynb', titulo: 'Regresión logística y GLM: del Challenger a las bicicletas', descripcion: 'Newton desde cero, razones de momios, bootstrap, separabilidad, softmax y regresión de Poisson.' },
+      { ruta: 'unidades/04-lineales/ejemplos/u04-e03-generativos.ipynb', titulo: 'Modelos generativos: análisis discriminante y Bayes ingenuo', descripcion: 'LDA y QDA desde cero con los pingüinos, Fisher contra PCA, y un filtro de spam para SMS.' },
+      { ruta: 'unidades/04-lineales/ejemplos/u04-e04-svm-kernels.ipynb', titulo: 'Máquinas de vectores de soporte y kernels', descripcion: 'El primal y el dual resueltos a mano, la cota de dejar-uno-fuera, margen suave, kernels y dígitos escritos a mano.' },
+    ],
+    laboratorios: [
+      { ruta: 'unidades/04-lineales/laboratorios/u04-lab04-logistica-bayes.ipynb', titulo: 'Laboratorio 4 · Regresión logística y Bayes ingenuo desde cero', descripcion: 'Sigmoide estable, entropía cruzada, Newton con intersección y regularización, y Bayes ingenuo multinomial sobre matrices dispersas. Se verifica automáticamente.' },
+    ],
+    lecturas: [
+      { obra: 'Abu-Mostafa, Magdon-Ismail y Lin (2012). Learning From Data.', detalle: 'Secciones 3.2 y 3.3, y el capítulo electrónico 8 (Support Vector Machines).' },
+      { obra: 'Hastie, Tibshirani y Friedman (2009). The Elements of Statistical Learning.', detalle: 'Capítulos 3 y 4, y secciones 12.1–12.3.' },
+      { obra: 'Ng y Jordan (2001). On discriminative vs. generative classifiers. NIPS 14.', detalle: 'Artículo completo.' },
+    ],
+    quiz: 'u04',
+  },
 }

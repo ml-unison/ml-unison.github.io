@@ -1,0 +1,114 @@
+---
+pagetitle: "Reconocimiento de Patrones · LCC · UNISON"
+toc: false
+page-layout: full
+title-block-banner: false
+---
+
+```{=html}
+<section class="rdp-hero">
+  <div class="rdp-hero-dep">Universidad de Sonora · Departamento de Matemáticas</div>
+  <h1>Reconocimiento de Patrones</h1>
+  <p class="rdp-hero-sub">Aprendizaje automático con fundamentos: de la teoría de la generalización a los modelos en producción. Licenciatura en Ciencias de la Computación.</p>
+  <img class="rdp-hero-buho" src="assets/brand/buho-blanco.png" alt="">
+</section>
+```
+
+::: {.rdp-datos}
+::: {}
+**Profesor**
+Julio Waissman · [julio.waissman@unison.mx](mailto:julio.waissman@unison.mx)
+:::
+::: {}
+**Horario**
+Lunes a viernes, 13:00–14:00 h
+:::
+::: {}
+**Lugar**
+Salón 101, edificio 3K-4
+:::
+::: {}
+**Herramientas**
+Python · scikit-learn · PyTorch · Colab
+:::
+:::
+
+## Objetivo del curso
+
+Al terminar el curso, el estudiante podrá **plantear, entrenar, evaluar y justificar** modelos de aprendizaje automático para problemas reales, entendiendo **por qué** funcionan, **cuándo** pueden fallar y **cómo** medir su desempeño de forma honesta.
+
+En particular, el estudiante:
+
+1. Entenderá la teoría básica que hace posible el aprendizaje supervisado: generalización, el compromiso entre sesgo y varianza, regularización y validación.
+2. Sabrá elegir, entrenar y comparar modelos lineales, de árboles, de ensambles y de redes neuronales, y justificar su elección.
+3. Aplicará técnicas no supervisadas para explorar datos y reducir su dimensionalidad.
+4. Construirá flujos de trabajo reproducibles, desde la preparación de datos hasta el despliegue y el monitoreo.
+
+## Unidades
+
+```{=html}
+<div class="rdp-tarjetas">
+  <a class="rdp-tarjeta" href="unidades/01-introduccion/index.html">
+    <span class="rdp-tarjeta-num">UNIDAD 1</span>
+    <span class="rdp-tarjeta-titulo">Introducción y flujo de trabajo</span>
+    <p class="rdp-tarjeta-desc">Qué es aprender de datos, el ciclo de vida de un modelo, pandas, atributos y <em>pipelines</em>.</p>
+    <span class="rdp-tarjeta-sem">2 semanas</span>
+  </a>
+  <a class="rdp-tarjeta pendiente" href="unidades/02-no-supervisado/index.html">
+    <span class="rdp-tarjeta-num">UNIDAD 2</span>
+    <span class="rdp-tarjeta-titulo">Aprendizaje no supervisado</span>
+    <p class="rdp-tarjeta-desc">Agrupamiento, mezclas gaussianas, PCA y visualización con t-SNE y UMAP.</p>
+    <span class="rdp-tarjeta-sem">2 semanas</span>
+  </a>
+  <a class="rdp-tarjeta pendiente" href="unidades/03-fundamentos/index.html">
+    <span class="rdp-tarjeta-num">UNIDAD 3</span>
+    <span class="rdp-tarjeta-titulo">Fundamentos del aprendizaje supervisado</span>
+    <p class="rdp-tarjeta-desc">Generalización, sesgo y varianza, regularización, validación y métricas.</p>
+    <span class="rdp-tarjeta-sem">2.5 semanas</span>
+  </a>
+  <a class="rdp-tarjeta pendiente" href="unidades/04-lineales/index.html">
+    <span class="rdp-tarjeta-num">UNIDAD 4</span>
+    <span class="rdp-tarjeta-titulo">Modelos lineales</span>
+    <p class="rdp-tarjeta-desc">Regresión lineal y logística como GLM, modelos generativos y máquinas de vectores de soporte.</p>
+    <span class="rdp-tarjeta-sem">2 semanas</span>
+  </a>
+  <a class="rdp-tarjeta pendiente" href="unidades/05-arboles-ensambles/index.html">
+    <span class="rdp-tarjeta-num">UNIDAD 5</span>
+    <span class="rdp-tarjeta-titulo">Árboles y ensambles</span>
+    <p class="rdp-tarjeta-desc">Árboles de decisión, <em>bagging</em>, bosques aleatorios, <em>boosting</em> e interpretabilidad.</p>
+    <span class="rdp-tarjeta-sem">2 semanas</span>
+  </a>
+  <a class="rdp-tarjeta pendiente" href="unidades/06-redes-neuronales/index.html">
+    <span class="rdp-tarjeta-num">UNIDAD 6</span>
+    <span class="rdp-tarjeta-titulo">Redes neuronales</span>
+    <p class="rdp-tarjeta-desc">Perceptrón multicapa, <em>backprop</em>, CNN, transferencia, RNN y atención.</p>
+    <span class="rdp-tarjeta-sem">3 semanas</span>
+  </a>
+  <a class="rdp-tarjeta pendiente" href="unidades/07-series-tiempo/index.html">
+    <span class="rdp-tarjeta-num">UNIDAD 7</span>
+    <span class="rdp-tarjeta-titulo">Series de tiempo</span>
+    <p class="rdp-tarjeta-desc">Validación temporal, modelos autorregresivos, atributos rezagados y modelos neuronales.</p>
+    <span class="rdp-tarjeta-sem">1.5 semanas</span>
+  </a>
+  <a class="rdp-tarjeta pendiente" href="unidades/08-mlops/index.html">
+    <span class="rdp-tarjeta-num">UNIDAD 8</span>
+    <span class="rdp-tarjeta-titulo">MLOps y despliegue</span>
+    <p class="rdp-tarjeta-desc">Seguimiento de experimentos, registro de modelos, servicio y monitoreo.</p>
+    <span class="rdp-tarjeta-sem">1 semana</span>
+  </a>
+</div>
+```
+
+## Cómo está organizado el material
+
+Cada unidad incluye:
+
+- **Presentaciones** web con ecuaciones, figuras y ejemplos interactivos. Se pueden exportar a PDF.
+- **Libretas de ejemplo** que se abren en Google Colab con un clic y corren igual en cualquier computadora.
+- **Laboratorios para completar**, con verificación automática de las respuestas dentro de la misma libreta.
+- **Cuestionarios de autoevaluación** al final de cada unidad, para comprobar la comprensión de los conceptos.
+
+::: {.callout-tip}
+## Antes de empezar
+No necesitas instalar nada: basta una cuenta de Google para abrir las libretas en Colab. Si prefieres trabajar en tu máquina, consulta [Recursos](recursos.qmd#entorno-local).
+:::

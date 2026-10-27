@@ -1,0 +1,9 @@
+---
+title: "Árboles y ensambles"
+subtitle: "Unidad 5"
+---
+
+::: {.callout-note}
+## En preparación
+El material de esta unidad (presentaciones, libretas, laboratorios y cuestionario) se publicará en una fase posterior del rediseño. Consulta los temas en el [temario](../../temario.qmd).
+:::

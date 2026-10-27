@@ -1,0 +1,42 @@
+[project]
+name = "rdp-curso"
+version = "2027.1.0"
+description = "Entorno de desarrollo del curso Reconocimiento de Patrones (LCC-UNISON)"
+requires-python = ">=3.11,<3.13"
+dependencies = [
+    "rdp",
+    "numpy>=2.0",
+    "pandas>=2.2",
+    "matplotlib>=3.9",
+    "scikit-learn>=1.6",
+    "scipy>=1.13",
+    "plotly>=5.24",
+    "openpyxl>=3.1",
+    "pyyaml>=6.0",
+    "ipywidgets>=8.1",
+    "jupyter>=1.1",
+    "nbformat>=5.10",
+    "nbclient>=0.10",
+]
+
+[project.optional-dependencies]
+# Unidades 6-8 (se instalan aparte por su tamaño)
+rn = ["torch>=2.5", "torchvision>=0.20"]
+mlops = ["mlflow>=2.18", "fastapi>=0.115", "uvicorn>=0.32"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.3",
+    "nbmake>=1.5",
+    "python-docx>=1.1",
+    "jupytext>=1.19.6",
+]
+
+[tool.uv]
+package = false
+
+[tool.uv.sources]
+rdp = { path = "paquete", editable = true }
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

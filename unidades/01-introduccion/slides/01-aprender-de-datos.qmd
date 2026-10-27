@@ -1,0 +1,370 @@
+---
+title: "¿Qué significa aprender de datos?"
+subtitle: "Unidad 1 · Introducción y flujo de trabajo"
+author:
+  - name: Julio Waissman
+    affiliation: "Departamento de Matemáticas · Universidad de Sonora"
+date: last-modified
+date-format: "MMMM YYYY"
+format: unison-revealjs
+jupyter: python3
+---
+
+```{python}
+#| include: false
+import numpy as np
+import matplotlib.pyplot as plt
+import rdp
+from rdp.estilo import AZUL, DORADO, ROJO, VERDE, MARINO, GRIS
+rdp.estilo.usar("presentacion")
+rng = np.random.default_rng(1942)
+```
+
+## Plan de la sesión
+
+1. El problema de aprender: ¿qué es (y qué no es) aprendizaje automático?
+2. Una formalización mínima: datos, hipótesis, pérdida y riesgo
+3. Aprender no es memorizar: la generalización
+4. El flujo de trabajo de un proyecto de aprendizaje
+5. Responsabilidad: datos, sesgos y decisiones
+
+# El problema de aprender
+
+## Programar *vs.* aprender
+
+:::: {.columns}
+::: {.column width="50%"}
+**Programación clásica**
+
+```{dot}
+//| fig-width: 6
+digraph G {
+  rankdir=LR; bgcolor="transparent";
+  node [shape=box, style="rounded,filled", fontname="Lato", fontsize=18, color="#24398A", fillcolor="#F1F4FA", fontcolor="#20305A", penwidth=2];
+  edge [color="#20305A", penwidth=2, arrowsize=0.9];
+  D [label="Datos"]; R [label="Reglas\n(escritas a mano)"]; P [label="Programa", fillcolor="#24398A", fontcolor="white"]; S [label="Respuestas"];
+  D -> P; R -> P; P -> S;
+}
+```
+:::
+::: {.column width="50%"}
+**Aprendizaje automático**
+
+```{dot}
+//| fig-width: 6
+digraph G {
+  rankdir=LR; bgcolor="transparent";
+  node [shape=box, style="rounded,filled", fontname="Lato", fontsize=18, color="#24398A", fillcolor="#F1F4FA", fontcolor="#20305A", penwidth=2];
+  edge [color="#20305A", penwidth=2, arrowsize=0.9];
+  D [label="Datos"]; S [label="Respuestas\n(ejemplos)"]; A [label="Algoritmo de\naprendizaje", fillcolor="#24398A", fontcolor="white"]; M [label="Modelo", fillcolor="#E1B73D", color="#946721"];
+  D -> A; S -> A; A -> M;
+}
+```
+:::
+::::
+
+::: {.idea}
+Usamos aprendizaje cuando **no sabemos escribir las reglas**, pero sí tenemos **ejemplos** del comportamiento que queremos.
+:::
+
+## Una definición operativa
+
+::: {.definicion nombre="Mitchell, 1997"}
+Un programa **aprende** de la experiencia $E$ respecto a una clase de tareas $T$ y una medida de desempeño $P$ si su desempeño en las tareas de $T$, medido por $P$, **mejora con la experiencia** $E$.
+:::
+
+. . .
+
+| | Tarea $T$ | Experiencia $E$ | Desempeño $P$ |
+|---|---|---|---|
+| Filtro de *spam* | clasificar correos | correos etiquetados | exactitud, falsos positivos |
+| Presas de Sonora | predecir almacenamiento | series históricas | error absoluto medio |
+| Segmentar clientes | agrupar perfiles | compras sin etiquetar | cohesión de los grupos |
+
+## Tres condiciones para que tenga sentido aprender
+
+1. **Existe un patrón.** Hay alguna relación entre entradas y salidas, aunque sea ruidosa.
+2. **No lo podemos describir analíticamente.** Si tuviéramos la fórmula, la usaríamos.
+3. **Tenemos datos** que reflejan ese patrón y son representativos del uso futuro.
+
+::: {.cuidado}
+Si falla la tercera condición, el modelo puede ser excelente en el laboratorio y **fallar en producción**. Volveremos a esto en la Unidad 3 (generalización) y en la Unidad 8 (*drift*).
+:::
+
+## Tipos de aprendizaje
+
+| Paradigma | Qué observamos | Qué buscamos | Ejemplos en el curso |
+|---|---|---|---|
+| **Supervisado** | pares $(\vx_i, y_i)$ | $h(\vx) \approx y$ | regresión, clasificación (U3–U6) |
+| **No supervisado** | solo $\vx_i$ | estructura en $P(\vx)$ | agrupamiento, PCA, UMAP (U2) |
+| **Auto-supervisado** | $\vx_i$, con etiquetas que salen de los propios datos | representaciones útiles | modelos de lenguaje (U6) |
+| **Por refuerzo** | estados, acciones, recompensas | una política $\pi(a \mid s)$ | fuera del alcance del curso |
+
+# Una formalización mínima
+
+## Los ingredientes del aprendizaje supervisado
+
+```{dot}
+//| fig-width: 14
+//| fig-height: 4.2
+digraph G {
+  rankdir=LR; bgcolor="transparent"; nodesep=0.35; ranksep=0.6;
+  node [shape=box, style="rounded,filled", fontname="Lato", fontsize=17, color="#24398A", fillcolor="#F1F4FA", fontcolor="#20305A", penwidth=2];
+  edge [color="#20305A", penwidth=2];
+  F [label="Función objetivo\ndesconocida  f : X → Y", fillcolor="#FBF3DC", color="#E1B73D"];
+  P [label="Distribución\nP(x, y)", fillcolor="#FBF3DC", color="#E1B73D"];
+  D [label="Datos de entrenamiento\nD = {(x₁,y₁), …, (xₙ,yₙ)}"];
+  A [label="Algoritmo\nde aprendizaje 𝒜", fillcolor="#24398A", fontcolor="white"];
+  H [label="Espacio de\nhipótesis ℋ"];
+  G [label="Hipótesis final\ng ≈ f", fillcolor="#E1B73D", color="#946721"];
+  F -> D; P -> D; D -> A; H -> A; A -> G;
+}
+```
+
+- $\mathcal{X}$: espacio de entradas (p. ej. $\R^d$); $\mathcal{Y}$: espacio de salidas ($\R$ o $\{1,\dots,K\}$).
+- Nunca conocemos $f$ ni $P$: **solo vemos la muestra** $\Dat \sim P^n$ (i.i.d.).
+- El algoritmo elige $g \in \Hyp$ usando únicamente $\Dat$.
+
+## Pérdida y riesgo
+
+::: {.definicion nombre="Riesgo (error fuera de muestra)"}
+Dada una función de pérdida $\ell : \mathcal{Y}\times\mathcal{Y} \to \R_{\ge 0}$, el **riesgo** de una hipótesis $h$ es
+$$
+\Eout(h) \;=\; \E_{(\vx,y)\sim P}\big[\,\ell\big(h(\vx),\, y\big)\,\big].
+$$
+:::
+
+::: {.definicion nombre="Riesgo empírico (error en muestra)"}
+$$
+\Ein(h) \;=\; \frac{1}{n}\sum_{i=1}^{n} \ell\big(h(\vx_i),\, y_i\big).
+$$
+:::
+
+. . .
+
+::: {.algoritmo nombre="Minimización del riesgo empírico (ERM)"}
+Elegir $\displaystyle g \;=\; \argmin_{h \in \Hyp} \; \Ein(h)$ y **esperar** que $\Eout(g) \approx \Ein(g)$.
+:::
+
+## Funciones de pérdida usuales
+
+:::: {.columns}
+::: {.column width="45%"}
+- **Cuadrática** (regresión): $\ell(\hat y, y) = (\hat y - y)^2$
+- **0–1** (clasificación): $\ell(\hat y, y) = \ind{\hat y \neq y}$
+- **Logística** (clasificación, $y\in\{-1,1\}$): $\ell = \log\!\big(1 + e^{-y\,s}\big)$, con $s = \vw\T\vx$
+- **Bisagra** (SVM): $\ell = \max(0,\, 1 - y\,s)$
+
+[La pérdida 0–1 es la que nos importa, pero no es diferenciable: en la práctica optimizamos **sustitutos convexos**.]{.pequeno .tenue}
+:::
+::: {.column width="55%"}
+```{python}
+#| fig-width: 8
+#| fig-height: 5.2
+m = np.linspace(-2.5, 2.5, 500)
+fig, ax = plt.subplots()
+ax.plot(m, (m < 0).astype(float), color=GRIS, lw=3.2, label="0–1", drawstyle="steps-post")
+ax.plot(m, np.log2(1 + np.exp(-m)), color=AZUL, label="logística (base 2)")
+ax.plot(m, np.maximum(0, 1 - m), color=DORADO, label="bisagra")
+ax.plot(m, (1 - m) ** 2, color=ROJO, ls="--", label="cuadrática")
+ax.set(xlabel=r"margen  $y\,s$", ylabel="pérdida", ylim=(-0.1, 4), xlim=(-2.5, 2.5))
+ax.legend(loc="upper right")
+plt.show()
+```
+:::
+::::
+
+# Aprender no es memorizar
+
+## Un experimento: ajustar polinomios
+
+```{python}
+#| include: false
+def f_real(x):
+    return np.sin(2 * np.pi * x)
+
+n = 15
+x_tr = np.sort(rng.uniform(0, 1, n))
+y_tr = f_real(x_tr) + rng.normal(0, 0.25, n)
+x_te = rng.uniform(0, 1, 2000)
+y_te = f_real(x_te) + rng.normal(0, 0.25, 2000)
+grid = np.linspace(0, 1, 400)
+
+def ajustar(grado):
+    # Mínimos cuadrados con base polinomial (estable en [0, 1])
+    V = np.polynomial.legendre.legvander(2 * x_tr - 1, grado)
+    c, *_ = np.linalg.lstsq(V, y_tr, rcond=None)
+    pred = lambda x: np.polynomial.legendre.legvander(2 * x - 1, grado) @ c
+    return pred, np.mean((pred(x_tr) - y_tr) ** 2), np.mean((pred(x_te) - y_te) ** 2)
+```
+
+```{python}
+#| fig-width: 15
+#| fig-height: 4.6
+fig, axs = plt.subplots(1, 3, sharey=True)
+for ax, g in zip(axs, (1, 4, 12)):
+    pred, ein, eout = ajustar(g)
+    ax.plot(grid, f_real(grid), color=GRIS, lw=2, ls=":", label="$f$ (desconocida)")
+    ax.plot(grid, pred(grid), color=AZUL, label="$g$")
+    ax.scatter(x_tr, y_tr, color=DORADO, s=70, zorder=3, label="$\\mathcal{D}$")
+    ax.set_title(f"grado {g}\n$E_{{in}}$ = {ein:.2f}    $E_{{out}}$ = {eout:.2g}", fontsize=15)
+    ax.set_ylim(-2, 2)
+axs[0].legend(loc="lower left", fontsize=12)
+plt.show()
+```
+
+[**Grado 1:** subajuste ($\Ein$ y $\Eout$ altos) · **Grado 4:** buen compromiso · **Grado 12:** sobreajuste ($\Ein \approx 0$, pero $\Eout$ enorme).]{.pequeno}
+
+## Explóralo tú: el grado del polinomio
+
+```{python}
+#| echo: false
+grados = list(range(0, 15))
+curvas, ein_l, eout_l = [], [], []
+for g in grados:
+    pred, ein, eout = ajustar(g)
+    curvas.append(np.clip(pred(grid), -3, 3).round(4).tolist())
+    ein_l.append(round(float(ein), 4)); eout_l.append(round(float(eout), 4))
+ojs_define(poli={"x": grid.round(4).tolist(), "curvas": curvas, "real": f_real(grid).round(4).tolist(),
+                 "xtr": x_tr.round(4).tolist(), "ytr": y_tr.round(4).tolist(),
+                 "ein": ein_l, "eout": eout_l, "grados": grados})
+```
+
+```{ojs}
+//| echo: false
+viewof grado = Inputs.range([0, 14], {step: 1, value: 3, label: "Grado", width: 520})
+```
+
+:::: {.columns}
+::: {.column width="58%"}
+```{ojs}
+//| echo: false
+Plot.plot({
+  width: 820, height: 470, marginLeft: 50, style: {fontSize: "18px", fontFamily: "Lato"},
+  y: {domain: [-2, 2], label: "y", grid: true}, x: {label: "x"},
+  marks: [
+    Plot.line(poli.x.map((x, i) => ({x, y: poli.real[i]})), {x: "x", y: "y", stroke: "#8a92a3", strokeDasharray: "4,4", strokeWidth: 2.5}),
+    Plot.line(poli.x.map((x, i) => ({x, y: poli.curvas[grado][i]})), {x: "x", y: "y", stroke: "#24398A", strokeWidth: 3.5}),
+    Plot.dot(poli.xtr.map((x, i) => ({x, y: poli.ytr[i]})), {x: "x", y: "y", fill: "#E1B73D", stroke: "white", r: 8})
+  ]
+})
+```
+:::
+::: {.column width="42%"}
+```{ojs}
+//| echo: false
+Plot.plot({
+  width: 560, height: 470, marginLeft: 55, style: {fontSize: "18px", fontFamily: "Lato"},
+  y: {type: "log", domain: [1e-3, 10], clamp: true, ticks: 5, tickFormat: "~g", label: "error cuadrático medio", grid: true},
+  x: {label: "grado", ticks: 8},
+  color: {domain: ["E_in", "E_out"], range: ["#E1B73D", "#24398A"], legend: true},
+  marks: [
+    Plot.line(poli.grados.flatMap(g => [{g, e: Math.max(poli.ein[g], 1e-4), t: "E_in"}, {g, e: Math.min(poli.eout[g], 10), t: "E_out"}]),
+              {x: "g", y: "e", stroke: "t", strokeWidth: 3, marker: "circle"}),
+    Plot.ruleX([grado], {stroke: "#D5433C", strokeWidth: 2, strokeDasharray: "6,4"})
+  ]
+})
+```
+:::
+::::
+
+## ¿Por qué no basta con minimizar $\Ein$?
+
+::: {.teorema nombre="Desigualdad de Hoeffding, una sola hipótesis fija"}
+Si $h$ se fija **antes** de ver los datos y la pérdida está acotada en $[0,1]$, para todo $\epsilon > 0$
+$$
+\Prob\big[\,|\Ein(h) - \Eout(h)| > \epsilon\,\big] \;\le\; 2\,e^{-2\epsilon^2 n}.
+$$
+:::
+
+. . .
+
+- Pero el algoritmo **elige** $g$ mirando los datos, entre muchas hipótesis de $\Hyp$.
+- Cuanto más "rico" es $\Hyp$, más fácil es encontrar una $h$ que se ajuste al **ruido**.
+- La Unidad 3 cuantifica esto: $\Eout(g) \le \Ein(g) + \underbrace{\Omega(\Hyp, n, \delta)}_{\text{complejidad}}$.
+
+::: {.idea}
+Aprender es un **compromiso**: un $\Hyp$ suficientemente expresivo para aproximar $f$, pero suficientemente restringido para que $\Ein$ sea un buen estimador de $\Eout$.
+:::
+
+# El flujo de trabajo
+
+## El ciclo de vida de un modelo
+
+```{mermaid}
+%%| fig-width: 14
+%%{init: {"theme": "base", "themeVariables": {"fontFamily": "Lato", "fontSize": "26px", "primaryColor": "#F1F4FA", "primaryBorderColor": "#24398A", "primaryTextColor": "#20305A", "lineColor": "#20305A"}}}%%
+flowchart LR
+  A["Definir el problema<br/>y la métrica"] --> B["Obtener y<br/>entender los datos"]
+  B --> C["Separar<br/>entrenamiento / prueba"]
+  C --> D["Preprocesar y<br/>crear atributos"]
+  D --> E["Entrenar y<br/>seleccionar modelos"]
+  E --> F["Evaluar en<br/>prueba (una vez)"]
+  F --> G["Desplegar y<br/>monitorear"]
+  G -. "nuevos datos, drift" .-> B
+  E -. "validación cruzada" .-> D
+  classDef clave fill:#24398A,color:#fff,stroke:#20305A;
+  classDef oro fill:#FBF3DC,stroke:#E1B73D,color:#20305A;
+  class C,F oro
+  class E clave
+```
+
+- La **separación** de datos va **antes** de cualquier transformación aprendida de los datos.
+- El conjunto de prueba se usa **una sola vez**, al final. Para seleccionar modelos se usa **validación**.
+
+## Fuga de información: un error frecuente
+
+:::: {.columns}
+::: {.column width="50%"}
+::: {.cuidado nombre="Incorrecto"}
+```python
+X = StandardScaler().fit_transform(X)   # ve todos los datos
+X_tr, X_te, y_tr, y_te = train_test_split(X, y)
+modelo.fit(X_tr, y_tr)
+modelo.score(X_te, y_te)                # optimista
+```
+:::
+:::
+::: {.column width="50%"}
+::: {.ejemplo nombre="Correcto: un Pipeline"}
+```python
+X_tr, X_te, y_tr, y_te = train_test_split(X, y)
+modelo = make_pipeline(StandardScaler(),
+                       LogisticRegression())
+modelo.fit(X_tr, y_tr)      # media y desv. solo de X_tr
+modelo.score(X_te, y_te)    # estimación honesta
+```
+:::
+:::
+::::
+
+Cualquier paso que **aprende parámetros de los datos** (escalamiento, imputación, codificación, selección de atributos) debe ajustarse **solo con los datos de entrenamiento**. Los `Pipeline` de *scikit-learn* lo garantizan.
+
+# Responsabilidad
+
+## Datos, sesgos y decisiones
+
+- Un modelo aprende la $P(\vx, y)$ **de los datos que le damos**, con todos sus sesgos históricos.
+- La métrica que optimizamos **es** una decisión de valores: ¿qué cuesta más, un falso positivo o un falso negativo, y **a quién** le cuesta?
+- Que un atributo sensible no esté en los datos no implica que el modelo no lo use: puede estar **codificado por otras variables** (código postal, escuela de procedencia…).
+
+::: {.pregunta}
+Antes de entrenar, pregúntate: ¿quién generó los datos?, ¿a quién representa la muestra y a quién no?, ¿quién será afectado por las decisiones del modelo y cómo podría impugnarlas?
+:::
+
+## Para cerrar
+
+::: {.idea}
+1. Aprender de datos es elegir $g \in \Hyp$ con $\Ein$ pequeño **y** con garantías de que $\Eout$ también lo sea.
+2. El problema central del curso es la **generalización**, no el ajuste.
+3. Un flujo de trabajo disciplinado (separar, validar y probar una sola vez) es lo que hace creíbles nuestros números.
+:::
+
+**Lecturas:** @abu-mostafa2012learning [cap. 1]; @hastie2009elements [cap. 2]; @james2023islp [cap. 2].
+
+**Libreta:** *Primer flujo de trabajo con scikit-learn* (Unidad 1, ejemplo 1).
+
+## Referencias {.smaller}
+
+::: {#refs}
+:::

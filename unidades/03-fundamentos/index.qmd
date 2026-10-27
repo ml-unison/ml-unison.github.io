@@ -1,0 +1,9 @@
+---
+title: "Fundamentos del aprendizaje supervisado"
+subtitle: "Unidad 3"
+---
+
+::: {.callout-note}
+## En preparación
+El material de esta unidad (presentaciones, libretas, laboratorios y cuestionario) se publicará en una fase posterior del rediseño. Consulta los temas en el [temario](../../temario.qmd).
+:::

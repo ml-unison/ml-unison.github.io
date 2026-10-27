@@ -1,0 +1,48 @@
+name: Publicar sitio
+
+# Publica main en https://ml-unison.github.io
+# Requiere: Settings → Pages → Source = "GitHub Actions".
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  construir:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v6
+        with:
+          python-version: "3.12"
+      - run: uv sync --group dev
+      - uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 1.8.27
+      - run: uv run python herramientas/exportar_quizzes.py
+      - name: Renderizar (perfil producción)
+        env:
+          QUARTO_PYTHON: .venv/bin/python
+        run: quarto render
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+  desplegar:
+    needs: construir
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - id: despliegue
+        uses: actions/deploy-pages@v4

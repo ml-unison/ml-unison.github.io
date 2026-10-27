@@ -1,0 +1,54 @@
+---
+title: "Recursos"
+---
+
+## Bibliografía
+
+**Textos base**
+
+- @abu-mostafa2012learning. Corto y riguroso; es la referencia principal de la Unidad 3.
+- @james2023islp. Muy accesible, con laboratorios en Python.
+- @hastie2009elements. La referencia clásica para profundizar.
+
+**Complementarios**
+
+- @bishop2006pattern y @murphy2022probabilistic. El enfoque probabilístico.
+- @shalev-shwartz2014understanding. Teoría del aprendizaje para quien quiera ir más a fondo.
+- @prince2023understanding y @goodfellow2016deep. Redes neuronales y aprendizaje profundo.
+- @hyndman2021forecasting. Series de tiempo.
+- @huyen2022designing. Sistemas de aprendizaje automático en producción.
+- @molnar2022interpretable. Interpretabilidad.
+- @barocas2023fairness. Equidad y aprendizaje automático.
+- @geron2022handson. Muy práctico y con mucho código.
+
+## Documentación de las herramientas
+
+- [scikit-learn](https://scikit-learn.org/stable/user_guide.html): la guía de usuario es excelente y bastante didáctica.
+- [pandas](https://pandas.pydata.org/docs/user_guide/index.html)
+- [PyTorch](https://docs.pytorch.org/docs/stable/index.html)
+- [MLflow](https://mlflow.org/docs/latest/)
+
+## Entorno local
+
+Todas las libretas corren en [Google Colab](https://colab.research.google.com) sin instalar nada. Para trabajar en tu máquina, instala [uv](https://docs.astral.sh/uv/) y ejecuta:
+
+```bash
+git clone https://github.com/ml-unison/ml-unison.github.io.git
+cd ml-unison.github.io
+uv sync                      # crea el entorno con las versiones del curso
+uv run jupyter lab
+```
+
+Las unidades 6 a 8 usan dependencias adicionales: `uv sync --extra rn --extra mlops`.
+
+## Conjuntos de datos
+
+- [UCI Machine Learning Repository](https://archive.ics.uci.edu)
+- [OpenML](https://www.openml.org), accesible desde `sklearn.datasets.fetch_openml`
+- [Kaggle Datasets](https://www.kaggle.com/datasets)
+- [Datos abiertos del Gobierno de México](https://www.datos.gob.mx)
+
+## Referencias
+
+::: {#refs}
+:::

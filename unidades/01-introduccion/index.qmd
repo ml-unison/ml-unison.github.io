@@ -1,0 +1,71 @@
+---
+title: "Introducción y flujo de trabajo"
+subtitle: "Unidad 1 · 2 semanas"
+---
+
+::: {.rdp-objetivos}
+**Al terminar esta unidad podrás:**
+
+- explicar qué problemas se pueden resolver aprendiendo de datos y cuáles no;
+- formalizar un problema supervisado en términos de hipótesis, pérdida y riesgo;
+- distinguir entre el error en muestra ($E_{\text{in}}$) y el error fuera de muestra ($E_{\text{out}}$);
+- construir un flujo de trabajo de scikit-learn sin fugas de información;
+- identificar riesgos éticos en los datos y en la elección de la métrica.
+:::
+
+## Presentaciones
+
+```{=html}
+<ul class="rdp-material">
+  <li>
+    <i class="bi bi-easel2" aria-hidden="true"></i>
+    <span><a href="slides/01-aprender-de-datos.html"><strong>¿Qué significa aprender de datos?</strong></a>
+      <span class="rdp-material-desc">Paradigmas, riesgo empírico, generalización, ciclo de vida y responsabilidad.</span></span>
+    <a href="slides/01-aprender-de-datos.html?print-pdf" title="Versión para imprimir o guardar como PDF"><i class="bi bi-filetype-pdf"></i> PDF</a>
+  </li>
+  <li class="pendiente">
+    <i class="bi bi-easel2" aria-hidden="true"></i>
+    <span><strong>Datos tabulares con pandas</strong>
+      <span class="rdp-material-desc">En preparación (Fase 1).</span></span>
+    <span></span>
+  </li>
+  <li class="pendiente">
+    <i class="bi bi-easel2" aria-hidden="true"></i>
+    <span><strong>Ingeniería de atributos y <em>pipelines</em></strong>
+      <span class="rdp-material-desc">En preparación (Fase 1).</span></span>
+    <span></span>
+  </li>
+</ul>
+```
+
+## Libretas de ejemplo
+
+```{=html}
+<ul class="rdp-material">
+  <li>
+    <i class="bi bi-journal-code" aria-hidden="true"></i>
+    <span><strong>Un primer flujo de trabajo completo con scikit-learn</strong>
+      <span class="rdp-material-desc">Separación, línea base, <code>Pipeline</code>, una fuga de información real y evaluación final.</span></span>
+    <span>{{< colab unidades/01-introduccion/ejemplos/u01-e01-primer-flujo.ipynb >}}</span>
+  </li>
+</ul>
+```
+
+## Laboratorio
+
+::: {.callout-note}
+El laboratorio autocalificado de esta unidad se publicará en la Fase 1.
+:::
+
+## Lecturas
+
+- @abu-mostafa2012learning, capítulo 1: *The Learning Problem*.
+- @james2023islp, capítulo 2: *Statistical Learning*.
+- @barocas2023fairness, capítulo 1: *Introduction*.
+
+{{< quiz u01 >}}
+
+## Referencias
+
+::: {#refs}
+:::

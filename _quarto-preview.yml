@@ -1,0 +1,11 @@
+# Perfil de vista previa: se publica en https://ml-unison.github.io/preview/
+# Uso: quarto render --profile preview
+curso:
+  rama: "rediseno-2027"
+website:
+  site-url: "https://ml-unison.github.io/preview"
+  announcement:
+    content: "**Vista previa** del rediseño del curso. El sitio oficial sigue en ml-unison.github.io."
+    type: warning
+    dismissable: true
+    position: below-navbar

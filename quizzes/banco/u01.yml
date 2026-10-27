@@ -1,0 +1,126 @@
+titulo: "Unidad 1 · ¿Qué significa aprender de datos?"
+unidad: 1
+preguntas:
+  - id: u01-p01
+    tipo: opcion
+    enunciado: |
+      ¿En cuál de estas situaciones **tiene menos sentido** usar aprendizaje automático?
+    opciones:
+      - texto: Calcular el impuesto de una factura a partir de una tasa fija establecida por ley.
+        correcta: true
+        retro: Hay una regla explícita y conocida; programarla directamente es más simple y exacto.
+      - texto: Estimar el almacenamiento de una presa a partir de lluvias y extracciones históricas.
+        retro: Existe un patrón, es difícil de describir analíticamente y hay datos históricos.
+      - texto: Detectar correos fraudulentos a partir de miles de ejemplos etiquetados.
+        retro: Es un caso clásico de clasificación supervisada.
+      - texto: Agrupar perfiles de estudiantes según su trayectoria académica.
+        retro: Es un problema no supervisado razonable.
+    explicacion: |
+      Aprender tiene sentido cuando (1) existe un patrón, (2) no sabemos describirlo analíticamente y (3) tenemos datos. En el cálculo del impuesto falla la condición (2).
+
+  - id: u01-p02
+    tipo: opcion
+    enunciado: |
+      Sea $\ell$ una función de pérdida y $\mathcal{D}=\{(\mathbf{x}_i,y_i)\}_{i=1}^n$ una muestra. ¿Cuál expresión corresponde al **riesgo empírico** $E_{\text{in}}(h)$?
+    opciones:
+      - texto: $\mathbb{E}_{(\mathbf{x},y)\sim P}\left[\ell(h(\mathbf{x}),y)\right]$
+        retro: Ese es el riesgo verdadero $E_{\text{out}}(h)$; depende de $P$, que no conocemos.
+      - texto: $\frac{1}{n}\sum_{i=1}^n \ell(h(\mathbf{x}_i),y_i)$
+        correcta: true
+      - texto: $\min_{h\in\mathcal{H}} \sum_{i=1}^n \ell(h(\mathbf{x}_i),y_i)$
+        retro: Ese es el valor óptimo del problema ERM, no el riesgo de una $h$ dada.
+      - texto: $\Pr\left[\,|E_{\text{in}}(h)-E_{\text{out}}(h)|>\epsilon\,\right]$
+        retro: Esa es la probabilidad que acota la desigualdad de Hoeffding.
+
+  - id: u01-p03
+    tipo: vf
+    enunciado: |
+      Si un modelo obtiene $E_{\text{in}} = 0$ en el conjunto de entrenamiento, entonces su error fuera de muestra también será pequeño.
+    respuesta: false
+    explicacion: |
+      Falso. En el experimento con polinomios, el de grado 12 interpola casi todos los puntos ($E_{\text{in}}\approx 0$) y su $E_{\text{out}}$ es enorme: está **sobreajustado**.
+
+  - id: u01-p04
+    tipo: numerica
+    enunciado: |
+      Un clasificador comete errores en 3 de 20 ejemplos de entrenamiento. Con la pérdida 0–1, ¿cuánto vale $E_{\text{in}}$? (escribe un decimal)
+    respuesta: 0.15
+    tolerancia: 0.001
+    explicacion: |
+      $E_{\text{in}} = \frac{1}{20}\sum_i \mathbb{1}[h(\mathbf{x}_i)\ne y_i] = 3/20 = 0.15$.
+
+  - id: u01-p05
+    tipo: numerica
+    enunciado: |
+      Usa la desigualdad de Hoeffding para **una hipótesis fija** con $n = 1000$ y $\epsilon = 0.05$. ¿Cuál es la cota superior de $\Pr[\,|E_{\text{in}}-E_{\text{out}}|>\epsilon\,]$? (redondea a 3 decimales)
+    respuesta: 0.013
+    tolerancia: 0.001
+    explicacion: |
+      $2e^{-2\epsilon^2 n} = 2e^{-2(0.0025)(1000)} = 2e^{-5} \approx 0.0135$.
+
+  - id: u01-p06
+    tipo: opcion
+    enunciado: |
+      ¿Por qué la cota de Hoeffding de una sola hipótesis **no** garantiza directamente que $E_{\text{out}}(g)\approx E_{\text{in}}(g)$ para la hipótesis $g$ que entrega el algoritmo?
+    opciones:
+      - texto: Porque la pérdida cuadrática no está acotada.
+        retro: Puede ser un problema técnico, pero no es la razón de fondo.
+      - texto: Porque $g$ se elige **después** de ver los datos, entre muchas hipótesis de $\mathcal{H}$.
+        correcta: true
+      - texto: Porque los datos de entrenamiento nunca son i.i.d.
+        retro: El supuesto i.i.d. es justamente el que usamos; el problema es otro.
+      - texto: Porque Hoeffding solo aplica a regresión lineal.
+        retro: Hoeffding es un resultado general sobre promedios de variables acotadas.
+    explicacion: |
+      Hoeffding exige que $h$ se fije antes de muestrear. Al elegir entre muchas hipótesis, aumenta la probabilidad de que alguna tenga $E_{\text{in}}$ engañosamente bajo. La Unidad 3 corrige esto con cotas que dependen de la complejidad de $\mathcal{H}$.
+
+  - id: u01-p07
+    tipo: multiple
+    enunciado: |
+      ¿Cuáles de estos pasos deben ajustarse **solo** con los datos de entrenamiento para evitar fuga de información?
+    opciones:
+      - texto: Calcular la media y la desviación estándar para estandarizar.
+        correcta: true
+      - texto: Imputar valores faltantes con la mediana de cada columna.
+        correcta: true
+      - texto: Elegir las categorías de una codificación *one-hot*.
+        correcta: true
+      - texto: Convertir una columna de texto `"2024-05-01"` a tipo fecha.
+        retro: Es una transformación determinista que no aprende parámetros de los datos.
+    explicacion: |
+      Todo paso que **estima parámetros** a partir de los datos (medias, medianas, vocabularios…) debe ajustarse con el conjunto de entrenamiento. Un `Pipeline` de scikit-learn lo garantiza.
+
+  - id: u01-p08
+    tipo: opcion
+    enunciado: |
+      Estás seleccionando entre 30 configuraciones de un modelo. ¿Qué conjunto debes usar para **compararlas**?
+    opciones:
+      - texto: El conjunto de prueba, porque es el más parecido a producción.
+        retro: Si eliges con el conjunto de prueba, su error deja de ser una estimación honesta de $E_{\text{out}}$.
+      - texto: Validación (un conjunto aparte o validación cruzada sobre el de entrenamiento).
+        correcta: true
+      - texto: El conjunto de entrenamiento completo, comparando $E_{\text{in}}$.
+        retro: $E_{\text{in}}$ favorece a los modelos más complejos; no detecta el sobreajuste.
+      - texto: Cualquiera; con 30 configuraciones la diferencia es despreciable.
+        retro: Con más configuraciones, el sesgo de selección es **mayor**, no menor.
+
+  - id: u01-p09
+    tipo: opcion
+    enunciado: |
+      ¿A qué paradigma corresponde entrenar un modelo para predecir la siguiente palabra de un texto, usando millones de textos **sin etiquetar a mano**?
+    opciones:
+      - texto: Aprendizaje no supervisado clásico (agrupamiento).
+      - texto: Aprendizaje auto-supervisado.
+        correcta: true
+      - texto: Aprendizaje por refuerzo.
+      - texto: Aprendizaje supervisado con etiquetas humanas.
+    explicacion: |
+      Las "etiquetas" (la siguiente palabra) se obtienen de los propios datos. Es la base del preentrenamiento de los modelos de lenguaje (Unidad 6).
+
+  - id: u01-p10
+    tipo: vf
+    enunciado: |
+      Si eliminamos de los datos la columna "sexo", un modelo de crédito ya no puede producir decisiones con sesgo de sexo.
+    respuesta: false
+    explicacion: |
+      Falso. Otras variables (ocupación, historial, patrones de compra…) pueden estar correlacionadas con el atributo eliminado y funcionar como **variables sustitutas** (*proxies*).

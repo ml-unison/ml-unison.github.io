@@ -1,0 +1,36 @@
+title: Tema UNISON para Reconocimiento de Patrones
+author: Julio Waissman
+version: 0.1.0
+quarto-required: ">=1.6.0"
+contributes:
+  shortcodes:
+    - colab.lua
+    - quiz/quiz.lua
+  formats:
+    revealjs:
+      theme: [default, revealjs/unison.scss]
+      filters:
+        - revealjs/unison.lua
+      slide-number: c/t
+      show-slide-number: all
+      transition: none
+      background-transition: fade
+      center: false
+      width: 1600
+      height: 900
+      margin: 0.06
+      html-math-method: mathjax
+      include-before-body:
+        - macros.html
+      footer: "Reconocimiento de Patrones · LCC · Universidad de Sonora"
+      menu:
+        side: left
+      chalkboard: false
+      pdf-separate-fragments: false
+      code-line-numbers: false
+      highlight-style: github
+      fig-dpi: 160
+      fig-format: svg
+      execute:
+        echo: false
+        warning: false

@@ -1,0 +1,14 @@
+[build-system]
+requires = ["hatchling>=1.25"]
+build-backend = "hatchling.build"
+
+[project]
+name = "rdp"
+version = "2027.1.0"
+description = "Utilidades del curso Reconocimiento de Patrones (LCC-UNISON): estilo de gráficas, datos y quizzes en libretas."
+requires-python = ">=3.10"
+dependencies = ["matplotlib>=3.8", "pyyaml>=6.0", "ipywidgets>=8.0", "pandas>=2.0"]
+
+[tool.hatch.build.targets.wheel]
+packages = ["rdp"]
+artifacts = ["rdp/fuentes/*.ttf", "rdp/fuentes/OFL.txt"]

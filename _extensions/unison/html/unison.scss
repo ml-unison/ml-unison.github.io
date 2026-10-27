@@ -1,0 +1,133 @@
+/*-- scss:defaults --*/
+// Colores oficiales (Manual de Identidad UNISON 2025–2030). Deben coincidir
+// con _brand.yml; tests/test_marca.py lo verifica.
+$rdp-azul: #24398A !default;
+$rdp-marino: #20305A !default;
+$rdp-dorado: #E1B73D !default;
+$rdp-medio: #496EA5 !default;
+$rdp-tenue: #C0CEE3 !default;
+$rdp-gris-claro: #F1F1F1 !default;
+$rdp-verde: #5CA847 !default;
+$rdp-ambar: #EBA93B !default;
+$rdp-rojo: #D5433C !default;
+$rdp-cafe: #946721 !default;
+$rdp-gris: #C5C5C5 !default;
+
+$navbar-bg: #ffffff;
+$navbar-fg: $rdp-marino;
+$navbar-hl: $rdp-azul;
+$footer-bg: $rdp-marino;
+$footer-fg: #e8ecf5;
+$border-radius: 6px;
+$toc-color: $rdp-azul;
+$code-color: #8a2d1f;
+$callout-color-note: $rdp-azul;
+$callout-color-tip: $rdp-verde;
+$callout-color-warning: $rdp-ambar;
+$callout-color-important: $rdp-rojo;
+$callout-color-caution: $rdp-cafe;
+
+/*-- scss:rules --*/
+:root {
+  --rdp-primario: #{$rdp-azul};
+  --rdp-secundario: #{$rdp-dorado};
+  --rdp-marino: #{$rdp-marino};
+  --rdp-exito: #{darken($rdp-verde, 12%)};
+  --rdp-error: #{$rdp-rojo};
+  --rdp-borde: #{mix($rdp-tenue, #ffffff, 60%)};
+  --rdp-superficie: #f6f8fb;
+}
+
+// ---- Barra de navegación --------------------------------------------------
+.navbar {
+  border-bottom: 4px solid $rdp-dorado;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, .04);
+  .navbar-brand img { max-height: 30px; }
+  .navbar-title {
+    font-family: Montserrat, sans-serif; font-weight: 700; color: $rdp-marino;
+    padding-left: .6rem; margin-left: .2rem; border-left: 1px solid $rdp-tenue;
+  }
+  .nav-link { font-family: Montserrat, sans-serif; font-weight: 500; }
+}
+
+// ---- Tipografía ------------------------------------------------------------
+h1, h2, h3, h4, .title { letter-spacing: -.01em; }
+h1.title { font-weight: 800; color: $rdp-marino; }
+.quarto-title .subtitle { color: $rdp-medio; font-family: Montserrat, sans-serif; font-weight: 500; }
+main h2 {
+  border-bottom: none !important;
+  padding-bottom: .3rem;
+  margin-top: 2.5rem;
+  &::after {
+    content: ""; display: block; width: 3rem; height: 3px;
+    margin-top: .45rem; background: $rdp-dorado; border-radius: 2px;
+  }
+}
+
+// ---- Portada ---------------------------------------------------------------
+.rdp-hero {
+  position: relative; overflow: hidden;
+  background: linear-gradient(135deg, $rdp-marino 0%, $rdp-azul 70%, $rdp-medio 100%);
+  color: #fff; border-radius: 10px; padding: 2.5rem 2rem 2.2rem; margin: 0 0 2.5rem;
+  border-bottom: 6px solid $rdp-dorado;
+  h1, h2, p { color: #fff; }
+  h1 { font-family: Montserrat, sans-serif; font-weight: 800; font-size: clamp(1.9rem, 4.5vw, 2.8rem); margin: 0 0 .4rem; }
+  .rdp-hero-sub { font-size: 1.1rem; opacity: .92; margin: 0; max-width: 40rem; }
+  .rdp-hero-dep {
+    font-family: Montserrat, sans-serif; font-size: .8rem; font-weight: 600;
+    letter-spacing: .1em; text-transform: uppercase; color: $rdp-dorado; margin-bottom: .9rem;
+  }
+  img.rdp-hero-buho {
+    position: absolute; right: -2.5rem; bottom: -2.5rem; width: 14rem; opacity: .13; pointer-events: none;
+  }
+}
+.rdp-datos {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr)); gap: .75rem; margin: 1.5rem 0;
+  > div { background: var(--rdp-superficie); border-left: 3px solid $rdp-dorado; border-radius: 4px; padding: .6rem .9rem; }
+  strong { display: block; font-family: Montserrat, sans-serif; font-size: .75rem; text-transform: uppercase;
+           letter-spacing: .06em; color: $rdp-medio; }
+}
+
+// ---- Tarjetas de unidades --------------------------------------------------
+.rdp-tarjetas {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr)); gap: 1rem; margin: 1.5rem 0;
+}
+.rdp-tarjeta {
+  display: flex; flex-direction: column; gap: .35rem;
+  border: 1px solid var(--rdp-borde); border-top: 4px solid $rdp-azul; border-radius: 8px;
+  padding: 1rem 1.1rem; background: #fff; color: inherit; text-decoration: none;
+  transition: transform .12s ease, box-shadow .12s ease;
+  &:hover { transform: translateY(-2px); box-shadow: 0 6px 18px rgba($rdp-marino, .12); color: inherit; }
+  .rdp-tarjeta-num { font-family: Montserrat, sans-serif; font-weight: 800; font-size: .8rem; color: $rdp-dorado; letter-spacing: .08em; }
+  .rdp-tarjeta-titulo { font-family: Montserrat, sans-serif; font-weight: 700; color: $rdp-marino; font-size: 1.05rem; line-height: 1.25; }
+  .rdp-tarjeta-desc { font-size: .9rem; color: #4a5263; margin: 0; }
+  .rdp-tarjeta-sem { margin-top: auto; font-size: .78rem; color: $rdp-medio; }
+  &.pendiente { border-top-color: $rdp-gris; opacity: .75; }
+}
+
+// ---- Listas de materiales (presentaciones, libretas) ----------------------
+.rdp-material {
+  list-style: none; padding: 0; margin: 1rem 0;
+  li {
+    display: grid; grid-template-columns: 2.2rem 1fr auto; align-items: center; gap: .75rem;
+    padding: .7rem .4rem; border-bottom: 1px solid var(--rdp-borde);
+  }
+  .bi { font-size: 1.3rem; color: $rdp-azul; }
+  .rdp-material-desc { display: block; font-size: .88rem; color: #5a6274; }
+}
+@media (max-width: 576px) {
+  .rdp-material li { grid-template-columns: 1.8rem 1fr; }
+  .rdp-material li > :last-child { grid-column: 2; justify-self: start; }
+}
+a.rdp-colab img { height: 22px; vertical-align: middle; }
+
+// ---- Objetivos de aprendizaje ---------------------------------------------
+.rdp-objetivos {
+  background: var(--rdp-superficie); border-radius: 8px; padding: 1rem 1.25rem 1rem 1.25rem;
+  border-left: 4px solid $rdp-azul; margin-bottom: 2rem;
+  > :last-child { margin-bottom: 0; }
+}
+
+// ---- Pie de página --------------------------------------------------------
+.nav-footer { border-top: 4px solid $rdp-dorado; font-size: .85rem;
+  a { color: $rdp-dorado; } }

@@ -50,29 +50,28 @@ preguntas:
       $E_{\text{in}} = \frac{1}{20}\sum_i \mathbb{1}[h(\mathbf{x}_i)\ne y_i] = 3/20 = 0.15$.
 
   - id: u01-p05
-    tipo: numerica
-    enunciado: |
-      Usa la desigualdad de Hoeffding para **una hipótesis fija** con $n = 1000$ y $\epsilon = 0.05$. ¿Cuál es la cota superior de $\Pr[\,|E_{\text{in}}-E_{\text{out}}|>\epsilon\,]$? (redondea a 3 decimales)
-    respuesta: 0.013
-    tolerancia: 0.001
-    explicacion: |
-      $2e^{-2\epsilon^2 n} = 2e^{-2(0.0025)(1000)} = 2e^{-5} \approx 0.0135$.
-
-  - id: u01-p06
     tipo: opcion
     enunciado: |
-      ¿Por qué la cota de Hoeffding de una sola hipótesis **no** garantiza directamente que $E_{\text{out}}(g)\approx E_{\text{in}}(g)$ para la hipótesis $g$ que entrega el algoritmo?
+      Dos modelos tienen el mismo error en los datos de entrenamiento. Uno es un polinomio de grado 3 y el otro de grado 12. Según la navaja de Occam, ¿cuál conviene preferir y por qué?
     opciones:
-      - texto: Porque la pérdida cuadrática no está acotada.
-        retro: Puede ser un problema técnico, pero no es la razón de fondo.
-      - texto: Porque $g$ se elige **después** de ver los datos, entre muchas hipótesis de $\mathcal{H}$.
+      - texto: El de grado 12, porque puede representar más funciones.
+        retro: Poder representar más funciones también significa poder ajustarse al ruido.
+      - texto: El de grado 3, porque al ser más simple es menos probable que su buen ajuste se deba al ruido.
         correcta: true
-      - texto: Porque los datos de entrenamiento nunca son i.i.d.
-        retro: El supuesto i.i.d. es justamente el que usamos; el problema es otro.
-      - texto: Porque Hoeffding solo aplica a regresión lineal.
-        retro: Hoeffding es un resultado general sobre promedios de variables acotadas.
+      - texto: Da igual, porque tienen el mismo error de entrenamiento.
+        retro: El error de entrenamiento no es lo que nos importa; nos importa el error en datos nuevos.
+      - texto: El de grado 12, porque los modelos complejos siempre generalizan mejor con más datos.
+        retro: Con muchos datos un modelo complejo puede funcionar bien, pero aquí ambos explican igual lo observado.
     explicacion: |
-      Hoeffding exige que $h$ se fije antes de muestrear. Al elegir entre muchas hipótesis, aumenta la probabilidad de que alguna tenga $E_{\text{in}}$ engañosamente bajo. La Unidad 3 corrige esto con cotas que dependen de la complejidad de $\mathcal{H}$.
+      Un modelo simple no puede ajustarse a cualquier cosa; si aun así se ajusta a los datos, es más probable que haya capturado el patrón. Simple no significa simplista: un modelo demasiado simple tampoco sirve.
+
+  - id: u01-p06
+    tipo: vf
+    enunciado: |
+      Un programa que guarda en una tabla todos los ejemplos de entrenamiento y responde buscando el ejemplo idéntico tiene $E_{\text{in}} = 0$, así que es un buen modelo.
+    respuesta: false
+    explicacion: |
+      Falso. Memorizar da error cero en los datos vistos, pero ante un caso nuevo el programa no tiene nada que decir. Lo que importa es $E_{\text{out}}$: generalizar, no memorizar.
 
   - id: u01-p07
     tipo: multiple
@@ -124,3 +123,75 @@ preguntas:
     respuesta: false
     explicacion: |
       Falso. Otras variables (ocupación, historial, patrones de compra…) pueden estar correlacionadas con el atributo eliminado y funcionar como **variables sustitutas** (*proxies*).
+
+  - id: u01-p11
+    tipo: opcion
+    enunciado: |
+      Al leer un archivo, `df.info()` muestra que la columna `fecha` es de tipo `object` (texto). ¿Qué problema tiene dejarla así?
+    opciones:
+      - texto: Ninguno; pandas convierte el texto a fecha cuando hace falta.
+        retro: pandas no lo hace automáticamente al agrupar u ordenar.
+      - texto: No se puede extraer el mes ni agrupar por periodos, y el orden es alfabético, no cronológico.
+        correcta: true
+      - texto: Ocupa más memoria, pero los cálculos son correctos.
+        retro: El problema no es la memoria; muchas operaciones con fechas no funcionan o dan resultados equivocados.
+      - texto: Solo es un problema si la columna tiene valores faltantes.
+    explicacion: |
+      Hay que convertirla con `pd.to_datetime`. Con texto, "2020/10/01" queda antes que "2020/2/01" y no existen `.dt.month` ni `resample`.
+
+  - id: u01-p12
+    tipo: vf
+    enunciado: |
+      En una serie de registros diarios, si `df.isna().sum()` da cero en todas las columnas, entonces no faltan datos.
+    respuesta: false
+    explicacion: |
+      Falso. Un día sin registro no aparece como `NaN`: simplemente no está la fila. Hay que comparar contra el rango completo de fechas, por ejemplo con `reindex(pd.date_range(...))`.
+
+  - id: u01-p13
+    tipo: opcion
+    enunciado: |
+      Unes una tabla de 11,533 registros diarios con un catálogo de presas usando `merge` por la clave de la presa. El resultado tiene 12,800 filas. ¿Qué pasó?
+    opciones:
+      - texto: Nada raro; `merge` siempre agrega filas.
+        retro: Una unión izquierda contra un catálogo con claves únicas conserva el número de filas.
+      - texto: Alguna clave aparece más de una vez en el catálogo, y sus registros se duplicaron.
+        correcta: true
+      - texto: Había valores faltantes en la columna de almacenamiento.
+        retro: Los faltantes en otras columnas no cambian el número de filas de la unión.
+      - texto: pandas agregó filas para las fechas faltantes.
+        retro: "`merge` no inventa fechas; eso lo haría un `reindex`."
+    explicacion: |
+      Si una clave está repetida en la tabla derecha, cada registro de la izquierda con esa clave se multiplica. Por eso conviene usar `validate="many_to_one"` y comparar el número de filas antes y después.
+
+  - id: u01-p14
+    tipo: opcion
+    enunciado: |
+      En un conjunto de datos de casas, la columna "calidad de la cocina" toma los valores *Excelente*, *Buena*, *Regular* y *Mala*. ¿Qué codificación es más adecuada para un modelo lineal?
+    opciones:
+      - texto: One-hot, porque es una variable categórica.
+        retro: Funciona, pero desperdicia el orden natural de las categorías.
+      - texto: Ordinal (Mala = 0, Regular = 1, Buena = 2, Excelente = 3), porque las categorías tienen un orden.
+        correcta: true
+      - texto: Dejarla como texto; el modelo aprende el orden solo.
+        retro: Los modelos de scikit-learn requieren números.
+      - texto: Eliminarla, porque las variables categóricas no aportan información.
+    explicacion: |
+      Cuando las categorías tienen un orden con sentido, una codificación ordinal conserva esa información en una sola columna. One-hot es la opción para categorías **sin** orden (barrio, color, tipo de techo).
+
+  - id: u01-p15
+    tipo: vf
+    enunciado: |
+      En el conjunto de casas, la columna "calidad de la alberca" tiene 99 % de valores faltantes, así que lo correcto es imputarlos con la categoría más frecuente.
+    respuesta: false
+    explicacion: |
+      Falso. Ahí el faltante **significa algo**: la casa no tiene alberca. Lo correcto es codificarlo como su propia categoría ("sin alberca"). Antes de imputar hay que preguntarse por qué falta el dato.
+
+  - id: u01-p16
+    tipo: numerica
+    enunciado: |
+      Estandarizas una columna con media 50 y desviación estándar 4, calculadas en el conjunto de entrenamiento. ¿Qué valor queda para un ejemplo de prueba con valor 58?
+    respuesta: 2
+    tolerancia: 0.001
+    explicacion: |
+      $z = (58 - 50)/4 = 2$. La media y la desviación son las del **entrenamiento**: el conjunto de prueba se transforma con los mismos parámetros, nunca con los suyos.
+

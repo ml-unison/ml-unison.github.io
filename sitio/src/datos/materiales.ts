@@ -23,7 +23,9 @@ export const materiales: Record<string, Material> = {
       { id: 'u01-03-atributos', titulo: 'Ingeniería de atributos y pipelines', descripcion: 'Escalamiento, codificación, imputación y Pipeline de scikit-learn.' },
     ],
     libretas: [
-      { ruta: 'unidades/01-introduccion/ejemplos/u01-e01-primer-flujo.ipynb', titulo: 'Un primer flujo de trabajo completo', descripcion: 'Separación, línea base, Pipeline, una fuga de información real y la evaluación final.' },
+      { ruta: 'unidades/01-introduccion/ejemplos/u01-e01-pandas-presas.ipynb', titulo: 'Explorar datos con pandas: las presas de Sonora', descripcion: 'Tipos de datos, uniones, agrupaciones, faltantes que no se ven y series de tiempo con datos de CONAGUA.' },
+      { ruta: 'unidades/01-introduccion/ejemplos/u01-e02-preprocesamiento.ipynb', titulo: 'Preprocesamiento: preparar datos reales para un modelo', descripcion: 'Faltantes, categorías con y sin orden, logaritmos, fechas, escalas y atípicos, con las casas de Ames.' },
+      { ruta: 'unidades/01-introduccion/ejemplos/u01-e03-pipeline-titanic.ipynb', titulo: 'Un primer pipeline sin trampas: el Titanic', descripcion: 'Qué información es legítima, línea base, Pipeline, una fuga de información real y la evaluación final.' },
     ],
     laboratorios: [],
     lecturas: [

@@ -35,9 +35,17 @@ MARINO = PALETA["azul-marino"]
 ROJO = PALETA["rojo"]
 VERDE = PALETA["verde"]
 GRIS = "#6B7385"
+#: Dorado más oscuro, legible sobre blanco como línea o texto.
+DORADO_OSC = "#C9971C"
 
-#: Orden de colores para series categóricas (contraste alto entre vecinos).
-CICLO: list[str] = [AZUL, DORADO, ROJO, VERDE, PALETA["azul-medio"], PALETA["cafe"], PALETA["ambar"], MARINO]
+# Neutros (los mismos del sitio y las presentaciones)
+TINTA = "#1A2133"
+TENUE = "#5E6678"
+LINEA = "#E2E5EC"
+
+#: Orden fijo de colores para series. Los primeros cuatro están validados para
+#: daltonismo (azul, rojo, dorado, gris); el verde no va junto al rojo.
+CICLO: list[str] = [AZUL, ROJO, DORADO_OSC, GRIS, PALETA["azul-medio"], PALETA["cafe"], MARINO]
 
 #: Mapa secuencial blanco → azul institucional, y divergente rojo ↔ azul.
 SECUENCIAL = mpl.colors.LinearSegmentedColormap.from_list("rdp_azul", ["#FFFFFF", PALETA["azul-tenue"], AZUL, MARINO])
@@ -47,20 +55,25 @@ CLASES2 = mpl.colors.ListedColormap(["#F4C7C3", "#C9D3EC"])
 
 _RC = {
     "axes.prop_cycle": cycler(color=CICLO),
-    "axes.edgecolor": "#5B6475",
-    "axes.labelcolor": "#1E2433",
+    "axes.edgecolor": "#8A91A0",
     "axes.titlecolor": MARINO,
-    "axes.titleweight": "bold",
-    "axes.titlesize": 13,
-    "axes.labelsize": 11.5,
+    "axes.titleweight": "semibold",
+    "axes.titlelocation": "left",
+    "axes.titlepad": 10,
+    "axes.titlesize": 13.5,
+    "axes.labelsize": 12,
+    "axes.labelcolor": TENUE,
     "axes.spines.top": False,
     "axes.spines.right": False,
     "axes.grid": True,
     "axes.axisbelow": True,
-    "grid.color": "#E3E7EE",
+    "grid.color": LINEA,
     "grid.linewidth": 0.8,
-    "xtick.color": "#5B6475",
-    "ytick.color": "#5B6475",
+    "xtick.color": TENUE,
+    "ytick.color": TENUE,
+    "xtick.labelsize": 11,
+    "ytick.labelsize": 11,
+    "text.color": TINTA,
     "legend.frameon": False,
     "lines.linewidth": 2.2,
     "lines.markersize": 6,
@@ -73,7 +86,8 @@ _RC = {
     "figure.facecolor": "white",
     "image.cmap": "rdp_azul",
     "font.family": "sans-serif",
-    "font.sans-serif": ["Lato", "DejaVu Sans"],
+    "font.sans-serif": ["Source Sans 3", "DejaVu Sans"],
+    "font.size": 12,
     "mathtext.fontset": "cm",
     "axes.formatter.use_mathtext": True,
     "axes.unicode_minus": True,
@@ -82,7 +96,7 @@ _RC = {
 
 
 def _registrar_fuentes() -> None:
-    """Registra Lato (incluida en el paquete, licencia OFL) en matplotlib."""
+    """Registra Source Sans 3 (incluida en el paquete, licencia OFL) en matplotlib."""
     for ttf in _FUENTES.glob("*.ttf"):
         font_manager.fontManager.addfont(str(ttf))
 
@@ -103,3 +117,26 @@ def usar(contexto: str = "libreta") -> None:
             "xtick.labelsize": 13, "ytick.labelsize": 13, "legend.fontsize": 13,
             "figure.figsize": (9.0, 5.0), "lines.linewidth": 2.8, "lines.markersize": 8,
         })
+
+
+def etiquetar(ax, x, valores: dict[str, float], separacion: float | None = None, **kwargs) -> None:
+    """Etiqueta series directamente a la derecha de su último punto, sin que se encimen.
+
+    `valores` asocia el nombre de cada serie con la altura de su último punto. Las
+    etiquetas se reparten verticalmente para quedar al menos a `separacion`
+    (por omisión, 5 % del rango del eje y) unas de otras.
+    """
+    if separacion is None:
+        y0, y1 = ax.get_ylim()
+        separacion = 0.055 * (y1 - y0)
+    orden = sorted(valores.items(), key=lambda kv: kv[1])
+    ys = [v for _, v in orden]
+    for i in range(1, len(ys)):
+        ys[i] = max(ys[i], ys[i - 1] + separacion)
+    # si se salieron por arriba, se recorren hacia abajo conservando la separación
+    exceso = ys[-1] - max(v for _, v in orden) if ys else 0
+    if exceso > 0:
+        ys = [y - exceso / 2 for y in ys]
+    opciones = {"va": "center", "fontsize": 11, "color": TINTA} | kwargs
+    for (nombre, _), y in zip(orden, ys):
+        ax.text(x, y, nombre, **opciones)

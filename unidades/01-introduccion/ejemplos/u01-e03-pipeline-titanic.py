@@ -9,22 +9,25 @@
 # ---
 
 # %% [markdown]
-# # Un primer flujo de trabajo completo con scikit-learn
+# <small>Reconocimiento de Patrones · Licenciatura en Ciencias de la Computación · Universidad de Sonora<br>
+# Julio Waissman · <a href="https://ml-unison.github.io">ml-unison.github.io</a> · Licencia CC BY-SA 4.0</small>
 #
-# **Reconocimiento de Patrones · Unidad 1 · Ejemplo 1**
-# Licenciatura en Ciencias de la Computación · Universidad de Sonora
+# ---
 #
-# En esta libreta recorremos, de principio a fin, el ciclo de vida de un modelo de clasificación:
+# # Un primer *pipeline* sin trampas: el Titanic
 #
-# 1. definir el problema y la métrica,
-# 2. separar los datos **antes** de hacer cualquier otra cosa,
-# 3. explorar solo el conjunto de entrenamiento,
+# **Unidad 1 · Ejemplo 3**
+#
+# En la libreta anterior preparamos datos con muchos problemas. Aquí juntamos todo en un flujo de trabajo completo y honesto:
+#
+# 1. plantear el problema y decidir **qué información es legítimo usar**,
+# 2. separar los datos **antes** de cualquier otra cosa,
+# 3. comparar contra una **línea base**,
 # 4. construir un `Pipeline` de preprocesamiento y modelo,
-# 5. compararlo contra una línea base con validación cruzada,
-# 6. detectar una **fuga de información**,
-# 7. y evaluar **una sola vez** en el conjunto de prueba.
+# 5. detectar una **fuga de información** real,
+# 6. y evaluar **una sola vez** en el conjunto de prueba.
 #
-# Los datos son los registros de pasajeros del *RMS Titanic* (1912), una base clásica que tiene variables numéricas, categóricas y faltantes, y una trampa interesante.
+# El modelo será una regresión logística, que por ahora usamos como una caja negra que clasifica; la estudiaremos en la Unidad 4. Lo importante de esta libreta es el **flujo**, no el modelo.
 
 # %% [markdown]
 # ## 0. Preparación del entorno
@@ -52,7 +55,6 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.linear_model import LogisticRegression
 from sklearn.dummy import DummyClassifier
-from sklearn.metrics import ConfusionMatrixDisplay, classification_report
 
 import rdp
 
@@ -60,16 +62,26 @@ rdp.estilo.usar()
 SEMILLA = 1942
 
 # %% [markdown]
-# ## 1. El problema
+# ## 1. El problema y los datos
 #
-# **Tarea.** Dadas las características de un pasajero conocidas *al momento de abordar*, predecir si sobrevivió al naufragio.
+# El *RMS Titanic* se hundió en abril de 1912 en su viaje inaugural, de Southampton a Nueva York. De sus pasajeros sobrevivió menos de la mitad. La tabla que usamos tiene a los 1,309 pasajeros (no incluye a la tripulación). La compiló Thomas Cason a partir de la *Encyclopedia Titanica*, la distribuyó Frank Harrell (Universidad de Vanderbilt) y hoy está en OpenML.
 #
-# **Métrica.** Usaremos la **exactitud** (*accuracy*) por simplicidad y, como las clases están desbalanceadas, también la **exactitud balanceada**, que promedia la exhaustividad (*recall*) de cada clase:
-# $$
-# \text{BA} = \frac{1}{2}\left(\frac{TP}{TP+FN} + \frac{TN}{TN+FP}\right).
-# $$
+# **Problema.** Con lo que se sabía de un pasajero **al momento de abordar**, predecir si sobrevivió. No es un problema práctico (nadie va a usar este modelo), pero es perfecto para aprender, porque los datos traen una trampa.
 #
-# Observa la frase *al momento de abordar*: define qué información es legítimo usar. Volveremos a ella.
+# **Métrica.** La **exactitud**: la proporción de pasajeros bien clasificados.
+#
+# Antes de tocar los datos, revisemos qué dice cada columna y **cuándo se conocía**:
+#
+# | Columna | Significado | ¿Se conoce al abordar? |
+# |---|---|---|
+# | `pclass` | clase del boleto (1, 2, 3) | sí |
+# | `name`, `sex`, `age` | nombre, sexo, edad | sí |
+# | `sibsp`, `parch` | hermanos o cónyuge, padres o hijos a bordo | sí |
+# | `ticket`, `fare`, `cabin`, `embarked` | boleto, tarifa, camarote, puerto de embarque | sí |
+# | `home.dest` | lugar de origen o destino | sí |
+# | `boat` | bote salvavidas en el que subió | **no**: se registró después |
+# | `body` | número de cuerpo recuperado | **no**: se registró después |
+# | `survived` | sobrevivió (1) o no (0) | es lo que queremos predecir |
 
 # %%
 df = rdp.datos.cargar("titanic")
@@ -124,16 +136,17 @@ plt.show()
 # %% [markdown]
 # ## 4. Línea base
 #
-# Todo modelo debe compararse contra una **línea base** trivial. Un clasificador que siempre predice la clase mayoritaria ya obtiene una exactitud nada despreciable:
+# Todo modelo debe compararse contra una **línea base** trivial. Un clasificador que siempre predice la clase más frecuente («no sobrevivió») ya acierta en más de la mitad de los casos. Cualquier modelo que no supere ese número no aprendió nada útil.
+#
+# Para estimar la exactitud sin tocar la prueba usamos **validación cruzada**: dividimos el entrenamiento en 5 partes, entrenamos con 4 y medimos en la quinta, y repetimos rotando. La veremos con detalle en la Unidad 3.
 
 # %%
 cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=SEMILLA)
 
 def evaluar(modelo, X, y, nombre):
+    """Exactitud estimada con validación cruzada de 5 particiones (solo con entrenamiento)."""
     acc = cross_val_score(modelo, X, y, cv=cv, scoring="accuracy")
-    ba = cross_val_score(modelo, X, y, cv=cv, scoring="balanced_accuracy")
-    print(f"{nombre:<38} exactitud = {acc.mean():.3f} ± {acc.std():.3f}   "
-          f"balanceada = {ba.mean():.3f} ± {ba.std():.3f}")
+    print(f"{nombre:<34} exactitud = {acc.mean():.3f} ± {acc.std():.3f}")
     return acc.mean()
 
 evaluar(DummyClassifier(strategy="most_frequent"), X_tr, y_tr, "Línea base (clase mayoritaria)");
@@ -141,7 +154,7 @@ evaluar(DummyClassifier(strategy="most_frequent"), X_tr, y_tr, "Línea base (cla
 # %% [markdown]
 # ## 5. Un `Pipeline` honesto
 #
-# Elegimos atributos que se conocen **al abordar** y los preprocesamos según su tipo:
+# Elegimos atributos que se conocen **al abordar** y los preprocesamos según su tipo, como en la libreta anterior:
 #
 # | Tipo | Columnas | Transformación |
 # |---|---|---|
@@ -186,7 +199,7 @@ con_fuga = Pipeline([
 evaluar(con_fuga, X_tr, y_tr, "Regresión logística + 'boat'");
 
 # %% [markdown]
-# ¡La exactitud sube a más del 95 %! Pero el modelo es **inútil**: `boat` solo se conoce **después** del naufragio. Tener un bote asignado casi equivale a haber sobrevivido. Lo mismo ocurre con `body` (número de cuerpo recuperado).
+# ¡La exactitud sube a más del 95 %! Pero el modelo es **inútil**: `boat` solo se conoce **después** del naufragio, y haber subido a un bote casi equivale a haber sobrevivido. Lo mismo ocurre con `body` (número de cuerpo recuperado). La tabla de la sección 1 ya nos lo advertía.
 #
 # Esta es una **fuga de la variable objetivo** (*target leakage*): un atributo que codifica la respuesta y que no estará disponible cuando el modelo se use. Ninguna técnica de validación la detecta. La única defensa es **entender el problema y los datos**.
 
@@ -197,34 +210,15 @@ evaluar(con_fuga, X_tr, y_tr, "Regresión logística + 'boat'");
 
 # %%
 modelo.fit(X_tr, y_tr)
-y_pred = modelo.predict(X_te)
-print(classification_report(y_te, y_pred, target_names=["no sobrevivió", "sobrevivió"], digits=3))
-
-# %%
-ConfusionMatrixDisplay.from_predictions(
-    y_te, y_pred, display_labels=["no sobrevivió", "sobrevivió"], cmap="rdp_azul", colorbar=False
-)
-plt.title("Matriz de confusión (prueba)")
-plt.grid(False)
-plt.show()
-
-# %% [markdown]
-# ¿Qué tanto debería parecerse la exactitud en prueba a la estimada con validación cruzada? El conjunto de prueba es **finito**, así que su exactitud también es una variable aleatoria. Con la desigualdad de Hoeffding de la presentación, para una hipótesis **fija** (no elegimos el modelo mirando la prueba), con probabilidad al menos $1-\delta$:
-# $$
-# |E_{\text{in}} - E_{\text{out}}| \le \epsilon = \sqrt{\frac{\ln(2/\delta)}{2n}}.
-# $$
-
-# %%
 acc_cv = cross_val_score(modelo, X_tr, y_tr, cv=cv, scoring="accuracy").mean()
-acc_te = (y_pred == y_te).mean()
-n, delta = len(y_te), 0.05
-eps = np.sqrt(np.log(2 / delta) / (2 * n))
-print(f"Exactitud estimada por validación cruzada : {acc_cv:.3f}")
-print(f"Exactitud en prueba (n = {n})             : {acc_te:.3f}")
-print(f"Intervalo de Hoeffding al 95 %             : [{acc_te - eps:.3f}, {acc_te + eps:.3f}]")
+acc_te = modelo.score(X_te, y_te)
+print(f"Exactitud estimada con validación cruzada : {acc_cv:.3f}")
+print(f"Exactitud en prueba (n = {len(y_te)})            : {acc_te:.3f}")
 
 # %% [markdown]
-# Con solo 262 ejemplos de prueba, el intervalo tiene un ancho de $\pm 0.08$. Ese es el **precio de evaluar con pocos datos**. La diferencia entre la validación cruzada y la prueba es compatible con la variabilidad del muestreo. En la Unidad 3 veremos estimaciones más finas, como intervalos binomiales y *bootstrap*.
+# La exactitud en prueba es algo menor que la estimada. Con solo 262 pasajeros de prueba, una diferencia de unos cuantos puntos es normal: el conjunto de prueba también es una muestra, y su exactitud también varía. En la Unidad 3 aprenderemos a cuantificar esa incertidumbre.
+#
+# Lo que **no** debemos hacer ahora es volver a ajustar el modelo para mejorar este número. En el momento en que usamos la prueba para decidir, deja de ser una estimación honesta.
 
 # %% [markdown]
 # ## 8. Autoevaluación
@@ -235,6 +229,6 @@ rdp.quiz.mostrar("u01", ids=["u01-p07", "u01-p08"])
 # %% [markdown]
 # ## 9. Para explorar
 #
-# 1. Agrega un atributo derivado del nombre: el **título** (`Mr`, `Mrs`, `Miss`, `Master`, …). ¿Mejora la validación cruzada? ¿Es una fuga?
-# 2. Sustituye `LogisticRegression` por `DecisionTreeClassifier(max_depth=d)` y grafica la exactitud de validación contra `d`. ¿Qué observas para valores grandes de `d`?
-# 3. Calcula la exactitud en **entrenamiento** del modelo final y compárala con la de prueba. Relaciónala con $E_{\text{in}}$ y $E_{\text{out}}$.
+# 1. Agrega un atributo derivado del nombre: el **título** (`Mr`, `Mrs`, `Miss`, `Master`, …). Hazlo **dentro** del `Pipeline` con un `FunctionTransformer`. ¿Mejora la validación cruzada? ¿Es una fuga?
+# 2. Repite la sección 6 con la columna `body` en lugar de `boat`. ¿Por qué la exactitud no sube tanto, si también es una fuga? Pista: revisa cuántos valores tiene.
+# 3. Calcula la exactitud en **entrenamiento** del modelo final y compárala con la de prueba. Relaciónala con $E_{\text{in}}$ y $E_{\text{out}}$ de la presentación.

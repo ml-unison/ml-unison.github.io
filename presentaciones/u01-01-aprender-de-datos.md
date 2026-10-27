@@ -625,7 +625,7 @@ etiqueta: Antes de entrenar cualquier modelo
 
 <div class="pequeno">
 
-**Libreta:** *Un primer flujo de trabajo completo* (Unidad 1, ejemplo 1), con la fuga del Titanic.
+**Libretas:** *Explorar datos con pandas* y *Un primer pipeline sin trampas* (Unidad 1, ejemplos 1 y 3).
 
 **Lectura:** Abu-Mostafa, Magdon-Ismail y Lin (2012), *Learning From Data*, cap. 1.
 

@@ -39,3 +39,11 @@ def test_todas_usan_la_misma_rama():
         assert m, f"{p.name}: falta la línea RAMA = \"...\""
         ramas[p.name] = m.group(1)
     assert len(set(ramas.values())) <= 1, ramas
+
+
+@pytest.mark.parametrize("ipynb", LIBRETAS, ids=lambda p: p.name)
+def test_encabezado_del_curso(ipynb):
+    """Cada libreta empieza con el encabezado del curso, para que sea autocontenida."""
+    primera = fuentes(json.loads(ipynb.read_text(encoding="utf-8")))[0]
+    for texto in ("Reconocimiento de Patrones", "Universidad de Sonora", "Julio Waissman", "CC BY-SA 4.0"):
+        assert texto in primera, f"{ipynb.name}: el encabezado no menciona «{texto}»"

@@ -382,6 +382,98 @@ Cada presa se describe con su porcentaje de llenado mes a mes (42 meses). Enlace
 -->
 
 ---
+layout: caso
+caso: Caso · Evolución humana
+cifra: 200 mil años
+cifraNota: edad aproximada de la ancestra común, por línea materna, de todas las personas vivas.
+fuente: R. Cann, M. Stoneking y A. Wilson, «Mitochondrial DNA and human evolution», Nature 325 (1987).
+---
+
+# La Eva mitocondrial
+
+Las mitocondrias tienen su propio ADN y lo heredamos **solo de la madre**, casi sin cambios: cada mutación es una marca que pasa a toda la descendencia.
+
+<v-click>
+
+Cann, Stoneking y Wilson compararon el ADN mitocondrial de **147 personas** de África, Asia, Europa, Australia y Nueva Guinea (133 tipos distintos) y los acomodaron en un **árbol según su parecido**, como el dendrograma de las presas. Al método no le dijeron de dónde venía cada persona.
+
+</v-click>
+
+<!--
+«Eva» no era la única mujer de su época: es la ancestra común más reciente por línea materna. Otras mujeres de su tiempo también son ancestras nuestras, por otras líneas. El árbol se construyó por parsimonia (el árbol con menos mutaciones), un método de agrupamiento jerárquico propio de la biología.
+-->
+
+---
+
+# Lo que dijo el árbol
+
+<div class="cols" style="grid-template-columns: 11fr 9fr; gap: 44px">
+<div>
+
+<ArbolMitocondrial />
+
+<p class="tenue" style="font-size: 16px; margin-top: 2px">Esquema de la forma del árbol, no los 133 tipos del artículo.</p>
+
+</div>
+<div>
+
+<v-clicks>
+
+- La raíz se abre en dos ramas: una **solo con africanos** y otra con **las cinco poblaciones**.
+- Los africanos son el grupo **más diverso**: la variación dentro de África es tan grande como entre África y cualquier otra región.
+- Conclusión: todos descendemos de una población que vivió **en África** hace unos 140 a 290 mil años; las demás regiones se poblaron después, varias veces.
+
+</v-clicks>
+
+<div v-click class="pequeno tenue" style="margin-top: 22px">
+
+El método del árbol recibió críticas, y la conclusión se confirmó después con genomas mitocondriales completos: M. Ingman et al., *Nature* 408 (2000).
+
+</div>
+</div>
+</div>
+
+---
+
+# Agrupar personas: lo que dicen los datos sobre las «razas»
+
+<div class="cols" style="gap: 48px">
+<div>
+
+<div class="comparacion">
+<div>
+<span class="comparacion__etiqueta">variación genética dentro de cada población</span>
+<span class="comparacion__cifra">93–95 %</span>
+<span class="comparacion__nota">Entre los grandes grupos geográficos, solo de 3 a 5 %.</span>
+</div>
+</div>
+
+<p class="pequeno tenue" style="margin-top: 20px">N. Rosenberg et al., «Genetic structure of human populations», <em>Science</em> 298 (2002): 1,056 personas de 52 poblaciones, agrupadas sin decirle al algoritmo su origen. R. Lewontin había encontrado algo parecido en 1972: alrededor de 85 % dentro de las poblaciones.</p>
+
+</div>
+<div>
+
+<v-clicks>
+
+- La mayor parte de lo que nos distingue genéticamente está **entre personas de una misma población**, no entre poblaciones.
+- Los grupos que encuentran los algoritmos siguen la **geografía** y cambian de forma **gradual**, sin fronteras nítidas.
+- Somos una especie joven, salida de África hace poco. Las «razas» no son grupos biológicos separados.
+
+</v-clicks>
+</div>
+</div>
+
+<div v-click class="nota">
+
+**Cuidado:** esos mismos grupos se han citado como «prueba» de que las razas existen, algo que sus autores no afirman. Lo que significa un grupo lo decide quien lo interpreta.
+
+</div>
+
+<!--
+Conectar con la cita de Estivill-Castro que viene más adelante: los grupos los pone el algoritmo, la interpretación la ponemos nosotros. Este es uno de los mejores ejemplos de aprendizaje no supervisado usado para desmontar un prejuicio con datos.
+-->
+
+---
 
 # El costo de ver todo el árbol
 

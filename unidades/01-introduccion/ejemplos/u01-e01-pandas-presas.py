@@ -57,7 +57,9 @@ pd.set_option("display.max_columns", 20)
 # %% [markdown]
 # ## 1. De dónde vienen los datos
 #
-# La Comisión Nacional del Agua (CONAGUA) publica diariamente el almacenamiento de las principales presas del país. Para el curso usamos dos tablas:
+# El Gobierno del Estado de Sonora publica en su portal de datos abiertos el conjunto [Recursos Hídricos](https://datos.sonora.gob.mx/dataset/Recursos%20H%C3%ADdricos), a cargo de la Secretaría de Agricultura, Ganadería, Recursos Hidráulicos, Pesca y Acuacultura (SAGARHPA), con licencia CC BY. Contiene el almacenamiento diario de las presas de Sonora desde 1941, en un archivo por década, más un catálogo de las presas.
+#
+# Para el curso usamos un extracto de dos tablas, guardado en el repositorio para que la libreta no dependa de que el portal esté disponible:
 #
 # - **`almac_reciente`**: un registro por presa y por día, de enero de 2020 a junio de 2023, con el almacenamiento en hectómetros cúbicos (1 hm³ = un millón de m³).
 # - **`catalogo_estatal`**: una fila por presa, con su nombre, el río, el municipio y sus capacidades.
@@ -69,7 +71,7 @@ pd.set_option("display.max_columns", 20)
 # | `cap_namo` | Capacidad al **nivel de aguas máximas ordinarias**: lo que la presa almacena en operación normal. |
 # | `cap_name` | Capacidad al **nivel de aguas máximas extraordinarias**: el máximo físico, que solo se alcanza en avenidas. |
 #
-# Por eso, el porcentaje de llenado que reporta CONAGUA se calcula respecto al NAMO.
+# Por eso, el porcentaje de llenado de una presa se calcula respecto al NAMO.
 
 # %%
 registros = rdp.datos.cargar("almac_reciente")

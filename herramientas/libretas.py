@@ -28,7 +28,7 @@ def _libretas() -> list[Path]:
 
 
 def _fuentes_py() -> list[Path]:
-    return sorted(p for p in UNIDADES.rglob("*.py") if p.with_suffix(".ipynb").exists() or "ejemplos" in p.parts or "laboratorios" in p.parts)
+    return sorted(p for p in UNIDADES.rglob("*.py") if "tests" not in p.parts and (p.with_suffix(".ipynb").exists() or "ejemplos" in p.parts or "laboratorios" in p.parts))
 
 
 def limpiar(nb: nbformat.NotebookNode) -> nbformat.NotebookNode:

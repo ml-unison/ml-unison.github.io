@@ -58,7 +58,7 @@ def u01() -> dict:
 
 
 def presas() -> dict:
-    """Almacenamiento de las presas de Sonora (CONAGUA), resumido para las láminas de pandas."""
+    """Almacenamiento de las presas de Sonora (datos.sonora.gob.mx), resumido para las láminas de pandas."""
     import pandas as pd
 
     raiz = DESTINO.parents[1] / "datos"

@@ -45,7 +45,7 @@ Esta pregunta acompaña toda la clase y es la base del proyecto. Preguntar si al
 
 ---
 
-# Los datos: dos tablas de CONAGUA
+# Los datos: presas de Sonora
 
 <div class="cols cols-6-4" style="gap: 50px">
 <div>
@@ -62,6 +62,8 @@ Esta pregunta acompaña toda la clase y es la base del proyecto. Preguntar si al
 <div class="pequeno">
 
 Almacenamiento diario de 10 presas, de enero de 2020 a junio de 2023, en **hm³** (millones de m³).
+
+<div style="font-size: 19px; color: var(--tenue); margin: -6px 0 22px">Fuente: portal de datos abiertos del Gobierno de Sonora (datos.sonora.gob.mx), conjunto «Recursos Hídricos», SAGARHPA, CC BY.</div>
 
 **`cap_namo`**: capacidad al nivel de aguas máximas **ordinarias**, lo que la presa guarda en operación normal. El porcentaje de llenado se calcula respecto a ella.
 

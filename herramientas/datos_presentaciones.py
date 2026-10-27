@@ -54,7 +54,55 @@ def u01() -> dict:
         "ein": r(ein, 5), "eout": r(eout, 5),
         "xnu": r(x_nu), "ynu": r(y_nu), "enu": r(enu, 5),
         "pred_tr": pred_tr, "pred_nu": pred_nu,
-    }, "digitos": digitos()}
+    }, "digitos": digitos(), "presas": presas()}
+
+
+def presas() -> dict:
+    """Almacenamiento de las presas de Sonora (CONAGUA), resumido para las láminas de pandas."""
+    import pandas as pd
+
+    raiz = DESTINO.parents[1] / "datos"
+    reg = pd.read_excel(raiz / "almac_reciente.xlsx")
+    cat = pd.read_excel(raiz / "catalogo_estatal.xlsx", sheet_name="Catálogo_estatal")
+    reg["fecha"] = pd.to_datetime(reg["fecha"], format="%Y/%m/%d")
+    df = reg.merge(cat[["Clave", "Nombre_comun", "cap_namo"]].rename(columns={"Clave": "clave", "Nombre_comun": "presa"}),
+                   on="clave", validate="many_to_one")
+    df["llenado"] = 100 * df["almacenamiento"] / df["cap_namo"]
+    ancho = df.pivot(index="fecha", columns="presa", values="llenado")
+    todas = pd.date_range(ancho.index.min(), ancho.index.max(), freq="D")
+    ancho = ancho.reindex(todas)
+
+    # Cobertura: tramos continuos con datos, por presa
+    cobertura = {}
+    for presa in ancho.columns:
+        hay = ancho[presa].notna().to_numpy()
+        tramos, ini = [], None
+        for i, v in enumerate(hay):
+            if v and ini is None:
+                ini = i
+            if (not v or i == len(hay) - 1) and ini is not None:
+                fin = i if v else i - 1
+                tramos.append([todas[ini].strftime("%Y-%m-%d"), todas[fin].strftime("%Y-%m-%d")])
+                ini = None
+        cobertura[presa] = tramos
+
+    yaqui = ["La Angostura", "El Novillo", "Oviachic"]
+    llenas = ancho.drop(columns="Los Pilares").interpolate(limit=10)
+    mensual = llenas[yaqui].resample("MS").mean()
+    anual = llenas[yaqui].groupby(llenas.index.month).mean()
+    muestra = (df.sort_values(["fecha", "clave"]).loc[lambda t: t["fecha"] == pd.Timestamp("2022-09-15")]
+               [["clave", "fecha", "almacenamiento", "presa", "cap_namo", "llenado"]])
+    return {
+        "inicio": todas[0].strftime("%Y-%m-%d"), "fin": todas[-1].strftime("%Y-%m-%d"),
+        "cobertura": cobertura,
+        "mensual": {"fechas": [d.strftime("%Y-%m-%d") for d in mensual.index],
+                    "series": {k: r(mensual[k], 1) for k in yaqui}},
+        "anual": {k: r(anual[k], 1) for k in yaqui},
+        "promedio": {k: round(float(v), 1) for k, v in df.groupby("presa")["llenado"].mean().sort_values().items()},
+        "muestra": [{"clave": f.clave, "fecha": f.fecha.strftime("%Y-%m-%d"), "alm": round(f.almacenamiento, 1),
+                     "presa": f.presa, "cap": int(f.cap_namo), "llenado": round(f.llenado, 1)} for f in muestra.itertuples()],
+        "n_registros": int(len(reg)),
+    }
 
 
 def digitos() -> dict:

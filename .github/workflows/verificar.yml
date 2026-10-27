@@ -27,6 +27,10 @@ jobs:
       - name: Ejecutar libretas de principio a fin
         env:
           RDP_RAPIDO: "1"   # las libretas de redes entrenan menos épocas
+          # Varias libretas a la vez con OpenMP (LightGBM, HistGradientBoosting, PyTorch)
+          # se estorban en las 4 CPU del CI: un hilo por proceso y sin espera activa.
+          OMP_NUM_THREADS: "1"
+          OMP_WAIT_POLICY: PASSIVE
         run: uv run pytest --nbmake --nbmake-timeout=900 -n 4 unidades/*/ejemplos -q
       # Los datos de las láminas (presentaciones/datos/*.json) se versionan; se
       # regeneran a mano con herramientas/datos_presentaciones.py (las redes tardan).

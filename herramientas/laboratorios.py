@@ -11,7 +11,7 @@ alrededor de las celdas de solución, `# BEGIN TESTS`/`# END TESTS`, y
 y un bloque "BEGIN TEST CONFIG" con `hidden: true` para las pruebas ocultas.
 
 Este script, para cada fuente:
-  1. fuerza la configuración de Colab (pruebas en archivos descargados de este repo),
+  1. fuerza la configuración del curso (pruebas en archivos; en Colab se descargan de este repo),
   2. ejecuta `otter assign`, que verifica que la solución pase todas las pruebas,
   3. copia la libreta del estudiante y sus pruebas públicas a unidades/<unidad>/laboratorios/,
   4. agrega la celda inicial del curso (RAMA, instalación de rdp),
@@ -51,7 +51,22 @@ CELDA_INICIAL = '''import os, sys
 RAMA = "{rama}"  # rama del repositorio del curso de la que se toman paquete, datos y pruebas
 os.environ["RDP_RAMA"] = RAMA
 if "google.colab" in sys.modules:
-    %pip install -q "rdp @ git+https://github.com/{repo}@{{RAMA}}#subdirectory=paquete"'''
+    %pip install -q otter-grader "rdp @ git+https://github.com/{repo}@{{RAMA}}#subdirectory=paquete"'''
+
+# otter-grader solo sabe descargar pruebas por URL en JupyterLite; en Colab las bajamos nosotros.
+CELDA_OTTER = '''# Verificador de respuestas (otter-grader). Usa las pruebas públicas del laboratorio:
+# la copia local si existe; si no (en Colab), las descarga del repositorio del curso.
+import pathlib, urllib.request
+import otter
+
+PRUEBAS = pathlib.Path("tests") / "{lab}"
+if not PRUEBAS.exists():
+    PRUEBAS.mkdir(parents=True)
+    for _p in {archivos}:
+        urllib.request.urlretrieve(
+            f"https://raw.githubusercontent.com/{repo}/{{RAMA}}/unidades/{unidad}/laboratorios/tests/{lab}/{{_p}}",
+            PRUEBAS / _p)
+grader = otter.Notebook(tests_dir=str(PRUEBAS))'''
 
 
 def rama_actual() -> str:
@@ -69,7 +84,7 @@ def leer(ruta: Path) -> nbformat.NotebookNode:
     return nbformat.read(ruta, as_version=4)
 
 
-def configurar(nb: nbformat.NotebookNode, url_pruebas: str) -> None:
+def configurar(nb: nbformat.NotebookNode) -> None:
     celda = next((c for c in nb.cells if c.cell_type == "raw" and c.source.lstrip().startswith("# ASSIGNMENT CONFIG")), None)
     if celda is None:
         raise ValueError("falta la celda raw '# ASSIGNMENT CONFIG'")
@@ -77,10 +92,11 @@ def configurar(nb: nbformat.NotebookNode, url_pruebas: str) -> None:
     config = yaml.safe_load(cuerpo) or {}
     # generate=True arma el paquete del autocalificador, que otter usa para correr las pruebas
     # contra la solución; strip_solutions_from_all_cells aplica las marcas "# SOLUTION" en cualquier celda.
-    config.update({"runs_on": "colab", "export_cell": False, "generate": True, "solutions_pdf": False,
+    config.update({"runs_on": "default", "export_cell": False, "generate": True, "solutions_pdf": False,
                    "strip_solutions_from_all_cells": True, "run_tests": True})
     config.setdefault("check_all_cell", True)
-    config["tests"] = {**config.get("tests", {}), "files": True, "url_prefix": url_pruebas}
+    config["tests"] = {**config.get("tests", {}), "files": True}
+    config["tests"].pop("url_prefix", None)
     celda.source = "# ASSIGNMENT CONFIG\n" + yaml.safe_dump(config, allow_unicode=True, sort_keys=False)
     nb.metadata["kernelspec"] = {"display_name": "Python 3", "language": "python", "name": "python3"}
 
@@ -126,11 +142,9 @@ def verificar_sin_soluciones(fuente: nbformat.NotebookNode, alumno: nbformat.Not
 def procesar(fuente: Path, base_soluciones: Path, rama: str) -> Path:
     relativa = fuente.parent.relative_to(base_soluciones / "unidades")  # p. ej. 01-introduccion
     destino = RAIZ / "unidades" / relativa / "laboratorios"
-    url = (f"https://raw.githubusercontent.com/{REPO}/{rama}/unidades/"
-           f"{relativa.as_posix()}/laboratorios/tests/{fuente.stem}/")
 
     nb = leer(fuente)
-    configurar(nb, url)
+    configurar(nb)
     with tempfile.TemporaryDirectory() as tmp:
         tmp = Path(tmp)
         entrada = tmp / f"{fuente.stem}.ipynb"
@@ -150,6 +164,11 @@ def procesar(fuente: Path, base_soluciones: Path, rama: str) -> Path:
         if "# BEGIN SOLUTION" in texto or "hidden: true" in texto:
             raise RuntimeError(f"{fuente.name}: la versión del estudiante conserva marcas de solución")
         verificar_sin_soluciones(nb, alumno, fuente.name)
+        archivos = sorted(t.name for t in (tmp / "dist" / "student" / "tests").glob("*.py"))
+        for c in alumno.cells:
+            if c.cell_type == "code" and "otter.Notebook(" in c.source:
+                c.source = CELDA_OTTER.format(lab=fuente.stem, archivos=archivos, repo=REPO, unidad=relativa.as_posix())
+        alumno.cells = [c for c in alumno.cells if not (c.cell_type == "code" and c.source.strip().startswith("%pip install") and "otter" in c.source)]
         inicial = nbformat.v4.new_code_cell(CELDA_INICIAL.format(rama=rama, repo=REPO))
         alumno.cells.insert(0, inicial)
         # el encabezado del curso va primero, antes de las celdas de instalación

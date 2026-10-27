@@ -1,0 +1,342 @@
+/* Tema de las presentaciones · Reconocimiento de Patrones · UNISON
+   Lienzo de 1280 × 720. Todas las medidas están en px del lienzo: Slidev escala
+   la lámina completa, así que las proporciones son las mismas en cualquier pantalla. */
+
+:root {
+  /* Identidad UNISON (Manual 2025–2030) */
+  --azul: #24398A;
+  --marino: #20305A;
+  --azul-medio: #496EA5;
+  --azul-claro: #8DA3C9;
+  --dorado: #E1B73D;
+  --dorado-osc: #A87C12;   /* dorado legible como texto sobre blanco */
+  --rojo: #D5433C;
+  --verde: #5CA847;
+
+  /* Neutros */
+  --tinta: #1A2133;
+  --tenue: #5E6678;
+  --suave: #8A91A0;
+  --linea: #E2E5EC;
+  --fondo: #FFFFFF;
+  --fondo-alt: #F6F7FA;
+  --tinte-azul: #EFF2F9;
+  --tinte-dorado: #FBF6E6;
+  --tinte-rojo: #FCEFEE;
+
+  --f-titulo: 'Montserrat Variable', 'Montserrat', system-ui, sans-serif;
+  --f-texto: 'Source Sans 3 Variable', 'Source Sans 3', system-ui, sans-serif;
+  --f-codigo: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+
+  --slidev-theme-primary: var(--azul);
+  --slidev-code-background: var(--fondo-alt);
+  --slidev-code-foreground: var(--tinta);
+  --slidev-code-font-size: 19px;
+  --slidev-code-line-height: 1.55;
+  --slidev-code-padding: 18px 22px;
+  --slidev-code-radius: 8px;
+  --slidev-code-margin: 0;
+}
+
+/* ---------- Base de todas las láminas ---------- */
+
+:root .slidev-layout {
+  font-family: var(--f-texto);
+  font-size: 26px;
+  line-height: 1.45;
+  color: var(--tinta);
+  background: var(--fondo);
+  padding: 50px 76px 70px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+:root .slidev-layout h1 {
+  font-family: var(--f-titulo);
+  font-weight: 650;
+  font-size: 38px;
+  line-height: 1.15;
+  letter-spacing: -0.015em;
+  color: var(--marino);
+  margin: 0 0 30px;
+}
+:root .slidev-layout.default h1::before {
+  content: "";
+  display: block;
+  width: 44px;
+  height: 4px;
+  border-radius: 2px;
+  background: var(--dorado);
+  margin-bottom: 18px;
+}
+:root .slidev-layout h2 {
+  font-family: var(--f-titulo);
+  font-weight: 600;
+  font-size: 26px;
+  color: var(--marino);
+  margin: 0 0 12px;
+}
+:root .slidev-layout h3 {
+  font-family: var(--f-titulo);
+  font-weight: 600;
+  font-size: 18px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--azul);
+  margin: 0 0 14px;
+}
+
+:root .slidev-layout p { margin: 0 0 18px; line-height: 1.45; }
+:root .slidev-layout strong { font-weight: 650; color: var(--marino); }
+:root .slidev-layout a { color: var(--azul); text-decoration: underline; text-underline-offset: 3px; }
+
+:root .slidev-layout ul,
+:root .slidev-layout ol { margin: 0 0 18px; padding-left: 1.15em; }
+:root .slidev-layout ul { list-style: none; }
+:root .slidev-layout li { line-height: 1.4; margin: 0 0 14px; position: relative; }
+:root .slidev-layout ul > li::before {
+  content: "";
+  position: absolute;
+  left: -1.05em;
+  top: 0.6em;
+  width: 9px;
+  height: 9px;
+  border-radius: 2px;
+  background: var(--dorado);
+}
+:root .slidev-layout ol { list-style: none; counter-reset: rdp; }
+:root .slidev-layout ol { padding-left: 52px; }
+:root .slidev-layout ol > li { counter-increment: rdp; }
+:root .slidev-layout ol > li::before {
+  content: counter(rdp);
+  position: absolute;
+  left: -52px;
+  top: 1px;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: var(--tinte-azul);
+  color: var(--azul);
+  font-family: var(--f-titulo);
+  font-weight: 650;
+  font-size: 17px;
+  line-height: 34px;
+  text-align: center;
+}
+
+/* Ecuaciones */
+:root .slidev-layout .katex { font-size: 1.08em; }
+:root .slidev-layout .katex-display { margin: 14px 0; }
+
+/* Código */
+:root .slidev-layout pre.shiki,
+:root .slidev-layout .slidev-code { border-radius: 8px; }
+:root .slidev-layout :not(pre) > code {
+  font-family: var(--f-codigo);
+  font-size: 0.82em;
+  background: var(--fondo-alt);
+  border: 1px solid var(--linea);
+  border-radius: 5px;
+  padding: 1px 6px;
+  color: var(--marino);
+}
+
+/* Tablas */
+:root .slidev-layout table { width: 100%; border-collapse: collapse; font-size: 22px; }
+:root .slidev-layout th {
+  font-family: var(--f-titulo);
+  font-weight: 600;
+  font-size: 15px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--tenue);
+  text-align: left;
+  padding: 0 18px 12px 0;
+  border-bottom: 2px solid var(--marino);
+}
+:root .slidev-layout td {
+  padding: 14px 18px 14px 0;
+  border-bottom: 1px solid var(--linea);
+  vertical-align: top;
+}
+:root .slidev-layout td:first-child { font-weight: 600; color: var(--marino); }
+
+/* ---------- Utilidades ---------- */
+
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+.cols-6-4 { grid-template-columns: 6fr 4fr; }
+.cols-4-6 { grid-template-columns: 4fr 6fr; }
+.cols-centro { align-items: center; }
+.abajo { margin-top: auto; }
+.pequeno { font-size: 21px; }
+.tenue { color: var(--tenue); }
+.resalta { color: var(--azul); font-weight: 650; }
+.nota {
+  font-size: 20px;
+  color: var(--tenue);
+  border-top: 1px solid var(--linea);
+  padding-top: 12px;
+  margin-top: auto;
+}
+.lema {
+  font-family: var(--f-titulo);
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 1.3;
+  color: var(--marino);
+}
+.lema em { font-style: normal; color: var(--azul); box-shadow: inset 0 -0.32em 0 var(--tinte-dorado); }
+
+/* ---------- Cajas (definición, teorema, …) ---------- */
+
+.caja {
+  --c: var(--azul);
+  --t: var(--tinte-azul);
+  --e: var(--azul);
+  background: var(--t);
+  border-left: 5px solid var(--c);
+  border-radius: 0 8px 8px 0;
+  padding: 18px 28px 20px;
+  margin: 0 0 22px;
+}
+.caja__etiqueta {
+  font-family: var(--f-titulo);
+  font-weight: 650;
+  font-size: 15px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--e);
+  margin-bottom: 8px;
+}
+.caja__etiqueta span { font-weight: 500; letter-spacing: 0.02em; text-transform: none; font-size: 17px; color: var(--tenue); }
+.caja__cuerpo > :last-child { margin-bottom: 0 !important; }
+.caja__cuerpo .katex-display { margin: 10px 0 4px; }
+.caja--teorema   { --c: var(--dorado); --t: var(--tinte-dorado); --e: var(--dorado-osc); }
+.caja--pregunta  { --c: var(--dorado); --t: var(--tinte-dorado); --e: var(--dorado-osc); }
+.caja--algoritmo { --c: var(--marino); --t: var(--fondo-alt); --e: var(--marino); }
+.caja--idea      { --c: var(--azul-medio); --t: #F2F5FA; --e: var(--azul-medio); }
+.caja--cuidado   { --c: var(--rojo); --t: var(--tinte-rojo); --e: #B23028; }
+.caja--correcto  { --c: var(--verde); --t: #F1F8EE; --e: #3F7F2E; }
+
+/* ---------- Portada ---------- */
+
+.slidev-layout.portada {
+  padding: 0;
+  display: grid;
+  grid-template-columns: 7fr 5fr;
+}
+.portada__texto {
+  padding: 68px 0 54px 84px;
+  display: flex;
+  flex-direction: column;
+}
+.portada__curso {
+  font-family: var(--f-titulo);
+  font-weight: 600;
+  font-size: 17px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--azul);
+}
+.portada__curso b { color: var(--dorado-osc); font-weight: 600; }
+:root .slidev-layout.portada h1 {
+  font-size: 60px;
+  font-weight: 700;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+  margin: 26px 0 22px;
+}
+.portada__subtitulo { font-size: 28px; color: var(--tenue); line-height: 1.35; max-width: 640px; }
+.portada__regla { width: 72px; height: 5px; border-radius: 3px; background: var(--dorado); margin: 40px 0 26px; }
+.portada__autor { font-size: 23px; line-height: 1.4; }
+.portada__autor b { font-weight: 650; color: var(--marino); }
+.portada__autor span { color: var(--tenue); }
+.portada__marca { margin-top: auto; display: flex; align-items: center; gap: 22px; }
+.portada__marca img { height: 46px; }
+.portada__marca div { border-left: 1px solid var(--linea); padding-left: 22px; font-family: var(--f-titulo); font-size: 14px; line-height: 1.35; color: var(--tenue); letter-spacing: 0.02em; }
+.portada__figura { background: var(--marino); position: relative; overflow: hidden; }
+
+/* ---------- Separador de sección ---------- */
+
+.slidev-layout.seccion {
+  background: var(--marino);
+  color: #fff;
+  justify-content: center;
+  padding: 0 110px;
+  position: relative;
+  overflow: hidden;
+}
+.seccion__numero {
+  font-family: var(--f-titulo);
+  font-weight: 700;
+  font-size: 22px;
+  letter-spacing: 0.14em;
+  color: var(--dorado);
+  margin-bottom: 18px;
+}
+:root .slidev-layout.seccion h1 { color: #fff; font-size: 58px; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 22px; max-width: 900px; }
+:root .slidev-layout.seccion p { color: var(--azul-claro); font-size: 28px; max-width: 820px; }
+.seccion__regla { width: 72px; height: 5px; border-radius: 3px; background: var(--dorado); margin-bottom: 34px; }
+.seccion__fondo { position: absolute; right: -60px; bottom: -40px; opacity: 0.16; }
+
+/* ---------- Pie de lámina ---------- */
+
+.pie {
+  position: absolute;
+  left: 76px;
+  right: 76px;
+  bottom: 26px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--f-titulo);
+  font-size: 13px;
+  letter-spacing: 0.04em;
+  color: var(--suave);
+  pointer-events: none;
+}
+.pie b { color: var(--azul); font-weight: 600; }
+
+/* ---------- Gráficas ---------- */
+
+.grafica { width: 100%; height: auto; display: block; overflow: visible; }
+.grafica text { font-family: var(--f-texto); fill: var(--tenue); font-size: 18px; }
+.grafica .eje line, .grafica .eje path { stroke: var(--suave); stroke-width: 1.2; }
+.grafica .rejilla line { stroke: var(--linea); stroke-width: 1; }
+.grafica .titulo-eje { fill: var(--tinta); font-size: 19px; }
+.grafica .etiqueta { font-weight: 600; font-size: 19px; }
+
+/* Control deslizante */
+.deslizador { display: flex; align-items: center; gap: 18px; font-size: 22px; margin: 0 0 10px; }
+.deslizador input[type=range] { flex: 0 0 360px; accent-color: var(--azul); height: 6px; }
+.deslizador output { font-family: var(--f-titulo); font-weight: 650; color: var(--azul); min-width: 2ch; }
+
+/* Diagramas de bloques */
+.flujo { display: flex; align-items: center; gap: 0; }
+.bloque {
+  border: 2px solid var(--azul);
+  background: #fff;
+  color: var(--marino);
+  border-radius: 10px;
+  padding: 14px 18px;
+  font-size: 21px;
+  line-height: 1.25;
+  text-align: center;
+  font-weight: 600;
+}
+.bloque small { display: block; font-weight: 400; color: var(--tenue); font-size: 17px; margin-top: 4px; }
+.bloque--clave { background: var(--azul); color: #fff; }
+.bloque--clave small { color: var(--azul-claro); }
+.bloque--oro { border-color: var(--dorado); background: var(--tinte-dorado); }
+.bloque--resultado { border-color: var(--dorado); background: var(--dorado); color: var(--marino); }
+.bloque--resultado small { color: var(--marino); opacity: .75; }
+.bloque--fantasma { border-style: dashed; border-color: var(--azul-claro); color: var(--tenue); background: transparent; }
+.flecha { flex: 0 0 auto; width: 46px; height: 16px; color: var(--marino); }
+.cols-estirar { align-items: stretch; }
+.cols-estirar > .caja { margin-bottom: 22px; }
+.codigo-chico { --slidev-code-font-size: 16px; }
+.codigo-chico .caja { padding: 16px 20px 18px; }
+.codigo-chico pre { font-size: 16px !important; }
+.seccion__fondo { width: 620px; height: 460px; opacity: 0.3 !important; }
+.seccion__fondo { -webkit-mask-image: linear-gradient(to right, transparent, #000 45%); mask-image: linear-gradient(to right, transparent, #000 45%); }

@@ -1,0 +1,190 @@
+---
+import Base from '../layouts/Base.astro'
+import MotivoFrontera from '../components/MotivoFrontera.astro'
+import Icono from '../components/Icono.astro'
+import { curso, unidades, dosDigitos } from '../datos/curso'
+import { url } from '../lib/rutas'
+
+const datos = [
+  { etiqueta: 'Profesor', valor: curso.profesor, extra: curso.correo, href: `mailto:${curso.correo}` },
+  { etiqueta: 'Horario', valor: curso.horario },
+  { etiqueta: 'Lugar', valor: curso.lugar },
+  { etiqueta: 'Semestre', valor: curso.semestre, extra: '16 semanas · 8 unidades' },
+]
+const material = [
+  { icono: 'presentacion', titulo: 'Presentaciones', texto: 'Web e interactivas, con ecuaciones, figuras y experimentos que puedes manipular en clase.' },
+  { icono: 'libreta', titulo: 'Libretas de ejemplo', texto: 'Se abren en Google Colab con un clic y corren igual en cualquier computadora.' },
+  { icono: 'laboratorio', titulo: 'Laboratorios', texto: 'Libretas para completar, con verificación automática de tus respuestas.' },
+  { icono: 'quiz', titulo: 'Autoevaluación', texto: 'Cuestionarios breves al final de cada unidad para comprobar que entendiste los conceptos.' },
+] as const
+---
+<Base>
+  <section class="portada">
+    <div class="contenedor portada__fila">
+      <div class="portada__texto">
+        <div class="antetitulo portada__ante">{curso.universidad} · {curso.departamento}</div>
+        <h1>Reconocimiento<br>de Patrones</h1>
+        <p class="portada__lema">Aprendizaje automático con fundamentos: de la teoría de la generalización a los modelos en producción.</p>
+        <div class="portada__acciones">
+          <a class="boton boton--oro" href={url('unidades/01-introduccion/')}>Empezar con la Unidad 1 <Icono nombre="flecha" /></a>
+          <a class="boton boton--contorno" href={url('temario/')}>Ver el temario</a>
+        </div>
+      </div>
+      <div class="portada__figura"><MotivoFrontera ancho={560} alto={520} /></div>
+    </div>
+  </section>
+
+  <section class="datos">
+    <div class="contenedor datos__fila">
+      {datos.map(d => (
+        <div class="dato">
+          <div class="dato__etiqueta">{d.etiqueta}</div>
+          <div class="dato__valor">{d.valor}</div>
+          {d.extra && (d.href ? <a class="dato__extra" href={d.href}>{d.extra}</a> : <div class="dato__extra">{d.extra}</div>)}
+        </div>
+      ))}
+    </div>
+  </section>
+
+  <section class="contenedor bloque objetivo">
+    <div>
+      <div class="antetitulo">Objetivo del curso</div>
+      <hr class="regla">
+    </div>
+    <div>
+      <p class="objetivo__lema">Plantear, entrenar, evaluar y <em>justificar</em> modelos de aprendizaje automático para problemas reales: entender por qué funcionan, cuándo pueden fallar y cómo medir su desempeño con honestidad.</p>
+      <ol class="objetivo__lista">
+        <li><strong>Teoría.</strong> Generalización, sesgo y varianza, regularización y validación.</li>
+        <li><strong>Modelos.</strong> Lineales, árboles, ensambles y redes neuronales: elegirlos, compararlos y justificar la elección.</li>
+        <li><strong>Exploración.</strong> Agrupamiento y reducción de dimensión para entender los datos.</li>
+        <li><strong>Práctica.</strong> Flujos reproducibles, desde la preparación de datos hasta el despliegue y el monitoreo.</li>
+      </ol>
+    </div>
+  </section>
+
+  <section class="contenedor bloque" id="unidades">
+    <div class="bloque__cabeza">
+      <div>
+        <div class="antetitulo">Contenido</div>
+        <h2>Ocho unidades, dieciséis semanas</h2>
+      </div>
+      <a class="bloque__enlace" href={url('temario/')}>Temario detallado <Icono nombre="flecha" /></a>
+    </div>
+    <ol class="unidades">
+      {unidades.map(u => (
+        <li class:list={['unidad', { 'unidad--pendiente': !u.disponible }]}>
+          <a href={url(`unidades/${u.slug}/`)}>
+            <span class="unidad__num">{dosDigitos(u.num)}</span>
+            <span class="unidad__cuerpo">
+              <span class="unidad__titulo">{u.titulo}</span>
+              <span class="unidad__resumen">{u.resumen}</span>
+              <span class="unidad__temas">{u.temas.join(' · ')}</span>
+            </span>
+            <span class="unidad__meta">
+              <span class="unidad__semanas">{u.semanas} {u.semanas === '1' ? 'semana' : 'semanas'}</span>
+              <span class:list={['estado', u.disponible ? 'estado--listo' : 'estado--pronto']}>{u.disponible ? 'Disponible' : 'En preparación'}</span>
+            </span>
+          </a>
+        </li>
+      ))}
+    </ol>
+  </section>
+
+  <section class="contenedor bloque">
+    <div class="bloque__cabeza">
+      <div>
+        <div class="antetitulo">Cómo se trabaja</div>
+        <h2>Cada unidad incluye</h2>
+      </div>
+    </div>
+    <div class="material">
+      {material.map(m => (
+        <div class="material__item">
+          <span class="material__icono"><Icono nombre={m.icono} /></span>
+          <h3>{m.titulo}</h3>
+          <p>{m.texto}</p>
+        </div>
+      ))}
+    </div>
+    <p class="nota">No necesitas instalar nada: basta una cuenta de Google para abrir las libretas en Colab. Si prefieres trabajar en tu máquina, consulta <a href={url('recursos/')}>Recursos</a>.</p>
+  </section>
+</Base>
+
+<style>
+  .portada { background: var(--marino); color: #fff; overflow: hidden; }
+  .portada__fila { display: grid; grid-template-columns: 1.15fr 1fr; align-items: stretch; min-height: 500px; }
+  .portada__texto { padding: 84px 0 80px; align-self: center; position: relative; z-index: 1; }
+  .portada__ante { color: var(--dorado); margin-bottom: 22px; }
+  .portada h1 { color: #fff; font-size: clamp(2.6rem, 6vw, 4.2rem); line-height: 1.03; }
+  .portada__lema { font-size: 1.22rem; line-height: 1.5; color: var(--azul-tenue); max-width: 520px; margin: 26px 0 36px; }
+  .portada__acciones { display: flex; gap: 12px; flex-wrap: wrap; }
+  .portada__figura { position: relative; margin-right: calc((100vw - min(100vw, var(--ancho))) / -2 - 24px); }
+  .portada__figura :global(svg) { position: absolute; inset: 0; width: 100%; height: 100%; }
+  @media (max-width: 860px) {
+    .portada__fila { grid-template-columns: 1fr; min-height: 0; }
+    .portada__texto { padding: 56px 0 48px; }
+    .portada__figura { height: 180px; margin: 0 -24px; }
+  }
+
+  .datos { border-bottom: 1px solid var(--linea); }
+  .datos__fila { display: grid; grid-template-columns: repeat(4, 1fr); }
+  .dato { padding: 26px 24px 26px 0; }
+  .dato + .dato { padding-left: 24px; border-left: 1px solid var(--linea); }
+  .dato__etiqueta { font: 650 0.7rem/1 var(--f-titulo); letter-spacing: .12em; text-transform: uppercase; color: var(--suave); margin-bottom: 10px; }
+  .dato__valor { font-weight: 600; color: var(--marino); line-height: 1.35; }
+  .dato__extra { font-size: 0.9rem; color: var(--tenue); }
+  @media (max-width: 860px) {
+    .datos__fila { grid-template-columns: 1fr 1fr; }
+    .dato, .dato + .dato { padding: 18px 12px 18px 0; border-left: 0; }
+    .dato:nth-child(even) { padding-left: 16px; border-left: 1px solid var(--linea); }
+    .dato:nth-child(-n+2) { border-bottom: 1px solid var(--linea); }
+  }
+
+  .bloque { padding-top: 88px; }
+  .bloque__cabeza { display: flex; justify-content: space-between; align-items: end; gap: 24px; margin-bottom: 32px; }
+  .bloque__cabeza h2 { margin-top: 10px; }
+  .bloque__enlace { display: inline-flex; gap: 6px; align-items: center; font: 600 0.92rem var(--f-titulo); text-decoration: none; white-space: nowrap; }
+  .bloque__enlace :global(svg) { width: 16px; height: 16px; }
+
+  .objetivo { display: grid; grid-template-columns: 240px 1fr; gap: 48px; }
+  .objetivo .regla { margin-top: 16px; }
+  .objetivo__lema { font: 600 clamp(1.25rem, 2.4vw, 1.6rem)/1.4 var(--f-titulo); color: var(--marino); letter-spacing: -0.01em; margin-bottom: 32px; }
+  .objetivo__lema em { font-style: normal; color: var(--azul); box-shadow: inset 0 -0.3em 0 var(--tinte-dorado); }
+  .objetivo__lista { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 20px 40px; counter-reset: obj; }
+  .objetivo__lista li { counter-increment: obj; position: relative; padding-left: 44px; color: var(--tenue); }
+  .objetivo__lista li::before { content: counter(obj); position: absolute; left: 0; top: 1px; width: 30px; height: 30px; border-radius: 50%; background: var(--tinte-azul); color: var(--azul); font: 650 0.85rem/30px var(--f-titulo); text-align: center; }
+  .objetivo__lista strong { color: var(--marino); }
+  @media (max-width: 860px) { .objetivo { grid-template-columns: 1fr; gap: 16px; } .objetivo__lista { grid-template-columns: 1fr; } }
+
+  .unidades { list-style: none; margin: 0; padding: 0; border-top: 2px solid var(--marino); }
+  .unidad a { display: grid; grid-template-columns: 92px 1fr 170px; gap: 24px; align-items: start; padding: 26px 16px 26px 0; border-bottom: 1px solid var(--linea); text-decoration: none; color: inherit; transition: background .15s; }
+  .unidad a:hover { background: var(--fondo-alt); }
+  .unidad__num { font: 700 2.6rem/1 var(--f-titulo); color: var(--dorado); letter-spacing: -0.03em; padding-left: 8px; }
+  .unidad--pendiente .unidad__num { color: var(--azul-tenue); }
+  .unidad__cuerpo { display: flex; flex-direction: column; gap: 4px; }
+  .unidad__titulo { font: 650 1.25rem/1.3 var(--f-titulo); color: var(--marino); }
+  .unidad a:hover .unidad__titulo { color: var(--azul); }
+  .unidad__resumen { color: var(--tinta); }
+  .unidad__temas { font-size: 0.88rem; color: var(--suave); }
+  .unidad__meta { display: flex; flex-direction: column; align-items: end; gap: 10px; padding-top: 4px; }
+  .unidad__semanas { font-size: 0.9rem; color: var(--tenue); }
+  .estado { font: 650 0.68rem/1 var(--f-titulo); letter-spacing: .08em; text-transform: uppercase; padding: 6px 10px; border-radius: 20px; }
+  .estado--listo { background: var(--tinte-verde); color: #3F7F2E; }
+  .estado--pronto { background: var(--fondo-alt); color: var(--suave); }
+  @media (max-width: 700px) {
+    .unidad a { grid-template-columns: 56px 1fr; gap: 14px; padding-right: 0; }
+    .unidad__num { font-size: 1.8rem; padding-left: 0; }
+    .unidad__meta { grid-column: 2; flex-direction: row; align-items: center; padding: 0; }
+    .unidad__temas { display: none; }
+  }
+
+  .material { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+  .material__item { border: 1px solid var(--linea); border-radius: var(--radio); padding: 26px 24px; }
+  .material__icono { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 10px; background: var(--tinte-azul); color: var(--azul); margin-bottom: 18px; }
+  .material__icono :global(svg) { width: 24px; height: 24px; }
+  .material__item h3 { font-size: 1.05rem; margin-bottom: 8px; }
+  .material__item p { font-size: 0.95rem; color: var(--tenue); margin: 0; }
+  @media (max-width: 960px) { .material { grid-template-columns: 1fr 1fr; } }
+  @media (max-width: 560px) { .material { grid-template-columns: 1fr; } }
+  .nota { margin-top: 28px; font-size: 0.95rem; color: var(--tenue); }
+</style>

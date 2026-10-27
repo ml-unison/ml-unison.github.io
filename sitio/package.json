@@ -1,0 +1,22 @@
+{
+  "name": "rdp-sitio",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview"
+  },
+  "dependencies": {
+    "@astrojs/markdown-remark": "^7.3.4",
+    "@astrojs/mdx": "^8.1.1",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/montserrat": "^5.3.0",
+    "@fontsource-variable/source-sans-3": "^5.3.1",
+    "astro": "^7.4.2",
+    "js-yaml": "^4.3.2",
+    "katex": "^0.18.10",
+    "rehype-katex": "^7.0.1",
+    "remark-math": "^6.0.0"
+  }
+}

@@ -13,23 +13,27 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
       - name: Instalar dependencias
-        run: uv sync --group dev
+        run: |
+          uv sync --group dev
+          npm ci
       - name: Pruebas (marca, quizzes, libretas)
         run: uv run pytest -q
       - name: Ejecutar libretas de principio a fin
         run: uv run pytest --nbmake unidades/ -q
-      - uses: quarto-dev/quarto-actions/setup@v2
-        with:
-          version: 1.8.27
-      - name: Exportar quizzes
-        run: uv run python herramientas/exportar_quizzes.py
-      - name: Renderizar sitio
-        env:
-          QUARTO_PYTHON: .venv/bin/python
-        run: quarto render
+      - name: Datos de las presentaciones y quizzes exportados
+        run: |
+          uv run python herramientas/datos_presentaciones.py
+          git diff --exit-code presentaciones/datos || (echo "::error::presentaciones/datos no está actualizado; corre herramientas/datos_presentaciones.py" && exit 1)
+          uv run python herramientas/exportar_quizzes.py
+      - name: Construir sitio y presentaciones
+        run: node herramientas/construir.mjs
       - name: Revisar enlaces
         uses: lycheeverse/lychee-action@v2
         with:
-          args: --offline --no-progress --root-dir "${{ github.workspace }}/_site" "_site/**/*.html"
+          args: --offline --no-progress --root-dir "${{ github.workspace }}/_construccion" "_construccion/**/*.html"
           fail: true

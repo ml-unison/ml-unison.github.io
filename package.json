@@ -1,0 +1,11 @@
+{
+  "name": "rdp-curso",
+  "private": true,
+  "type": "module",
+  "workspaces": ["sitio", "presentaciones"],
+  "scripts": {
+    "sitio": "npm run dev -w sitio",
+    "presentacion": "npm run dev -w presentaciones --",
+    "construir": "node herramientas/construir.mjs"
+  }
+}

@@ -1,0 +1,27 @@
+---
+layout: ../layouts/Pagina.astro
+titulo: Evaluación
+antetitulo: Cómo se califica
+seccion: evaluacion
+---
+import { url as ruta } from '../lib/rutas'
+
+| Componente | Peso | Descripción |
+|---|:-:|---|
+| Laboratorios | 35 % | Libretas para completar de cada unidad, con verificación automática de las respuestas. |
+| Exámenes | 35 % | Exámenes rápidos en clase y un examen intermedio para llevar. |
+| Proyecto integrador | 30 % | Cuatro entregas ligadas a las unidades del curso. Ver <a href={ruta('proyecto/')}>Proyecto</a>. |
+
+Los cuestionarios de autoevaluación del sitio **no cuentan** para la calificación: sirven para que compruebes tu comprensión antes de los exámenes.
+
+## Reglas generales
+
+- Los laboratorios se entregan como la libreta `.ipynb` **ejecutada de principio a fin**: todas las celdas deben correr en orden y sin errores.
+- Puedes discutir las ideas con tus compañeros, pero el código y las respuestas que entregas deben ser tuyos.
+- Si usas asistentes de IA, indica en la libreta para qué los usaste. Eres responsable de entender y poder explicar todo lo que entregas.
+
+## Exámenes de semestres anteriores
+
+- <a href={ruta('examenes/archivo/e1-2024-2.pdf')}>Examen en clase, 2024-2</a> (PDF)
+- <a href={ruta('examenes/archivo/e2-2024-2.pdf')}>Examen para llevar, 2024-2</a> (PDF)
+- <a href={ruta('examenes/archivo/intermedio-2025-2.pdf')}>Examen intermedio para llevar, 2025-2</a> (PDF)

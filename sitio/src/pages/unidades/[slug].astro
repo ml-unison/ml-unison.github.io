@@ -1,0 +1,188 @@
+---
+import fs from 'node:fs'
+import path from 'node:path'
+import Base from '../../layouts/Base.astro'
+import Icono from '../../components/Icono.astro'
+import Quiz from '../../components/Quiz.astro'
+import { unidades, dosDigitos, type Unidad } from '../../datos/curso'
+import { materiales } from '../../datos/materiales'
+import { url, colab, presentacion } from '../../lib/rutas'
+import { texto } from '../../lib/texto'
+
+export function getStaticPaths() {
+  return unidades.map(u => ({ params: { slug: u.slug }, props: { u } }))
+}
+const { u } = Astro.props as { u: Unidad }
+const m = materiales[u.slug]
+const i = unidades.findIndex(x => x.slug === u.slug)
+const anterior = unidades[i - 1], siguiente = unidades[i + 1]
+const raiz = path.resolve(process.cwd(), '..')
+const existe = (rel: string) => fs.existsSync(path.join(raiz, rel))
+---
+<Base titulo={`Unidad ${u.num}: ${u.titulo}`} seccion="unidades">
+  <header class="cabecera">
+    <div class="contenedor">
+      <nav class="migas"><a href={url('')}>Inicio</a> / <a href={url('#unidades')}>Unidades</a></nav>
+      <div class="cabecera__fila">
+        <span class="cabecera__num">{dosDigitos(u.num)}</span>
+        <div>
+          <div class="antetitulo">Unidad {u.num} · {u.semanas} {u.semanas === '1' ? 'semana' : 'semanas'}</div>
+          <h1>{u.titulo}</h1>
+          <p class="cabecera__resumen">{u.resumen}</p>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="contenedor cuerpo">
+    {!m && (
+      <div class="aviso aviso--oro">
+        <strong>En preparación.</strong> Las presentaciones, libretas, laboratorios y el cuestionario de esta unidad se publicarán en una fase posterior del rediseño.
+      </div>
+    )}
+
+    <div class="columnas">
+      <aside class="lateral">
+        {m ? (
+          <section>
+            <h2 class="titulo-chico">Al terminar podrás</h2>
+            <ul class="objetivos">{m.objetivos.map(o => <li set:html={texto(o)} />)}</ul>
+          </section>
+        ) : null}
+        <section>
+          <h2 class="titulo-chico">Temas</h2>
+          <ul class="temas">{u.temas.map(t => <li>{t}</li>)}</ul>
+        </section>
+      </aside>
+
+      <div class="principal">
+        {m && (
+          <>
+            <section class="seccion">
+              <h2><Icono nombre="presentacion" /> Presentaciones</h2>
+              <ul class="materiales">
+                {m.presentaciones.map(p => {
+                  const lista = existe(`presentaciones/${p.id}.md`)
+                  return (
+                    <li class:list={['material', { 'material--pendiente': !lista }]}>
+                      <div>
+                        <h3>{p.titulo}</h3>
+                        <p>{p.descripcion}</p>
+                      </div>
+                      {lista
+                        ? <span class="acciones">
+                            <a class="boton boton--suave" href={presentacion(p.id) + '#/export'} target="_blank" rel="noopener" title="Exportar a PDF desde el navegador"><Icono nombre="pdf" /> PDF</a>
+                            <a class="boton boton--azul" href={presentacion(p.id)} target="_blank" rel="noopener">Abrir <Icono nombre="externo" /></a>
+                          </span>
+                        : <span class="pronto">En preparación</span>}
+                    </li>
+                  )
+                })}
+              </ul>
+              <p class="ayuda">Las presentaciones se abren en una pestaña nueva. Usa las flechas o la barra espaciadora para avanzar, <kbd>o</kbd> para ver todas las láminas y <kbd>f</kbd> para pantalla completa.</p>
+            </section>
+
+            <section class="seccion">
+              <h2><Icono nombre="libreta" /> Libretas de ejemplo</h2>
+              <ul class="materiales">
+                {m.libretas.map(l => (
+                  <li class="material">
+                    <div>
+                      <h3>{l.titulo}</h3>
+                      <p>{l.descripcion}</p>
+                    </div>
+                    <a class="boton boton--suave" href={colab(l.ruta)} target="_blank" rel="noopener">Abrir en Colab <Icono nombre="externo" /></a>
+                  </li>
+                ))}
+              </ul>
+            </section>
+
+            <section class="seccion">
+              <h2><Icono nombre="laboratorio" /> Laboratorio</h2>
+              {m.laboratorios.length ? (
+                <ul class="materiales">
+                  {m.laboratorios.map(l => (
+                    <li class="material">
+                      <div><h3>{l.titulo}</h3><p>{l.descripcion}</p></div>
+                      <a class="boton boton--suave" href={colab(l.ruta)} target="_blank" rel="noopener">Abrir en Colab <Icono nombre="externo" /></a>
+                    </li>
+                  ))}
+                </ul>
+              ) : <p class="vacio">El laboratorio autocalificado de esta unidad se publicará en la siguiente fase.</p>}
+            </section>
+
+            <section class="seccion">
+              <h2><Icono nombre="libro" /> Lecturas</h2>
+              <ul class="lecturas">
+                {m.lecturas.map(l => <li><span>{l.obra}</span> <span class="tenue">{l.detalle}</span></li>)}
+              </ul>
+            </section>
+
+            {m.quiz && (
+              <section class="seccion">
+                <h2><Icono nombre="quiz" /> Autoevaluación</h2>
+                <Quiz id={m.quiz} />
+              </section>
+            )}
+          </>
+        )}
+
+        <nav class="vecinas">
+          {anterior ? <a href={url(`unidades/${anterior.slug}/`)}><span>← Unidad {anterior.num}</span>{anterior.titulo}</a> : <span />}
+          {siguiente && <a class="vecinas__sig" href={url(`unidades/${siguiente.slug}/`)}><span>Unidad {siguiente.num} →</span>{siguiente.titulo}</a>}
+        </nav>
+      </div>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .cabecera { background: var(--tinte-azul); border-bottom: 1px solid var(--linea); padding: 28px 0 48px; }
+  .migas { font-size: 0.85rem; color: var(--suave); margin-bottom: 28px; }
+  .migas a { color: var(--tenue); text-decoration: none; }
+  .migas a:hover { color: var(--azul); }
+  .cabecera__fila { display: grid; grid-template-columns: auto 1fr; gap: 32px; align-items: start; }
+  .cabecera__num { font: 700 5.5rem/0.85 var(--f-titulo); color: var(--dorado); letter-spacing: -0.04em; }
+  .cabecera h1 { margin: 10px 0 12px; font-size: clamp(1.9rem, 4vw, 2.7rem); }
+  .cabecera__resumen { font-size: 1.15rem; color: var(--tenue); max-width: 680px; margin: 0; }
+  @media (max-width: 640px) { .cabecera__fila { grid-template-columns: 1fr; gap: 8px; } .cabecera__num { font-size: 3.2rem; } }
+
+  .cuerpo { padding-top: 48px; }
+  .columnas { display: grid; grid-template-columns: 290px 1fr; gap: 64px; align-items: start; }
+  @media (max-width: 920px) { .columnas { grid-template-columns: 1fr; gap: 24px; } }
+
+  .lateral { position: sticky; top: 104px; display: flex; flex-direction: column; gap: 32px; }
+  @media (max-width: 920px) { .lateral { position: static; } }
+  .titulo-chico { font: 650 0.72rem/1 var(--f-titulo); letter-spacing: .12em; text-transform: uppercase; color: var(--azul); margin-bottom: 14px; }
+  .objetivos, .temas { list-style: none; padding: 0; margin: 0; font-size: 0.95rem; }
+  .objetivos li { padding: 0 0 12px 22px; position: relative; color: var(--tinta); line-height: 1.5; }
+  .objetivos li::before { content: ''; position: absolute; left: 0; top: 0.55em; width: 8px; height: 8px; border-radius: 2px; background: var(--dorado); }
+  .temas { display: flex; flex-wrap: wrap; gap: 6px; }
+  .temas li { background: var(--fondo-alt); border: 1px solid var(--linea); border-radius: 20px; padding: 3px 12px; font-size: 0.85rem; color: var(--tenue); }
+
+  .seccion { margin-bottom: 52px; }
+  .seccion h2 { display: flex; align-items: center; gap: 12px; font-size: 1.35rem; padding-bottom: 14px; border-bottom: 2px solid var(--marino); margin-bottom: 4px; }
+  .seccion h2 :global(svg) { width: 24px; height: 24px; color: var(--azul); }
+
+  .materiales { list-style: none; margin: 0; padding: 0; }
+  .material { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; padding: 20px 0; border-bottom: 1px solid var(--linea); }
+  .material h3 { font-size: 1.08rem; margin-bottom: 4px; }
+  .material p { margin: 0; color: var(--tenue); font-size: 0.95rem; }
+  .material--pendiente h3 { color: var(--suave); }
+  .pronto { font: 650 0.68rem/1 var(--f-titulo); letter-spacing: .08em; text-transform: uppercase; color: var(--suave); background: var(--fondo-alt); padding: 7px 11px; border-radius: 20px; }
+  @media (max-width: 560px) { .material { grid-template-columns: 1fr; gap: 12px; } .material .boton { justify-self: start; } }
+  .acciones { display: flex; gap: 8px; flex-wrap: wrap; }
+  .ayuda { font-size: 0.88rem; color: var(--suave); margin-top: 14px; }
+  kbd { font-family: var(--f-codigo); font-size: 0.8em; border: 1px solid var(--linea); border-bottom-width: 2px; border-radius: 4px; padding: 0 5px; background: #fff; color: var(--tinta); }
+  .vacio { color: var(--tenue); padding: 18px 0 0; margin: 0; }
+
+  .lecturas { list-style: none; margin: 0; padding: 0; }
+  .lecturas li { padding: 14px 0; border-bottom: 1px solid var(--linea); display: flex; flex-direction: column; }
+  .lecturas .tenue { color: var(--tenue); font-size: 0.92rem; }
+
+  .vecinas { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 24px; }
+  .vecinas a { display: flex; flex-direction: column; gap: 4px; padding: 18px 20px; border: 1px solid var(--linea); border-radius: var(--radio); text-decoration: none; color: var(--marino); font: 600 1rem/1.3 var(--f-titulo); }
+  .vecinas a:hover { border-color: var(--azul); }
+  .vecinas a span { font: 600 0.75rem var(--f-titulo); letter-spacing: .06em; text-transform: uppercase; color: var(--suave); }
+  .vecinas__sig { text-align: right; grid-column: 2; }
+</style>

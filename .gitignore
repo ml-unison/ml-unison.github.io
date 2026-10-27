@@ -38,3 +38,12 @@ soluciones/
 
 # Exportaciones de quizzes (se generan en CI)
 quizzes/exportados/
+_construccion/
+
+# Node, Astro y Slidev
+node_modules/
+sitio/dist/
+sitio/.astro/
+presentaciones/dist/
+presentaciones/.slidev/
+presentaciones/components.d.ts

@@ -1,0 +1,166 @@
+---
+// Cuestionario de autoevaluación. Lee quizzes/banco/<id>.yml (el mismo banco que usan
+// las libretas y la exportación a Moodle/Forms). Todo se califica en el navegador.
+import fs from 'node:fs'
+import path from 'node:path'
+import yaml from 'js-yaml'
+import { texto } from '../lib/texto'
+
+interface Props { id: string }
+const { id } = Astro.props
+const ruta = path.resolve(process.cwd(), '..', 'quizzes', 'banco', `${id}.yml`)
+const banco = yaml.load(fs.readFileSync(ruta, 'utf-8')) as any
+const preguntas = banco.preguntas as any[]
+const letras = 'abcdefgh'
+---
+<section class="quiz" data-quiz>
+  <div class="quiz__cabeza">
+    <p class="quiz__intro">{preguntas.length} preguntas. Responde, verifica y lee la explicación. No cuenta para la calificación y nada se guarda.</p>
+    <div class="quiz__marcador" aria-live="polite"><b data-marcador>0</b> de {preguntas.length} correctas</div>
+  </div>
+
+  {preguntas.map((p, k) => (
+    <fieldset class="pregunta" data-tipo={p.tipo} data-respuesta={p.tipo === 'vf' ? String(p.respuesta) : p.respuesta} data-tolerancia={p.tolerancia ?? 0}>
+      <legend class="pregunta__num">Pregunta {k + 1}{p.tipo === 'multiple' && <span> · selecciona todas las correctas</span>}</legend>
+      <div class="pregunta__enunciado" set:html={`<p>${texto(p.enunciado)}</p>`} />
+
+      {(p.tipo === 'opcion' || p.tipo === 'multiple') && (
+        <div class="opciones">
+          {p.opciones.map((o: any, j: number) => (
+            <label class="opcion">
+              <input type={p.tipo === 'opcion' ? 'radio' : 'checkbox'} name={p.id} data-correcta={o.correcta ? '1' : '0'} />
+              <span class="opcion__letra">{letras[j]}</span>
+              <span class="opcion__texto">
+                <span set:html={texto(String(o.texto))} />
+                {o.retro && <span class="opcion__retro" hidden set:html={texto(o.retro)} />}
+              </span>
+            </label>
+          ))}
+        </div>
+      )}
+      {p.tipo === 'vf' && (
+        <div class="opciones opciones--vf">
+          <label class="opcion"><input type="radio" name={p.id} data-correcta={p.respuesta ? '1' : '0'} /><span class="opcion__texto">Verdadero</span></label>
+          <label class="opcion"><input type="radio" name={p.id} data-correcta={p.respuesta ? '0' : '1'} /><span class="opcion__texto">Falso</span></label>
+        </div>
+      )}
+      {p.tipo === 'numerica' && (
+        <div class="numerica"><input type="text" inputmode="decimal" autocomplete="off" aria-label="Respuesta numérica" placeholder="Tu respuesta" /></div>
+      )}
+
+      <div class="pregunta__pie">
+        <button type="button" class="boton boton--azul" data-verificar>Verificar</button>
+        <span class="pregunta__resultado" aria-live="polite" data-resultado></span>
+      </div>
+      {p.explicacion && <div class="pregunta__explicacion" hidden set:html={`<p>${texto(p.explicacion)}</p>`} />}
+    </fieldset>
+  ))}
+
+  <button type="button" class="quiz__reiniciar" data-reiniciar>Reiniciar cuestionario</button>
+</section>
+
+<script>
+  const aNumero = (s: string) => {
+    const t = s.trim().replace(/\s/g, '').replace(',', '.')
+    if (/^-?\d+(\.\d+)?\/\d+(\.\d+)?$/.test(t)) { const [a, b] = t.split('/'); return Number(a) / Number(b) }
+    return t === '' ? NaN : Number(t)
+  }
+
+  function evaluar(fs: HTMLElement): boolean | null {
+    if (fs.dataset.tipo === 'numerica') {
+      const v = aNumero((fs.querySelector('.numerica input') as HTMLInputElement).value)
+      if (Number.isNaN(v)) return null
+      return Math.abs(v - Number(fs.dataset.respuesta)) <= Number(fs.dataset.tolerancia || 0) + 1e-12
+    }
+    let alguna = false, bien = true
+    fs.querySelectorAll<HTMLInputElement>('.opcion input').forEach(inp => {
+      const correcta = inp.dataset.correcta === '1'
+      if (inp.checked) alguna = true
+      if (inp.checked !== correcta) bien = false
+      const retro = inp.closest('.opcion')!.querySelector<HTMLElement>('.opcion__retro')
+      if (retro) retro.hidden = !inp.checked
+      inp.closest('.opcion')!.classList.remove('es-correcta', 'es-incorrecta')
+    })
+    return alguna ? bien : null
+  }
+
+  function marcar(quiz: HTMLElement) {
+    quiz.querySelector('[data-marcador]')!.textContent = String(quiz.querySelectorAll('.pregunta.es-correcta').length)
+  }
+
+  document.querySelectorAll<HTMLElement>('[data-quiz]').forEach(quiz => {
+    quiz.addEventListener('click', ev => {
+      const t = ev.target as HTMLElement
+      if (t.closest('[data-verificar]')) {
+        const fs = t.closest('.pregunta') as HTMLElement
+        const r = evaluar(fs)
+        const salida = fs.querySelector('[data-resultado]')!
+        fs.classList.remove('es-correcta', 'es-incorrecta')
+        if (r === null) { salida.textContent = fs.dataset.tipo === 'numerica' ? 'Escribe un número.' : 'Elige una opción.'; return }
+        fs.classList.add(r ? 'es-correcta' : 'es-incorrecta')
+        salida.textContent = r ? 'Correcto' : 'Todavía no. Revisa y vuelve a intentarlo.'
+        if (r) fs.querySelectorAll<HTMLInputElement>('.opcion input:checked').forEach(i => i.closest('.opcion')!.classList.add('es-correcta'))
+        else fs.querySelectorAll<HTMLInputElement>('.opcion input:checked').forEach(i => { if (i.dataset.correcta !== '1') i.closest('.opcion')!.classList.add('es-incorrecta') })
+        const expl = fs.querySelector<HTMLElement>('.pregunta__explicacion')
+        if (expl) expl.hidden = !r
+        marcar(quiz)
+      }
+      if (t.closest('[data-reiniciar]')) {
+        quiz.querySelectorAll<HTMLElement>('.pregunta').forEach(fs => {
+          fs.classList.remove('es-correcta', 'es-incorrecta')
+          fs.querySelectorAll<HTMLInputElement>('input').forEach(i => { if (i.type === 'text') i.value = ''; else i.checked = false })
+          fs.querySelectorAll<HTMLElement>('.opcion').forEach(o => o.classList.remove('es-correcta', 'es-incorrecta'))
+          fs.querySelectorAll<HTMLElement>('.opcion__retro, .pregunta__explicacion').forEach(e => { e.hidden = true })
+          fs.querySelector('[data-resultado]')!.textContent = ''
+        })
+        marcar(quiz)
+      }
+    })
+    quiz.addEventListener('keydown', ev => {
+      const t = ev.target as HTMLInputElement
+      if (ev.key === 'Enter' && t.matches('.numerica input')) { ev.preventDefault(); (t.closest('.pregunta')!.querySelector('[data-verificar]') as HTMLElement).click() }
+    })
+  })
+</script>
+
+<style>
+  .quiz__cabeza { display: flex; justify-content: space-between; align-items: center; gap: 20px; flex-wrap: wrap; margin-bottom: 24px; }
+  .quiz__intro { margin: 0; color: var(--tenue); font-size: 0.95rem; max-width: 520px; }
+  .quiz__marcador { font: 600 0.9rem var(--f-titulo); color: var(--tenue); background: var(--fondo-alt); padding: 8px 14px; border-radius: 20px; }
+  .quiz__marcador b { color: var(--azul); }
+
+  .pregunta { border: 1px solid var(--linea); border-radius: var(--radio); padding: 22px 26px 22px; margin: 0 0 18px; min-width: 0; transition: border-color .2s; }
+  .pregunta.es-correcta { border-color: var(--verde); box-shadow: inset 4px 0 0 var(--verde); }
+  .pregunta.es-incorrecta { border-color: #E9A9A5; box-shadow: inset 4px 0 0 var(--rojo); }
+  .pregunta__num { float: left; width: 100%; padding: 0; font: 650 0.72rem/1 var(--f-titulo); letter-spacing: .1em; text-transform: uppercase; color: var(--azul); margin-bottom: 12px; }
+  .pregunta__num span { color: var(--suave); letter-spacing: .04em; text-transform: none; font-weight: 500; font-size: .8rem; }
+  .pregunta__enunciado { clear: both; }
+  .pregunta__enunciado :global(p) { margin: 0 0 14px; }
+
+  .opciones { display: flex; flex-direction: column; gap: 8px; }
+  .opciones--vf { flex-direction: row; }
+  .opcion { display: flex; gap: 12px; align-items: flex-start; padding: 10px 14px; border: 1px solid var(--linea); border-radius: 8px; cursor: pointer; transition: background .15s, border-color .15s; }
+  .opcion:hover { background: var(--fondo-alt); }
+  .opcion:has(input:checked) { border-color: var(--azul); background: var(--tinte-azul); }
+  .opcion.es-correcta { border-color: var(--verde); background: var(--tinte-verde); }
+  .opcion.es-incorrecta { border-color: var(--rojo); background: var(--tinte-rojo); }
+  .opcion input { margin: 5px 0 0; accent-color: var(--azul); width: 16px; height: 16px; flex: none; }
+  .opcion__letra { font: 650 0.8rem/1.9 var(--f-titulo); color: var(--suave); width: 1em; flex: none; }
+  .opcion__texto { display: flex; flex-direction: column; gap: 4px; min-width: 0; overflow-x: auto; }
+  .opcion__retro { font-size: 0.9rem; color: var(--tenue); }
+  .opciones--vf .opcion { flex: 0 0 160px; }
+
+  .numerica input { font: inherit; padding: 10px 14px; border: 1px solid var(--linea); border-radius: 8px; width: 200px; }
+  .numerica input:focus { border-color: var(--azul); outline: none; box-shadow: 0 0 0 3px var(--tinte-azul); }
+
+  .pregunta__pie { display: flex; align-items: center; gap: 16px; margin-top: 16px; }
+  .pregunta__pie .boton { padding: 8px 16px; font-size: 0.85rem; border: 0; cursor: pointer; }
+  .pregunta__resultado { font-weight: 600; font-size: 0.95rem; }
+  .es-correcta .pregunta__resultado { color: #3F7F2E; }
+  .es-incorrecta .pregunta__resultado { color: #B23028; }
+  .pregunta__explicacion { margin-top: 16px; padding: 14px 18px; background: var(--fondo-alt); border-radius: 8px; font-size: 0.95rem; color: var(--tenue); }
+  .pregunta__explicacion :global(p) { margin: 0; }
+
+  .quiz__reiniciar { font: 600 0.85rem var(--f-titulo); color: var(--tenue); background: none; border: 0; text-decoration: underline; text-underline-offset: 3px; cursor: pointer; padding: 4px 0; }
+  @media (max-width: 560px) { .pregunta { padding: 18px 16px; } .opciones--vf .opcion { flex: 1; } }
+</style>

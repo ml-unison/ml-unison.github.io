@@ -1,4 +1,4 @@
-"""Paleta y estilo de matplotlib del curso, alineados con _brand.yml.
+"""Paleta y estilo de matplotlib del curso, alineados con el sitio y las presentaciones.
 
 Colores: Manual de Identidad Institucional UNISON 2025–2030 (p. 8–9).
 """
@@ -13,7 +13,7 @@ from matplotlib import font_manager
 
 _FUENTES = Path(__file__).with_name("fuentes")
 
-#: Paleta institucional (nombre → HEX). Debe coincidir con _brand.yml.
+#: Paleta institucional (nombre → HEX). Debe coincidir con las hojas de estilo (tests/test_marca.py).
 PALETA: dict[str, str] = {
     "azul": "#24398A",
     "dorado": "#E1B73D",

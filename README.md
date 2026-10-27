@@ -7,30 +7,31 @@ Sitio y material del curso de aprendizaje automático de la Licenciatura en Cien
 
 ## Estructura
 
-| Ruta | Contenido |
+| Carpeta | Contenido |
 |---|---|
-| `_quarto.yml`, `_quarto-*.yml` | Configuración del sitio y perfiles `produccion` y `preview` |
-| `_brand.yml` | Identidad visual (Manual de Identidad UNISON 2025–2030) |
-| `_extensions/unison/` | Tema del sitio y de las presentaciones, macros LaTeX y los shortcodes `colab` y `quiz` |
-| `unidades/NN-*/` | Página de cada unidad, con sus presentaciones (`slides/`), libretas (`ejemplos/`) y laboratorios |
-| `quizzes/banco/uNN.yml` | Banco de preguntas: fuente única del sitio, las libretas y las exportaciones |
-| `paquete/rdp/` | Paquete `rdp` que usan las libretas: estilo de gráficas, datos y cuestionarios |
-| `herramientas/` | Scripts de mantenimiento |
-| `datos/` | Conjuntos de datos que usan las libretas |
+| `sitio/` | Sitio del curso en [Astro](https://astro.build). Datos de las unidades en `src/datos/`, páginas en `src/pages/` |
+| `presentaciones/` | Presentaciones en [Slidev](https://sli.dev): un `uNN-MM-nombre.md` por presentación, con el tema, las plantillas y las gráficas compartidas |
+| `unidades/NN-nombre/` | Libretas de ejemplo (`ejemplos/`) y laboratorios para estudiantes (`laboratorios/`) |
+| `quizzes/banco/` | Banco de preguntas, uno por unidad |
+| `paquete/` | Paquete `rdp`: estilo de gráficas, carga de datos y quizzes en las libretas |
+| `datos/` | Conjuntos de datos pequeños del curso |
 | `examenes/archivo/` | Exámenes de semestres anteriores |
+| `herramientas/` | Scripts de construcción, libretas, laboratorios, quizzes y datos de las presentaciones |
 
 ## Trabajo local
 
-Requisitos: [uv](https://docs.astral.sh/uv/) y [Quarto](https://quarto.org) ≥ 1.8.
+Requisitos: [uv](https://docs.astral.sh/uv/) y Node.js ≥ 22.
 
 ```bash
-uv sync --group dev                                 # entorno Python 3.12
-export QUARTO_PYTHON=$PWD/.venv/bin/python
-quarto preview                                      # sitio con recarga automática
-quarto render --profile preview                     # igual que la vista previa publicada
-uv run pytest -q                                    # pruebas de consistencia
-uv run pytest --nbmake unidades/                    # ejecuta todas las libretas
+uv sync --group dev && npm install
+npm run sitio                                         # sitio con recarga automática
+npm run presentacion -- u01-01-aprender-de-datos.md   # una presentación con recarga automática
+node herramientas/construir.mjs                       # todo junto en _construccion/
+uv run pytest -q                                      # pruebas de consistencia
+uv run pytest --nbmake unidades/                      # ejecuta todas las libretas
 ```
+
+`BASE=/preview/ node herramientas/construir.mjs` construye igual que la vista previa publicada.
 
 ### Libretas
 
@@ -45,17 +46,23 @@ Cada libreta define `RAMA = "..."`, la rama de la que Colab instala el paquete `
 
 ### Presentaciones
 
-Son archivos `.qmd` con `format: unison-revealjs`. Tienen cajas académicas (`::: {.definicion nombre="..."}`, `.teorema`, `.algoritmo`, `.ejemplo`, `.idea`, `.cuidado`, `.pregunta`, `.demostracion`), figuras generadas con Python (`rdp.estilo.usar("presentacion")`) y widgets interactivos con OJS. Para obtener el PDF, abre la presentación con `?print-pdf` e imprime desde el navegador.
+Cada presentación es un archivo Markdown de Slidev sobre un lienzo de 1280 × 720. El tema (`presentaciones/styles/tema.css`) y las plantillas `portada` y `seccion` son comunes a todas. Para el contenido se usan:
+
+- cajas académicas: `<Caja tipo="definicion" nombre="...">`, con los tipos `teorema`, `algoritmo`, `idea`, `cuidado`, `pregunta` y `correcto`;
+- ecuaciones con KaTeX y las macros de `presentaciones/setup/katex.ts` (`\Ein`, `\Eout`, `\Hyp`, `\vx`…);
+- gráficas como componentes Vue en `presentaciones/components/`. Los números los calcula Python (`uv run python herramientas/datos_presentaciones.py` → `presentaciones/datos/uNN.json`) y el navegador los dibuja con la tipografía de la lámina.
+
+Para agregar una presentación a una unidad, crea el `.md` y regístralo en `sitio/src/datos/materiales.ts`. Se abre en una pestaña nueva; para el PDF, abre `…/#/export` en la presentación (o el menú «Exportar») e imprime desde el navegador. Cada presentación nueva debe tener `browserExporter: true` en su encabezado.
 
 ### Cuestionarios
 
 Cada pregunta se escribe una sola vez en `quizzes/banco/uNN.yml`. Desde ahí:
 
-- se muestra en el sitio con `{{< quiz uNN >}}`;
+- se muestra en la página de la unidad (campo `quiz` en `sitio/src/datos/materiales.ts`);
 - se muestra en una libreta con `rdp.quiz.mostrar("uNN")`;
 - se exporta a GIFT, Moodle XML y DOCX (para Microsoft Forms) con `uv run python herramientas/exportar_quizzes.py`.
 
-En los bancos solo se permite LaTeX estándar, sin las macros del sitio.
+En los bancos solo se permite LaTeX estándar, sin las macros de las presentaciones.
 
 ### Laboratorios
 
@@ -63,6 +70,6 @@ Las versiones con solución viven en el repositorio privado `ml-unison/solucione
 
 ## Licencias
 
-El código se distribuye bajo licencia MIT (ver `LICENSE`) y el material didáctico bajo [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.es). El escudo y el logotipo de la Universidad de Sonora son propiedad de la Universidad y se usan conforme a su Manual de Identidad Institucional. La tipografía Lato se distribuye bajo la licencia SIL OFL (`paquete/rdp/fuentes/OFL.txt`).
+El código se distribuye bajo licencia MIT (ver `LICENSE`) y el material didáctico bajo [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/deed.es). El escudo y el logotipo de la Universidad de Sonora son propiedad de la Universidad y se usan conforme a su Manual de Identidad Institucional. Las tipografías Montserrat, Source Sans 3, JetBrains Mono y Lato se distribuyen bajo la licencia SIL OFL.
 
 El material anterior al rediseño se conserva en la etiqueta `legado-2026`.

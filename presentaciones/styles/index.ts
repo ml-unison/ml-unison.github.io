@@ -1,0 +1,5 @@
+import '@fontsource-variable/montserrat'
+import '@fontsource-variable/source-sans-3'
+import '@fontsource-variable/source-sans-3/wght-italic.css'
+import '@fontsource-variable/jetbrains-mono'
+import './tema.css'

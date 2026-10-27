@@ -1,0 +1,30 @@
+---
+// Plantilla para páginas de texto escritas en MDX (temario, evaluación, recursos…).
+import Base from './Base.astro'
+import { url } from '../lib/rutas'
+
+const fm = (Astro.props as any).frontmatter ?? Astro.props
+const { titulo, subtitulo, antetitulo, seccion } = fm
+---
+<Base titulo={titulo} seccion={seccion}>
+  <header class="cabecera">
+    <div class="contenedor">
+      <nav class="migas"><a href={url('')}>Inicio</a> / {titulo}</nav>
+      {antetitulo && <div class="antetitulo">{antetitulo}</div>}
+      <h1>{titulo}</h1>
+      {subtitulo && <p class="cabecera__sub">{subtitulo}</p>}
+    </div>
+  </header>
+  <div class="contenedor">
+    <article class="prosa"><slot /></article>
+  </div>
+</Base>
+
+<style>
+  .cabecera { background: var(--tinte-azul); border-bottom: 1px solid var(--linea); padding: 28px 0 44px; margin-bottom: 48px; }
+  .migas { font-size: 0.85rem; color: var(--suave); margin-bottom: 28px; }
+  .migas a { color: var(--tenue); text-decoration: none; }
+  .cabecera h1 { margin-top: 10px; }
+  .cabecera__sub { font-size: 1.15rem; color: var(--tenue); margin: 12px 0 0; max-width: 680px; }
+  .prosa > :global(h2:first-child) { margin-top: 0; }
+</style>

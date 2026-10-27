@@ -25,18 +25,22 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
-      - run: uv sync --group dev
-      - uses: quarto-dev/quarto-actions/setup@v2
+      - uses: actions/setup-node@v4
         with:
-          version: 1.8.27
+          node-version: 22
+          cache: npm
+      - run: |
+          uv sync --group dev
+          npm ci
       - run: uv run python herramientas/exportar_quizzes.py
-      - name: Renderizar (perfil producción)
+      - name: Construir (producción)
         env:
-          QUARTO_PYTHON: .venv/bin/python
-        run: quarto render
+          BASE: /
+          RDP_RAMA: main
+        run: node herramientas/construir.mjs
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: _site
+          path: _construccion
   desplegar:
     needs: construir
     runs-on: ubuntu-latest

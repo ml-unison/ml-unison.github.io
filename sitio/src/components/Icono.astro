@@ -1,0 +1,18 @@
+---
+// Íconos de línea propios (24×24), en el color del texto.
+interface Props { nombre: 'presentacion' | 'libreta' | 'laboratorio' | 'quiz' | 'libro' | 'externo' | 'flecha' | 'menu' | 'pdf' | 'reloj'; clase?: string }
+const { nombre, clase = '' } = Astro.props
+const trazos: Record<string, string> = {
+  presentacion: 'M3 4h18M4 4v11a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1V4M12 16v4M8 20h8M8 12l3-3 2 2 3-3',
+  libreta: 'M6 3h11a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2zM8 3v18M11 8l-2 2 2 2M14 8l2 2-2 2',
+  laboratorio: 'M9 3h6M10 3v6l-5 9a2 2 0 0 0 1.7 3h10.6a2 2 0 0 0 1.7-3l-5-9V3M7.5 14h9',
+  quiz: 'M9 11l2 2 4-4M5 4h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z',
+  libro: 'M4 5a2 2 0 0 1 2-2h13v15H6a2 2 0 0 0-2 2V5zM4 20a2 2 0 0 0 2 1h13v-3',
+  externo: 'M14 4h6v6M20 4l-9 9M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5',
+  flecha: 'M5 12h14M13 6l6 6-6 6',
+  menu: 'M4 7h16M4 12h16M4 17h16',
+  pdf: 'M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8l-5-5zM14 3v5h5M9 13h6M9 17h4',
+  reloj: 'M12 7v5l3 2M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z',
+}
+---
+<svg class={clase} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d={trazos[nombre]} /></svg>

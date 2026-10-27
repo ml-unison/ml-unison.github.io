@@ -1,23 +1,29 @@
-"""Los colores institucionales deben ser los mismos en _brand.yml, SCSS y rdp.estilo."""
+"""Los colores institucionales son los mismos en rdp.estilo (Python), el sitio y las presentaciones."""
 import re
 from pathlib import Path
 
-import yaml
+import pytest
 
 from rdp.estilo import PALETA
 
 RAIZ = Path(__file__).resolve().parents[1]
-BRAND = yaml.safe_load((RAIZ / "_brand.yml").read_text(encoding="utf-8"))["color"]["palette"]
+OFICIALES = {v.upper() for v in PALETA.values()}
+# Variables CSS que deben tomar su valor de la paleta oficial
+INSTITUCIONALES = {"azul", "marino", "azul-medio", "azul-claro", "azul-tenue", "dorado", "rojo", "verde"}
+HOJAS = [RAIZ / "sitio/src/estilos/global.css", RAIZ / "presentaciones/styles/tema.css"]
 
 
-def test_paleta_python_coincide_con_brand():
-    assert {k: v.upper() for k, v in PALETA.items()} == {k: v.upper() for k, v in BRAND.items()}
+@pytest.mark.parametrize("hoja", HOJAS, ids=lambda p: p.parent.parent.name)
+def test_css_usa_colores_oficiales(hoja):
+    variables = dict(re.findall(r"--([\w-]+):\s*(#[0-9A-Fa-f]{6})", hoja.read_text(encoding="utf-8")))
+    revisadas = INSTITUCIONALES & variables.keys()
+    assert revisadas, f"{hoja.name} no define colores institucionales"
+    for nombre in revisadas:
+        assert variables[nombre].upper() in OFICIALES, f"{hoja.name}: --{nombre} = {variables[nombre]} no es un color oficial"
 
 
-def test_scss_usa_colores_oficiales():
-    oficiales = {v.upper() for v in BRAND.values()}
-    for scss in (RAIZ / "_extensions/unison").rglob("*.scss"):
-        for nombre, valor in re.findall(r"\$rdp-([\w-]+):\s*(#[0-9A-Fa-f]{6})", scss.read_text()):
-            if nombre == "texto":
-                continue
-            assert valor.upper() in oficiales, f"{scss.name}: ${'rdp-' + nombre} = {valor} no está en _brand.yml"
+def test_azul_y_dorado_iguales_en_todos_lados():
+    for hoja in HOJAS:
+        texto = hoja.read_text(encoding="utf-8")
+        assert f"--azul: {PALETA['azul']}" in texto
+        assert f"--dorado: {PALETA['dorado']}" in texto

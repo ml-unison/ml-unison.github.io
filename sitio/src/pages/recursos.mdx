@@ -1,0 +1,54 @@
+---
+layout: ../layouts/Pagina.astro
+titulo: Recursos
+antetitulo: Bibliografía y herramientas
+seccion: recursos
+---
+
+## Bibliografía
+
+### Textos base
+
+- **Abu-Mostafa, Magdon-Ismail y Lin (2012).** *Learning From Data: A Short Course.* AMLBook. Corto y riguroso; es la referencia principal de la Unidad 3.
+- **James, Witten, Hastie, Tibshirani y Taylor (2023).** *An Introduction to Statistical Learning with Applications in Python.* Springer. Muy accesible, con laboratorios en Python.
+- **Hastie, Tibshirani y Friedman (2009).** *The Elements of Statistical Learning*, 2.ª ed. Springer. La referencia clásica para profundizar.
+
+### Complementarios
+
+- **Bishop (2006).** *Pattern Recognition and Machine Learning.* Springer. El enfoque probabilístico.
+- **Murphy (2022).** *Probabilistic Machine Learning: An Introduction.* MIT Press.
+- **Shalev-Shwartz y Ben-David (2014).** *Understanding Machine Learning: From Theory to Algorithms.* Cambridge University Press. Teoría del aprendizaje para ir más a fondo.
+- **Prince (2023).** *Understanding Deep Learning.* MIT Press.
+- **Goodfellow, Bengio y Courville (2016).** *Deep Learning.* MIT Press.
+- **Hyndman y Athanasopoulos (2021).** *Forecasting: Principles and Practice*, 3.ª ed. OTexts. Series de tiempo.
+- **Huyen (2022).** *Designing Machine Learning Systems.* O'Reilly. Sistemas en producción.
+- **Molnar (2022).** *Interpretable Machine Learning*, 2.ª ed. Interpretabilidad.
+- **Barocas, Hardt y Narayanan (2023).** *Fairness and Machine Learning.* MIT Press. Equidad.
+- **Géron (2022).** *Hands-On Machine Learning with Scikit-Learn, Keras, and TensorFlow*, 3.ª ed. O'Reilly. Muy práctico.
+
+## Documentación de las herramientas
+
+- [scikit-learn](https://scikit-learn.org/stable/user_guide.html): la guía de usuario es excelente y muy didáctica.
+- [pandas](https://pandas.pydata.org/docs/user_guide/index.html)
+- [PyTorch](https://docs.pytorch.org/docs/stable/index.html)
+- [MLflow](https://mlflow.org/docs/latest/)
+
+## Entorno local
+
+Todas las libretas corren en [Google Colab](https://colab.research.google.com) sin instalar nada. Para trabajar en tu máquina, instala [uv](https://docs.astral.sh/uv/) y ejecuta:
+
+```bash
+git clone https://github.com/ml-unison/ml-unison.github.io.git
+cd ml-unison.github.io
+uv sync            # crea el entorno con las versiones del curso
+uv run jupyter lab
+```
+
+Las unidades 6 a 8 usan dependencias adicionales: `uv sync --extra rn --extra mlops`.
+
+## Conjuntos de datos
+
+- [UCI Machine Learning Repository](https://archive.ics.uci.edu)
+- [OpenML](https://www.openml.org), accesible desde `sklearn.datasets.fetch_openml`
+- [Kaggle Datasets](https://www.kaggle.com/datasets)
+- [Datos abiertos del Gobierno de México](https://www.datos.gob.mx)

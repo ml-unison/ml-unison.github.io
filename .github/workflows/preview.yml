@@ -20,21 +20,27 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
-      - run: uv sync --group dev
-      - uses: quarto-dev/quarto-actions/setup@v2
+      - uses: actions/setup-node@v4
         with:
-          version: 1.8.27
+          node-version: 22
+          cache: npm
+      - run: |
+          uv sync --group dev
+          npm ci
       - run: uv run python herramientas/exportar_quizzes.py
-      - name: Renderizar (perfil preview)
+      - name: Construir (base /preview/)
         env:
-          QUARTO_PYTHON: .venv/bin/python
-        run: quarto render --profile preview
+          BASE: /preview/
+          SITIO: https://ml-unison.github.io
+          RDP_RAMA: rediseno-2027
+        run: node herramientas/construir.mjs
       - name: Publicar en ml-unison/preview
         uses: peaceiris/actions-gh-pages@v4
         with:
           personal_token: ${{ secrets.PREVIEW_TOKEN }}
           external_repository: ml-unison/preview
           publish_branch: gh-pages
-          publish_dir: ./_site
+          publish_dir: ./_construccion
           force_orphan: true
+          enable_jekyll: false
           commit_message: "Vista previa de ${{ github.sha }}"

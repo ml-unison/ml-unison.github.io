@@ -12,9 +12,9 @@ import exportar_quizzes as ex  # noqa: E402
 from rdp import quiz  # noqa: E402
 
 BANCOS = sorted((RAIZ / "quizzes" / "banco").glob("u*.yml"))
-# Macros que solo existen en el sitio (_extensions/unison/macros.html): no sirven en
-# Colab ni en Moodle, así que están prohibidas en los bancos.
-MACROS = re.findall(r"\\newcommand\{(\\\w+)\}", (RAIZ / "_extensions/unison/macros.html").read_text())
+# Macros que solo existen en las presentaciones (presentaciones/setup/katex.ts): no sirven
+# en el sitio, en Colab ni en Moodle, así que están prohibidas en los bancos.
+MACROS = [m.replace("\\\\", "\\") for m in re.findall(r"'(\\\\\w+)':", (RAIZ / "presentaciones/setup/katex.ts").read_text())]
 
 
 @pytest.mark.parametrize("ruta", BANCOS, ids=lambda p: p.stem)
@@ -26,7 +26,7 @@ def test_banco_valido(ruta):
 def test_sin_macros_del_sitio(ruta):
     texto = ruta.read_text(encoding="utf-8")
     usadas = [m for m in MACROS if re.search(re.escape(m) + r"(?![A-Za-z])", texto)]
-    assert not usadas, f"{ruta.name} usa macros del sitio: {usadas}"
+    assert not usadas, f"{ruta.name} usa macros de las presentaciones: {usadas}"
 
 
 @pytest.mark.parametrize("ruta", BANCOS, ids=lambda p: p.stem)

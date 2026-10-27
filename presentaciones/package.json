@@ -1,0 +1,17 @@
+{
+  "name": "rdp-presentaciones",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "slidev --open=false"
+  },
+  "dependencies": {
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "@fontsource-variable/montserrat": "^5.3.0",
+    "@fontsource-variable/source-sans-3": "^5.3.1",
+    "@slidev/cli": "^53.0.0",
+    "d3-scale": "^4.0.2",
+    "d3-shape": "^3.2.0",
+    "katex": "^0.18.10"
+  }
+}

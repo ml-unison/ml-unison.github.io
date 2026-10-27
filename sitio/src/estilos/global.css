@@ -1,0 +1,138 @@
+/* Sitio del curso · Reconocimiento de Patrones · UNISON
+   Mismos colores y tipografías que las presentaciones (presentaciones/styles/tema.css). */
+
+@import '@fontsource-variable/montserrat';
+@import '@fontsource-variable/source-sans-3';
+@import '@fontsource-variable/source-sans-3/wght-italic.css';
+@import '@fontsource-variable/jetbrains-mono';
+@import 'katex/dist/katex.min.css';
+
+:root {
+  --azul: #24398A;
+  --marino: #20305A;
+  --marino-prof: #182447;
+  --azul-medio: #496EA5;
+  --azul-claro: #8DA3C9;
+  --azul-tenue: #C0CEE3;
+  --dorado: #E1B73D;
+  --dorado-osc: #A87C12;
+  --rojo: #D5433C;
+  --verde: #5CA847;
+
+  --tinta: #1A2133;
+  --tenue: #5E6678;
+  --suave: #8A91A0;
+  --linea: #E2E5EC;
+  --fondo: #FFFFFF;
+  --fondo-alt: #F6F7FA;
+  --tinte-azul: #EFF2F9;
+  --tinte-dorado: #FBF6E6;
+  --tinte-rojo: #FCEFEE;
+  --tinte-verde: #F1F8EE;
+
+  --f-titulo: 'Montserrat Variable', 'Montserrat', system-ui, sans-serif;
+  --f-texto: 'Source Sans 3 Variable', 'Source Sans 3', system-ui, sans-serif;
+  --f-codigo: 'JetBrains Mono Variable', 'JetBrains Mono', ui-monospace, monospace;
+
+  --ancho: 1160px;
+  --ancho-texto: 720px;
+  --radio: 10px;
+  color-scheme: light;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
+body {
+  margin: 0;
+  font-family: var(--f-texto);
+  font-size: 18px;
+  line-height: 1.6;
+  color: var(--tinta);
+  background: var(--fondo);
+  -webkit-font-smoothing: antialiased;
+}
+img, svg { max-width: 100%; }
+
+h1, h2, h3, h4 {
+  font-family: var(--f-titulo);
+  color: var(--marino);
+  line-height: 1.2;
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+h1 { font-size: clamp(2.1rem, 4.5vw, 3.1rem); font-weight: 700; letter-spacing: -0.025em; }
+h2 { font-size: clamp(1.45rem, 2.6vw, 1.85rem); font-weight: 650; }
+h3 { font-size: 1.2rem; font-weight: 650; }
+p { margin: 0 0 1em; }
+a { color: var(--azul); text-underline-offset: 3px; text-decoration-thickness: 1px; }
+a:hover { text-decoration-thickness: 2px; }
+strong { font-weight: 650; }
+code { font-family: var(--f-codigo); font-size: 0.86em; background: var(--fondo-alt); border: 1px solid var(--linea); border-radius: 5px; padding: 1px 5px; }
+pre { font-family: var(--f-codigo); font-size: 0.85rem; background: var(--fondo-alt); border: 1px solid var(--linea); border-radius: var(--radio); padding: 16px 18px; overflow-x: auto; line-height: 1.55; }
+pre code { background: none; border: 0; padding: 0; font-size: inherit; }
+
+:focus-visible { outline: 3px solid var(--dorado); outline-offset: 2px; border-radius: 4px; }
+
+.contenedor { width: 100%; max-width: var(--ancho); margin: 0 auto; padding: 0 24px; }
+@media (max-width: 600px) { .contenedor { padding: 0 16px; } }
+
+.antetitulo {
+  font-family: var(--f-titulo);
+  font-size: 0.78rem;
+  font-weight: 650;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--azul);
+}
+.regla { width: 56px; height: 4px; border-radius: 2px; background: var(--dorado); border: 0; margin: 0; }
+
+/* ---------- Botones ---------- */
+.boton {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--f-titulo);
+  font-weight: 600;
+  font-size: 0.92rem;
+  padding: 11px 20px;
+  border-radius: 8px;
+  text-decoration: none;
+  border: 1.5px solid transparent;
+  transition: background .15s, border-color .15s, color .15s;
+  white-space: nowrap;
+}
+.boton--oro { background: var(--dorado); color: var(--marino); }
+.boton--oro:hover { background: #EBC75A; }
+.boton--contorno { border-color: rgba(255,255,255,.45); color: #fff; }
+.boton--contorno:hover { border-color: #fff; background: rgba(255,255,255,.06); }
+.boton--azul { background: var(--azul); color: #fff; }
+.boton--azul:hover { background: var(--marino); }
+.boton--suave { background: var(--tinte-azul); color: var(--azul); }
+.boton--suave:hover { background: #E2E8F5; }
+.boton svg { width: 16px; height: 16px; flex: none; }
+
+/* ---------- Texto largo (páginas de contenido) ---------- */
+.prosa { max-width: var(--ancho-texto); }
+.prosa h2 { margin: 2.2em 0 0.6em; }
+.prosa h3 { margin: 1.8em 0 0.5em; }
+.prosa ul, .prosa ol { padding-left: 1.3em; margin: 0 0 1.2em; }
+.prosa li { margin: 0.35em 0; }
+.prosa li::marker { color: var(--dorado-osc); }
+.prosa table { width: 100%; border-collapse: collapse; margin: 1.2em 0 1.6em; font-size: 0.95rem; }
+.prosa th { font-family: var(--f-titulo); font-weight: 600; font-size: 0.72rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tenue); text-align: left; padding: 0 14px 10px 0; border-bottom: 2px solid var(--marino); }
+.prosa td { padding: 12px 14px 12px 0; border-bottom: 1px solid var(--linea); vertical-align: top; }
+.prosa .katex { font-size: 1.05em; }
+
+.aviso {
+  background: var(--tinte-azul);
+  border-left: 4px solid var(--azul);
+  border-radius: 0 var(--radio) var(--radio) 0;
+  padding: 16px 22px;
+  margin: 0 0 2em;
+  font-size: 0.97rem;
+}
+.aviso strong { color: var(--marino); }
+.aviso--oro { background: var(--tinte-dorado); border-color: var(--dorado); }
+
+/* ---------- Tabla responsiva ---------- */
+.tabla-scroll { overflow-x: auto; -webkit-overflow-scrolling: touch; }

@@ -1,0 +1,161 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{framed}
+
+\spanishdecimal{.}
+
+\setlist[enumerate,1]{label=\textbf{\arabic*.}, leftmargin=*, itemsep=6pt}
+\setlist[enumerate,2]{label=(\alph*), itemsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\pagestyle{plain}
+
+\newcommand{\Ein}{E_{\text{in}}}
+\newcommand{\Eout}{E_{\text{out}}}
+\newcommand{\Hyp}{\mathcal{H}}
+\newcommand{\dvc}{d_{\text{VC}}}
+\newcommand{\vx}{\mathbf{x}}
+\newcommand{\vw}{\mathbf{w}}
+\newcommand{\vy}{\mathbf{y}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\T}{^{\top}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\pts}[1]{\hfill\textbf{(#1~puntos)}}
+\newcommand{\linea}[1]{\rule{#1}{0.4pt}}
+\newcommand{\ptsinc}[1]{{\unskip\nobreak\hfil\penalty50\hskip1em\hbox{}\nobreak\hfill(#1)\parfillskip=0pt\finalhyphendemerits=0\par}}
+
+\newcommand{\encabezado}[2]{%
+\begin{center}
+{\large\bfseries Reconocimiento de Patrones}\\[2pt]
+Universidad de Sonora \textperiodcentered{} Licenciatura en Ciencias de la Computación\\
+Semestre 2027-1 \textperiodcentered{} Prof.\ Julio Waissman Vilanova\\[10pt]
+{\Large\bfseries #1}%
+\ifdefined\tipodoc\\[4pt]{\large\itshape\tipodoc}\fi
+\end{center}
+\ifdefined\tipodoc\else
+\vspace{6pt}
+\textbf{Nombre:} \hrulefill\quad \textbf{Expediente:} \rule{3.5cm}{0.4pt}\par
+\vspace{6pt}
+\fi
+#2
+\par\medskip\hrule\medskip
+}
+
+\newcommand{\espacio}[1]{\par\vspace{#1}}
+\newcommand{\nuevapagina}{\newpage}
+
+
+\begin{document}
+
+\encabezado{Examen rápido 1 \textperiodcentered{} Aprender de datos y preparar atributos}{%
+Tiempo: 20 minutos. Responde en esta hoja. Puedes usar calculadora; no se permiten apuntes.}
+
+\begin{enumerate}
+
+%% ---------------------------------------------------------------
+\item \textbf{Del registro al vector.} Para predecir el precio de casas tenemos cinco casas de entrenamiento:
+
+\begin{center}
+\begin{tabular}{cccc}
+\toprule
+Casa & Área (m$^2$) & Cocina & Barrio \\
+\midrule
+A & 70 & Buena & Norte \\
+B & 90 & Regular & Centro \\
+C & --- & Excelente & Norte \\
+D & 110 & Buena & Sur \\
+E & 130 & Mala & Centro \\
+\bottomrule
+\end{tabular}
+\end{center}
+
+El \emph{pipeline} trata cada columna así:
+\begin{itemize}[itemsep=0pt]
+  \item \emph{Área}: imputar los faltantes con la mediana y después estandarizar, $z = (x - \bar x)/s$, con la desviación estándar $s$ calculada con denominador $n$ (como lo hace \texttt{StandardScaler}).
+  \item \emph{Cocina}: codificación ordinal, Mala $=0$, Regular $=1$, Buena $=2$, Excelente $=3$.
+  \item \emph{Barrio}: \emph{one-hot} con las categorías en orden alfabético; una categoría que no se vio en el entrenamiento se codifica con puros ceros.
+\end{itemize}
+
+\begin{enumerate}
+  \item ¿Qué valores aprende el \emph{pipeline} al llamar a \texttt{fit} con estas cinco casas? Escribe cada uno.
+  \espacio{2.8cm}
+
+  \item ¿Cuántas columnas tiene la matriz que entrega el \emph{pipeline}?
+  \espacio{0.8cm}
+
+  \item Escribe el vector que produce \texttt{transform} para cada una de estas casas nuevas:
+  \begin{itemize}[itemsep=0pt]
+    \item F: área 150 m$^2$, cocina Excelente, barrio Sur.
+    \item G: área desconocida, cocina Regular, barrio Pitic.
+  \end{itemize}
+  \espacio{2.5cm}
+
+  \item Un compañero propone calcular la mediana, la media y la desviación con las siete casas (las de entrenamiento y las de prueba) «para tener más datos». ¿Qué problema tiene la propuesta?
+  \espacio{2.5cm}
+\end{enumerate}
+
+\nuevapagina
+%% ---------------------------------------------------------------
+\item \textbf{¿Información legítima?} Un banco quiere un modelo que, \emph{antes de llamar} a un cliente, estime la probabilidad de que contrate un depósito a plazo, para decidir a quién llamar. Tiene los registros de una campaña anterior.
+
+\begin{enumerate}
+  \item Marca cada columna como \textbf{L} (se puede usar) o \textbf{F} (fuga de información) y justifica en una línea.
+
+  \begin{center}
+  \renewcommand{\arraystretch}{1.6}
+  \begin{tabular}{p{6cm}c p{7.6cm}}
+  \toprule
+  Columna & L / F & Justificación \\
+  \midrule
+  \texttt{edad} & & \\
+  \texttt{saldo}: saldo promedio anual de la cuenta & & \\
+  \texttt{resultado\_previo}: resultado con ese cliente en la campaña \emph{anterior} & & \\
+  \texttt{duracion}: duración de la llamada, en segundos & & \\
+  \texttt{fecha\_alta}: fecha en que se abrió el depósito (vacía si no lo contrató) & & \\
+  \bottomrule
+  \end{tabular}
+  \end{center}
+
+  \item Este código reporta una exactitud que será optimista. Señala \textbf{dos} problemas (por número de línea) y di cómo corregirlos.
+\begin{verbatim}
+1  X = pd.get_dummies(datos.drop(columns="suscribe"))
+2  X = SimpleImputer(strategy="median").fit_transform(X)
+3  X_ent, X_pru, y_ent, y_pru = train_test_split(X, datos["suscribe"])
+4  for C in [0.01, 0.1, 1, 10, 100]:
+5      modelo = LogisticRegression(C=C).fit(X_ent, y_ent)
+6      print(C, modelo.score(X_pru, y_pru))   # reporto el mejor
+\end{verbatim}
+  \espacio{3.2cm}
+\end{enumerate}
+
+\nuevapagina
+%% ---------------------------------------------------------------
+\item \textbf{¿Aprender o programar?} Recuerda las tres condiciones para que tenga sentido aprender: hay un patrón, no sabemos escribirlo y tenemos datos que se parecen a los casos futuros. Para cada situación, si alguna condición falla di cuál; si tiene sentido aprender, di el tipo de aprendizaje y qué serían $\vx$ y $y$ (si hay $y$).
+\begin{enumerate}
+  \item Calcular la retención del impuesto sobre la renta de cada empleado en la nómina.
+  \espacio{2.2cm}
+  \item Pronosticar el volumen que entrará a una presa la próxima semana, con el historial de lluvias y escurrimientos.
+  \espacio{2.2cm}
+  \item Elegir los números de la lotería del domingo a partir de los resultados de los últimos 20 años.
+  \espacio{2.2cm}
+  \item Un detector de neumonía entrenado con radiografías de un hospital de Boston, que se usará en clínicas rurales de la sierra de Sonora con otros equipos de rayos X.
+  \espacio{2.2cm}
+  \item Encontrar grupos de clientes con hábitos de compra parecidos, sin categorías definidas de antemano.
+  \espacio{2.2cm}
+\end{enumerate}
+
+\end{enumerate}
+
+
+\end{document}

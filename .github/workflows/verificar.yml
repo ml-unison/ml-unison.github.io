@@ -13,6 +13,7 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
+          enable-cache: true
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -24,11 +25,13 @@ jobs:
       - name: Pruebas (marca, quizzes, libretas)
         run: uv run pytest -q
       - name: Ejecutar libretas de principio a fin
-        run: uv run pytest --nbmake unidades/*/ejemplos -q
-      - name: Datos de las presentaciones y quizzes exportados
-        run: |
-          uv run python herramientas/datos_presentaciones.py
-          uv run python herramientas/exportar_quizzes.py
+        env:
+          RDP_RAPIDO: "1"   # las libretas de redes entrenan menos épocas
+        run: uv run pytest --nbmake --nbmake-timeout=900 -n 4 unidades/*/ejemplos -q
+      # Los datos de las láminas (presentaciones/datos/*.json) se versionan; se
+      # regeneran a mano con herramientas/datos_presentaciones.py (las redes tardan).
+      - name: Quizzes exportados
+        run: uv run python herramientas/exportar_quizzes.py
       - name: Construir sitio y presentaciones
         run: node herramientas/construir.mjs
       - name: Revisar enlaces

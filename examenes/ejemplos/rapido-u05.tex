@@ -1,0 +1,112 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{framed}
+
+\spanishdecimal{.}
+
+\setlist[enumerate,1]{label=\textbf{\arabic*.}, leftmargin=*, itemsep=6pt}
+\setlist[enumerate,2]{label=(\alph*), itemsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\pagestyle{plain}
+
+\newcommand{\Ein}{E_{\text{in}}}
+\newcommand{\Eout}{E_{\text{out}}}
+\newcommand{\Hyp}{\mathcal{H}}
+\newcommand{\dvc}{d_{\text{VC}}}
+\newcommand{\vx}{\mathbf{x}}
+\newcommand{\vw}{\mathbf{w}}
+\newcommand{\vy}{\mathbf{y}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\T}{^{\top}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\pts}[1]{\hfill\textbf{(#1~puntos)}}
+\newcommand{\linea}[1]{\rule{#1}{0.4pt}}
+\newcommand{\ptsinc}[1]{{\unskip\nobreak\hfil\penalty50\hskip1em\hbox{}\nobreak\hfill(#1)\parfillskip=0pt\finalhyphendemerits=0\par}}
+
+\newcommand{\encabezado}[2]{%
+\begin{center}
+{\large\bfseries Reconocimiento de Patrones}\\[2pt]
+Universidad de Sonora \textperiodcentered{} Licenciatura en Ciencias de la Computación\\
+Semestre 2027-1 \textperiodcentered{} Prof.\ Julio Waissman Vilanova\\[10pt]
+{\Large\bfseries #1}%
+\ifdefined\tipodoc\\[4pt]{\large\itshape\tipodoc}\fi
+\end{center}
+\ifdefined\tipodoc\else
+\vspace{6pt}
+\textbf{Nombre:} \hrulefill\quad \textbf{Expediente:} \rule{3.5cm}{0.4pt}\par
+\vspace{6pt}
+\fi
+#2
+\par\medskip\hrule\medskip
+}
+
+\newcommand{\espacio}[1]{\par\vspace{#1}}
+\newcommand{\nuevapagina}{\newpage}
+
+
+\begin{document}
+
+\encabezado{Examen rápido 5 \textperiodcentered{} Árboles y ensambles}{%
+Tiempo: 20 minutos. Responde en esta hoja. Puedes usar calculadora; no se permiten apuntes. Deja indicadas las operaciones.}
+
+\begin{enumerate}
+
+%% ---------------------------------------------------------------
+\item \textbf{Partir y podar.} Un nodo $t$ tiene 12 datos: 6 de la clase «sí» y 6 de la clase «no». Hay dos divisiones candidatas, que mandan a las hijas los conteos (sí, no) siguientes:
+\begin{center}
+A: $(5, 1) \mid (1, 5)$ \qquad\qquad B: $(6, 3) \mid (0, 3)$
+\end{center}
+\begin{enumerate}
+  \item Calcula el índice de Gini, $G = \sum_k p_k(1 - p_k)$, del padre y de cada hija, y la ganancia $\Delta = G(\text{padre}) - \frac{n_I}{n}G(\text{izq}) - \frac{n_D}{n}G(\text{der})$ de cada división. ¿Cuál elige CART?
+  \espacio{4.5cm}
+
+  \item Se eligió A. Después, la hija izquierda $a = (5, 1)$ se partió en dos hojas puras, $(5, 0)$ y $(0, 1)$; la derecha, $b = (1, 5)$, quedó como hoja. Mide el error $R$ en número de datos mal clasificados. En la poda por costo–complejidad, colapsar la rama $T_s$ de un nodo $s$ conviene cuando $\alpha \ge g(s) = \frac{R(s) - R(T_s)}{|T_s| - 1}$. Calcula $g(a)$ y $g(t)$. ¿Qué nodo se poda primero? Después de podarlo, ¿cuánto vale $g(t)$? Escribe qué subárbol se usa para cada valor de $\alpha \ge 0$.
+  \espacio{5cm}
+\end{enumerate}
+
+\nuevapagina
+%% ---------------------------------------------------------------
+\item \textbf{Una ronda de AdaBoost.} Ocho datos con pesos iguales, $w_n = 1/8$. El tocón elegido en la primera ronda clasifica bien seis y se equivoca en dos.
+\begin{enumerate}
+  \item Calcula el error ponderado $\varepsilon_1$ y el voto $\alpha_1 = \frac12 \ln\frac{1 - \varepsilon_1}{\varepsilon_1}$.
+  \espacio{2.2cm}
+
+  \item Actualiza los pesos con $w_n \leftarrow w_n\, e^{-\alpha_1 y_n h_1(\vx_n)}$ y normaliza. ¿Cuánto pesa cada dato bien clasificado y cada mal clasificado? ¿Qué fracción del peso total tienen los dos errores?
+  \espacio{3.5cm}
+
+  \item ¿Qué error ponderado tiene el mismo tocón $h_1$ con los pesos nuevos? ¿Qué consecuencia tiene para la ronda 2?
+  \espacio{2.2cm}
+\end{enumerate}
+
+%% ---------------------------------------------------------------
+\item \textbf{Shapley con tres atributos.} Un modelo de precios (en miles de dólares) explica la predicción de una casa con los atributos área (A), calidad (C) y cochera (G). El valor de cada coalición $S$ es la predicción promedio cuando se conocen solo los atributos de $S$:
+\begin{center}
+\begin{tabular}{l|cccccccc}
+$S$ & $\varnothing$ & A & C & G & A, C & A, G & C, G & A, C, G \\ \hline
+$v(S)$ & 180 & 200 & 230 & 190 & 270 & 210 & 250 & 290
+\end{tabular}
+\end{center}
+\begin{enumerate}
+  \item Calcula los valores de Shapley $\phi_A$, $\phi_C$ y $\phi_G$ promediando las contribuciones marginales en los $3! = 6$ órdenes de llegada. Verifica la propiedad de eficiencia.
+  \espacio{5cm}
+
+  \item El dueño de la casa ve que $\phi_G > 0$ y concluye que construirle una cochera más grande aumentaría el precio de venta en $\phi_G$ miles de dólares. ¿Qué está mal en su razonamiento?
+  \espacio{2.5cm}
+\end{enumerate}
+
+\end{enumerate}
+
+
+\end{document}

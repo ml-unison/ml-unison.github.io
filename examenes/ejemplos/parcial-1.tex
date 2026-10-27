@@ -1,0 +1,183 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{framed}
+
+\spanishdecimal{.}
+
+\setlist[enumerate,1]{label=\textbf{\arabic*.}, leftmargin=*, itemsep=6pt}
+\setlist[enumerate,2]{label=(\alph*), itemsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\pagestyle{plain}
+
+\newcommand{\Ein}{E_{\text{in}}}
+\newcommand{\Eout}{E_{\text{out}}}
+\newcommand{\Hyp}{\mathcal{H}}
+\newcommand{\dvc}{d_{\text{VC}}}
+\newcommand{\vx}{\mathbf{x}}
+\newcommand{\vw}{\mathbf{w}}
+\newcommand{\vy}{\mathbf{y}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\T}{^{\top}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\pts}[1]{\hfill\textbf{(#1~puntos)}}
+\newcommand{\linea}[1]{\rule{#1}{0.4pt}}
+\newcommand{\ptsinc}[1]{{\unskip\nobreak\hfil\penalty50\hskip1em\hbox{}\nobreak\hfill(#1)\parfillskip=0pt\finalhyphendemerits=0\par}}
+
+\newcommand{\encabezado}[2]{%
+\begin{center}
+{\large\bfseries Reconocimiento de Patrones}\\[2pt]
+Universidad de Sonora \textperiodcentered{} Licenciatura en Ciencias de la Computación\\
+Semestre 2027-1 \textperiodcentered{} Prof.\ Julio Waissman Vilanova\\[10pt]
+{\Large\bfseries #1}%
+\ifdefined\tipodoc\\[4pt]{\large\itshape\tipodoc}\fi
+\end{center}
+\ifdefined\tipodoc\else
+\vspace{6pt}
+\textbf{Nombre:} \hrulefill\quad \textbf{Expediente:} \rule{3.5cm}{0.4pt}\par
+\vspace{6pt}
+\fi
+#2
+\par\medskip\hrule\medskip
+}
+
+\newcommand{\espacio}[1]{\par\vspace{#1}}
+\newcommand{\nuevapagina}{\newpage}
+
+
+\begin{document}
+
+\encabezado{Examen parcial \textperiodcentered{} Unidades 1 a 4}{%
+Tiempo: 90 minutos. Total: 100 puntos. Responde en hojas aparte, indicando el número de problema y dejando indicadas las operaciones. Puedes usar calculadora y una hoja tamaño carta con notas escritas a mano por ti. Si te atoras en un inciso, supón el resultado y sigue: los incisos posteriores se califican con tu resultado.}
+
+\begin{enumerate}
+
+%% ===============================================================
+\item \textbf{Un 93\,\% que no significa nada.} \pts{10}
+
+Un hospital quiere un modelo que, en el momento de dar de alta a un paciente, estime la probabilidad de que vuelva a internarse en los siguientes 30 días. El 8\,\% de las altas termina en un reingreso. Con 40,000 altas de 2019 a 2024 (un mismo paciente puede tener varias), un analista hizo lo siguiente:
+\begin{enumerate}[label=\arabic*), itemsep=1pt]
+  \item Agregó la columna \texttt{urgencias\_post}: número de visitas del paciente a urgencias en los 30 días posteriores al alta.
+  \item Rellenó los faltantes de cada columna con su media, calculada con las 40,000 altas.
+  \item Partió las altas al azar: 80\,\% para entrenamiento y 20\,\% para prueba.
+  \item Probó 200 combinaciones de hiperparámetros y se quedó con la de mayor exactitud en el conjunto de prueba.
+  \item Reportó: «el modelo tiene una exactitud de 93\,\% en datos que nunca vio».
+\end{enumerate}
+
+\begin{enumerate}
+  \item Identifica al menos cuatro problemas. Para cada uno, explica en qué sentido distorsiona la conclusión. \ptsinc{6}
+
+  \item Describe, en pasos, un procedimiento correcto para elegir el modelo y estimar su desempeño. \ptsinc{4}
+\end{enumerate}
+
+%% ===============================================================
+\item \textbf{Encadenar o compactar.} \pts{12}
+
+Seis puntos en la recta real: $0,\ 2,\ 3,\ 6,\ 10,\ 15$. Usamos agrupamiento jerárquico aglomerativo con la distancia $|x - x'|$.
+\begin{enumerate}
+  \item Con enlace \emph{simple} (distancia entre los dos puntos más cercanos de cada grupo), escribe en orden qué grupos se unen y a qué altura. Dibuja el dendrograma. \ptsinc{4}
+  \item Repite con enlace \emph{completo} (distancia entre los dos puntos más lejanos). \ptsinc{4}
+  \item Corta cada dendrograma para obtener dos grupos. ¿Qué grupos salen en cada caso? ¿Qué fenómeno del enlace simple explica la diferencia? \ptsinc{4}
+\end{enumerate}
+
+%% ===============================================================
+\item \textbf{Una iteración de EM.} \pts{13}
+
+Ajustamos una mezcla de dos gaussianas en una dimensión con varianzas conocidas y fijas, $\sigma_1^2 = \sigma_2^2 = 1$, a los datos $x = 0,\ 2,\ 3,\ 5$. Empezamos con $\mu_1 = 1$, $\mu_2 = 4$ y $\pi_1 = \pi_2 = 0.5$.
+\begin{enumerate}
+  \item Paso E: calcula la responsabilidad $\gamma_{i1}$ de la primera componente para cada uno de los cuatro puntos (tres cifras). \ptsinc{4}
+  \item Paso M: calcula los nuevos $\mu_1$, $\mu_2$, $\pi_1$ y $\pi_2$. \ptsinc{4}
+  \item Con las responsabilidades fijas, el paso M maximiza $\sum_{i=1}^n \sum_{k=1}^K \gamma_{ik} \ln \pi_k$ (más términos que no dependen de $\pi$), sujeto a $\sum_k \pi_k = 1$. Demuestra que el máximo es $\pi_k = N_k / n$, con $N_k = \sum_i \gamma_{ik}$. \ptsinc{5}
+\end{enumerate}
+
+%% ===============================================================
+\item \textbf{La dimensión VC de los tocones.} \pts{15}
+
+Un \emph{tocón de decisión} en $\R^2$ compara una sola coordenada con un umbral:
+\[
+h(\vx) = s \cdot \operatorname{sign}(x_j - a), \qquad j \in \{1, 2\},\quad s \in \{-1, +1\},\quad a \in \R .
+\]
+Supón que los puntos tienen coordenadas distintas entre sí, así que nunca ocurre $x_j = a$.
+\begin{enumerate}
+  \item Si solo se permite $j = 1$, el problema es de una dimensión. Muestra que el número máximo de dicotomías en $N \ge 2$ puntos es $2N$. \ptsinc{3}
+  \item Justifica que, con las dos coordenadas, $m_{\Hyp}(N) \le 4N - 2$. \ptsinc{3}
+  \item Concluye que ningún conjunto de 4 puntos se puede romper. ¿Qué cota obtienes para $\dvc(\Hyp)$? \ptsinc{3}
+  \item Muestra que los puntos $A = (0, 1)$, $B = (1, 0)$ y $C = (2, 2)$ sí se pueden romper: para cada una de las 8 dicotomías da un tocón ($j$, $s$, $a$) que la produce. \ptsinc{4}
+  \item ¿Cuánto vale $\dvc(\Hyp)$? Con la regla práctica de la clase, ¿alrededor de cuántos datos pedirías para aprender con tocones? \ptsinc{2}
+\end{enumerate}
+
+%% ===============================================================
+\item \textbf{Sesgo y varianza de una constante.} \pts{13}
+
+La función objetivo es $f(x) = x^2$ con $x \sim \mathcal U[-1, 1]$, sin ruido. Usamos el modelo $\Hyp_0 = \{h(x) = b\}$ y elegimos $b$ por mínimos cuadrados con $N$ datos $(x_n, x_n^2)$. Puedes usar que $\E[x^2] = 1/3$ y $\E[x^4] = 1/5$.
+\begin{enumerate}
+  \item Muestra que la hipótesis aprendida es $g^{(\mathcal D)}(x) = \frac1N \sum_n x_n^2$. \ptsinc{2}
+  \item Calcula la hipótesis promedio $\bar g$, el sesgo $\E_x\big[(\bar g(x) - f(x))^2\big]$ y la varianza $\E_x\big[\operatorname{Var}_{\mathcal D}\, g^{(\mathcal D)}(x)\big]$ en función de $N$. \ptsinc{5}
+  \item Con $N = 2$, el modelo $\Hyp_1 = \{h(x) = ax + b\}$ (la recta que pasa por los dos puntos) tiene sesgo $0.20$ y varianza $0.33$. ¿Cuál de los dos modelos tiene menor $\E_{\mathcal D}[\Eout]$? ¿No es raro, si $\Hyp_1$ contiene a $\Hyp_0$? \ptsinc{3}
+  \item Si ahora $y = x^2 + \epsilon$, con ruido independiente de media cero y varianza $\sigma^2$, ¿cómo queda $\E_{\mathcal D}[\Eout]$ para $\Hyp_0$? \ptsinc{3}
+\end{enumerate}
+
+%% ===============================================================
+\item \textbf{Diez puntajes.} \pts{12}
+
+Un clasificador asigna estos puntajes a diez casos de validación, cuatro positivos y seis negativos:
+\begin{center}
+\begin{tabular}{l|cccccc}
+Positivos ($y = 1$) & 0.90 & 0.70 & 0.55 & 0.30 & & \\
+Negativos ($y = 0$) & 0.80 & 0.50 & 0.40 & 0.30 & 0.20 & 0.10
+\end{tabular}
+\end{center}
+\begin{enumerate}
+  \item Si marcamos como positivo todo caso con puntaje $\ge 0.5$, ¿cuánto valen TVP, TFP y la precisión? \ptsinc{3}
+  \item Calcula el área bajo la curva ROC contando parejas (un positivo y un negativo). Los empates cuentan $1/2$. \ptsinc{4}
+  \item Supón que los puntajes son probabilidades bien calibradas, que un falso positivo cuesta 2 y un falso negativo cuesta 3. ¿Cuál es el umbral óptimo de Bayes? Calcula el costo total en estos diez casos al marcar como positivo cuando el puntaje es \emph{mayor} que $t$, para $t = 0.25$, $0.45$ y $0.6$. ¿Cuál conviene? \ptsinc{5}
+\end{enumerate}
+
+%% ===============================================================
+\item \textbf{Bayes ingenuo con seis mensajes.} \pts{12}
+
+Vocabulario: \emph{gratis}, \emph{premio}, \emph{hola}, \emph{mañana}. Mensajes de entrenamiento:
+\begin{center}
+\begin{tabular}{ll}
+\toprule
+Spam & Normal \\
+\midrule
+gratis premio gratis & hola mañana \\
+premio hola & hola hola gratis \\
+gratis gratis mañana & mañana hola \\
+\bottomrule
+\end{tabular}
+\end{center}
+Usamos Bayes ingenuo multinomial con suavizado de Laplace, $\hat\theta_{yj} = (N_{yj} + 1)/(N_y + V)$, y previas estimadas con la proporción de mensajes de cada clase.
+\begin{enumerate}
+  \item Estima $\hat\theta_{\text{spam},j}$ y $\hat\theta_{\text{normal},j}$ para las cuatro palabras. \ptsinc{4}
+  \item Calcula $\ln \dfrac{P(\text{spam} \mid \vx)}{P(\text{normal} \mid \vx)}$ para el mensaje «premio hola mañana» y la probabilidad de que sea spam. ¿Cómo se clasifica? \ptsinc{4}
+  \item ¿Qué pasaría con ese mismo mensaje si no usáramos suavizado? \ptsinc{2}
+  \item Escribe los pesos $w_j = \ln\big(\hat\theta_{\text{spam},j} / \hat\theta_{\text{normal},j}\big)$. ¿Qué palabra empuja más hacia spam? \ptsinc{2}
+\end{enumerate}
+
+%% ===============================================================
+\item \textbf{Una SVM con tres puntos.} \pts{13}
+
+Datos: $\vx_1 = (0, 0)$ con $y_1 = -1$; $\vx_2 = (2, 0)$ con $y_2 = +1$; $\vx_3 = (0, 2)$ con $y_3 = +1$.
+\begin{enumerate}
+  \item Verifica que $\vw = (1, 1)$, $b = -1$ cumple las restricciones $y_n(\vw\T\vx_n + b) \ge 1$ y que las tres se cumplen con igualdad. ¿Cuánto vale el margen $1/\lVert\vw\rVert$? \ptsinc{4}
+  \item Encuentra los multiplicadores $\alpha_n \ge 0$ que cumplen $\vw = \sum_n \alpha_n y_n \vx_n$ y $\sum_n \alpha_n y_n = 0$. Verifica que el valor del problema dual, $\sum_n \alpha_n - \frac12\lVert\vw\rVert^2$, coincide con el del primal, $\frac12 \lVert\vw\rVert^2$. \ptsinc{4}
+  \item Da un argumento geométrico de que ningún hiperplano separa estos datos con un margen mayor. \ptsinc{2}
+  \item Agregamos $\vx_4 = (1, 1)$ con $y_4 = -1$. ¿Siguen siendo linealmente separables? Con el mismo $(\vw, b)$, ¿qué holgura $\xi_4$ necesita ese punto en la SVM de margen suave y está bien o mal clasificado? \ptsinc{3}
+\end{enumerate}
+
+\end{enumerate}
+
+\end{document}

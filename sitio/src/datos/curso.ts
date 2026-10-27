@@ -53,25 +53,25 @@ export const unidades: Unidad[] = [
     num: 5, slug: '05-arboles-ensambles', titulo: 'Árboles y ensambles', semanas: '2',
     resumen: 'Los modelos que dominan los datos tabulares, y cómo explicar lo que hacen.',
     temas: ['Árboles de decisión', 'Bagging y bosques aleatorios', 'Boosting', 'XGBoost y LightGBM', 'SHAP e interpretabilidad'],
-    disponible: false,
+    disponible: true,
   },
   {
     num: 6, slug: '06-redes-neuronales', titulo: 'Redes neuronales', semanas: '3',
     resumen: 'Del perceptrón multicapa a la atención, con PyTorch.',
     temas: ['MLP y backprop', 'Optimización', 'Redes convolucionales', 'Transferencia', 'RNN, atención y transformers'],
-    disponible: false,
+    disponible: true,
   },
   {
     num: 7, slug: '07-series-tiempo', titulo: 'Series de tiempo', semanas: '1.5',
     resumen: 'Pronosticar respetando el orden del tiempo.',
     temas: ['Validación temporal', 'AR y ARIMA', 'Atributos rezagados con boosting', 'Modelos neuronales'],
-    disponible: false,
+    disponible: true,
   },
   {
     num: 8, slug: '08-mlops', titulo: 'MLOps y despliegue', semanas: '1',
     resumen: 'Llevar un modelo a producción y mantenerlo vivo.',
     temas: ['MLflow', 'Registro de modelos', 'Servicio con FastAPI', 'Monitoreo y drift'],
-    disponible: false,
+    disponible: true,
   },
 ]
 

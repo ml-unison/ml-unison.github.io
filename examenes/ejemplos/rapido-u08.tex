@@ -1,0 +1,123 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{framed}
+
+\spanishdecimal{.}
+
+\setlist[enumerate,1]{label=\textbf{\arabic*.}, leftmargin=*, itemsep=6pt}
+\setlist[enumerate,2]{label=(\alph*), itemsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\pagestyle{plain}
+
+\newcommand{\Ein}{E_{\text{in}}}
+\newcommand{\Eout}{E_{\text{out}}}
+\newcommand{\Hyp}{\mathcal{H}}
+\newcommand{\dvc}{d_{\text{VC}}}
+\newcommand{\vx}{\mathbf{x}}
+\newcommand{\vw}{\mathbf{w}}
+\newcommand{\vy}{\mathbf{y}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\T}{^{\top}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\pts}[1]{\hfill\textbf{(#1~puntos)}}
+\newcommand{\linea}[1]{\rule{#1}{0.4pt}}
+\newcommand{\ptsinc}[1]{{\unskip\nobreak\hfil\penalty50\hskip1em\hbox{}\nobreak\hfill(#1)\parfillskip=0pt\finalhyphendemerits=0\par}}
+
+\newcommand{\encabezado}[2]{%
+\begin{center}
+{\large\bfseries Reconocimiento de Patrones}\\[2pt]
+Universidad de Sonora \textperiodcentered{} Licenciatura en Ciencias de la Computación\\
+Semestre 2027-1 \textperiodcentered{} Prof.\ Julio Waissman Vilanova\\[10pt]
+{\Large\bfseries #1}%
+\ifdefined\tipodoc\\[4pt]{\large\itshape\tipodoc}\fi
+\end{center}
+\ifdefined\tipodoc\else
+\vspace{6pt}
+\textbf{Nombre:} \hrulefill\quad \textbf{Expediente:} \rule{3.5cm}{0.4pt}\par
+\vspace{6pt}
+\fi
+#2
+\par\medskip\hrule\medskip
+}
+
+\newcommand{\espacio}[1]{\par\vspace{#1}}
+\newcommand{\nuevapagina}{\newpage}
+
+\usepackage{listings}
+\lstset{basicstyle=\ttfamily\small, columns=fullflexible, keepspaces=true, numbers=left, numberstyle=\tiny\color{gray}, xleftmargin=2em, upquote=true, literate={°}{{\textdegree}}1}
+
+\begin{document}
+
+\encabezado{Examen rápido 8 \textperiodcentered{} MLOps y despliegue}{%
+Tiempo: 20 minutos. Responde en esta hoja. Puedes usar calculadora; no se permiten apuntes. Deja indicadas las operaciones.}
+
+\begin{enumerate}
+
+%% ---------------------------------------------------------------
+\item \textbf{PSI de dos histogramas.} Un modelo de demanda vigila la temperatura de entrada. Las cubetas se definieron con los cuartiles de la referencia, así que las proporciones de referencia son $p = (0.25,\ 0.25,\ 0.25,\ 0.25)$. Esta semana se observó $q = (0.10,\ 0.20,\ 0.30,\ 0.40)$.
+\begin{enumerate}
+  \item Calcula $\text{PSI} = \sum_k (q_k - p_k)\ln(q_k/p_k)$. Según la regla de la industria (menos de 0.1, estable; de 0.1 a 0.25, mirar; más de 0.25, cambio importante), ¿qué dirías?
+  \espacio{3.2cm}
+
+  \item Aun sin ningún cambio real, el PSI de dos muestras no es cero: $\E[\text{PSI}] \approx (K - 1)\big(\frac1N + \frac1M\big)$. Calcula ese piso si referencia y semana actual tienen $N = M = 200$ datos, y si tienen $N = M = 30$. ¿En cuál de los dos casos te preocuparía el 0.228?
+  \espacio{2.8cm}
+
+  \item Con las mismas proporciones, el estadístico de Kolmogorov–Smirnov es $D = \max_x |F_1(x) - F_2(x)|$. Calcúlalo en los bordes de las cubetas y compáralo con el umbral del 5\,\%, $1.358\sqrt{(n+m)/(nm)}$, para $n = m = 200$.
+  \espacio{2.8cm}
+\end{enumerate}
+
+\nuevapagina
+%% ---------------------------------------------------------------
+\item \textbf{Qué registrar.} Una compañera te manda su libreta con este mensaje: «Mi mejor modelo, un \textit{boosting}, tiene AUC de 0.805 contra 0.803 del bosque, con validación cruzada. El modelo está en el archivo \texttt{modelo\_final\_v3.pkl}».
+\begin{enumerate}
+  \item Para poder reproducir ese número dentro de seis meses, ¿qué seis cosas deberían haber quedado registradas con la corrida? Da un ejemplo concreto de cada una.
+  \espacio{3.5cm}
+
+  \item Repitiendo con cinco semillas, el bosque da AUC de $0.801, 0.806, 0.799, 0.804, 0.805$ y el \textit{boosting} $0.806, 0.803, 0.808, 0.802, 0.806$. ¿Es mejor el \textit{boosting}? Justifica con números.
+  \espacio{2.8cm}
+
+  \item Tu compañera te ofrece también un modelo que descargó de un foro, en un \texttt{.pkl}. ¿Por qué no deberías cargarlo con \texttt{pickle.load}, aunque no pienses usar sus predicciones?
+  \espacio{2cm}
+\end{enumerate}
+
+\nuevapagina
+%% ---------------------------------------------------------------
+\item \textbf{Revisar un servicio.} Este servicio sirve un modelo de rentas de bicicletas entrenado con un \texttt{Pipeline} que estandariza la temperatura (°C) con la media y desviación de 2011:
+\begin{lstlisting}[language=Python]
+modelo = joblib.load("modelo.joblib")
+
+class Hora(BaseModel):
+    hora: int
+    temp: float
+    humedad: float
+
+@app.post("/predecir")
+def predecir(h: Hora):
+    X = pd.DataFrame([h.model_dump()])
+    X["temp"] = (X.temp - X.temp.mean()) / X.temp.std()
+    return {"rentas": float(modelo.predict(X)[0])}
+\end{lstlisting}
+\begin{enumerate}
+  \item Señala cuatro problemas, indicando la línea, y cómo arreglarías cada uno.
+  \espacio{4cm}
+
+  \item Ya corregido, el servicio lleva tres meses. Los PSI de las entradas y de las predicciones son todos menores que 0.05, pero el error medido con las etiquetas se duplicó y el modelo subestima casi siempre. ¿Qué tipo de cambio es el más probable y qué harías?
+  \espacio{2.5cm}
+\end{enumerate}
+
+\end{enumerate}
+
+
+\end{document}

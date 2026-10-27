@@ -1,0 +1,100 @@
+titulo: Unidad 8 · MLOps y despliegue
+unidad: 8
+preguntas:
+- id: u08-p01
+  tipo: opcion
+  enunciado: |
+    Entrenas el mismo bosque aleatorio con diez semillas distintas y el AUC de validación varía entre 0.7714 y 0.7728. En tu búsqueda de modelos, el primer lugar le gana al segundo por 0.0017 de AUC. ¿Qué conclusión es la más razonable?
+  opciones:
+  - texto: La diferencia entre los dos modelos es del mismo orden que el ruido de la semilla; no basta para afirmar que uno es mejor.
+    correcta: true
+  - texto: El primer lugar es claramente mejor, porque 0.0017 es mayor que cero.
+    retro: Cualquier diferencia es mayor que cero; la pregunta es si es mayor que la variación que produce el azar con el mismo código.
+  - texto: Hay un error en el código, porque el mismo modelo debería dar siempre el mismo AUC.
+    retro: Con la semilla fija sí da exactamente lo mismo; con semillas distintas es normal que varíe.
+  - texto: Hay que reportar solo la semilla con el AUC más alto.
+    retro: Eso es elegir el resultado después de verlo; sobreestima el desempeño.
+  explicacion: |
+    El rango por semilla (1.4 milésimas) y la desviación entre pliegues (3.3 milésimas) son del mismo tamaño que la diferencia entre los modelos. Por eso conviene registrar la dispersión, no solo la media, y comparar con los mismos pliegues.
+- id: u08-p02
+  tipo: opcion
+  enunciado: |
+    En el registro de modelos de MLflow, la versión 1 de `riesgo-credito` tiene el alias `champion` y la versión 2 el alias `challenger`. La versión 2 gana en el conjunto de prueba. ¿Cómo se pone en producción?
+  opciones:
+  - texto: Se mueve el alias `champion` a la versión 2; el sistema, que carga `models:/riesgo-credito@champion`, la usa sin cambiar su código.
+    correcta: true
+  - texto: Se borra la versión 1 y se renumera la 2 como 1.
+    retro: Las versiones no se borran ni se renumeran; conservar la 1 permite regresar a ella moviendo el alias.
+  - texto: Se cambia el código del sistema para que cargue `models:/riesgo-credito/2`.
+    retro: Funciona, pero obliga a tocar el código en cada cambio; para evitarlo existen los alias.
+  - texto: Se vuelve a registrar la versión 2 con el nombre de la versión 1.
+    retro: Las versiones son inmutables; lo que se mueve es el alias.
+  explicacion: |
+    Las versiones son inmutables y quedan ligadas a la corrida que las produjo. Un alias es una etiqueta que apunta a una versión: promover un modelo, o regresar al anterior, es mover el alias.
+- id: u08-p03
+  tipo: vf
+  enunciado: |
+    Cargar con `pickle.load` un modelo descargado de internet es seguro siempre que después no llamemos a ninguno de sus métodos.
+  respuesta: false
+  explicacion: |
+    Falso. `pickle` puede ejecutar código **al cargar**: un objeto define con `__reduce__` qué función se llama y con qué argumentos al reconstruirlo. Formatos como `skops` guardan datos y auditan los tipos antes de construirlos.
+- id: u08-p04
+  tipo: opcion
+  enunciado: |
+    `mlflow.sklearn.autolog()` registró para una regresión logística la métrica `training_roc_auc = 0.722`. ¿Qué es ese número?
+  opciones:
+  - texto: El AUC calculado con los mismos datos con los que se ajustó el modelo; no estima el desempeño fuera de la muestra.
+    correcta: true
+  - texto: El AUC promedio de una validación cruzada que autolog hace por su cuenta.
+    retro: Autolog no hace validación cruzada; el prefijo `training_` indica que se midió en los datos de entrenamiento.
+  - texto: El AUC en el conjunto de prueba.
+    retro: Autolog no conoce tu conjunto de prueba; solo ve la llamada a `fit`.
+  - texto: Una cota superior de $E_{\text{out}}$.
+    retro: Es una medida dentro de la muestra; por la Unidad 3 sabemos que tiende a ser optimista.
+  explicacion: |
+    Autolog sirve para no olvidar parámetros ni versiones, pero sus métricas son de entrenamiento. La evaluación honesta (validación cruzada, conjunto de prueba) hay que diseñarla y registrarla aparte.
+- id: u08-p05
+  tipo: opcion
+  enunciado: |
+    Sean $p$ y $q$ las proporciones por cubeta de la referencia y de los datos actuales. ¿A qué es igual $\text{PSI} = \sum_k (q_k - p_k)\ln(q_k/p_k)$?
+  opciones:
+  - texto: $D(q\,\|\,p) + D(p\,\|\,q)$, la divergencia de Kullback–Leibler simetrizada.
+    correcta: true
+  - texto: $D(q\,\|\,p)$, la divergencia de Kullback–Leibler de los datos actuales respecto de la referencia.
+    retro: Falta un término. Separa la suma en $\sum_k q_k\ln(q_k/p_k)$ y $-\sum_k p_k\ln(q_k/p_k)$.
+  - texto: $\max_k |q_k - p_k|$, la mayor diferencia entre cubetas.
+    retro: Eso se parece más al estadístico de Kolmogorov–Smirnov, que usa distribuciones acumuladas, no proporciones por cubeta.
+  - texto: La entropía cruzada entre $q$ y $p$.
+    retro: La entropía cruzada $-\sum_k q_k \ln p_k$ no es cero cuando $q = p$; el PSI sí.
+  explicacion: |
+    $\sum_k (q_k - p_k)\ln\frac{q_k}{p_k} = \sum_k q_k\ln\frac{q_k}{p_k} + \sum_k p_k\ln\frac{p_k}{q_k} = D(q\|p) + D(p\|q)$. Por eso el PSI es simétrico, no negativo y vale cero solo si $q = p$.
+- id: u08-p06
+  tipo: numerica
+  enunciado: |
+    Se calcula el PSI con $K = 10$ cubetas entre dos muestras de 720 datos cada una que vienen **de la misma distribución**. Con la aproximación $\mathbb{E}[\text{PSI}] \approx (K-1)\left(\frac1N + \frac1M\right)$, ¿cuánto vale el PSI esperado? (Tres decimales.)
+  respuesta: 0.025
+  tolerancia: 0.001
+  explicacion: |
+    $9 \times (1/720 + 1/720) = 0.025$. Aunque no haya ningún cambio, el PSI no es cero: hay un piso de ruido que crece cuando las muestras son chicas. Con 168 datos (una semana de horas) el piso es 0.107, y la regla «PSI > 0.1» daría falsas alarmas más de la mitad de las veces.
+- id: u08-p07
+  tipo: opcion
+  enunciado: |
+    Un modelo de demanda en producción muestra PSI bajos en todas sus entradas y en sus predicciones, pero cuando llegan las etiquetas el error se triplica y el modelo subestima sistemáticamente. ¿Qué tipo de cambio es el más probable?
+  opciones:
+  - texto: Un cambio de concepto, en $P(y \mid \mathbf{x})$.
+    correcta: true
+  - texto: Un cambio de covariables, en $P(\mathbf{x})$.
+    retro: Si cambiara $P(\mathbf{x})$, lo verían los PSI de las entradas.
+  - texto: Sobreajuste del modelo durante el entrenamiento.
+    retro: El sobreajuste se habría visto en la validación; aquí el error creció después, con entradas que se parecen a las de entrenamiento.
+  - texto: Un error en el servicio, porque el modelo no puede empeorar si las entradas no cambian.
+    retro: 'Sí puede: si cambia la relación entre entradas y respuesta, las mismas entradas llevan a otra respuesta.'
+  explicacion: |
+    Entradas y predicciones estables con un error que crece es la firma del cambio de concepto: la relación $\mathbb{E}[y \mid \mathbf{x}]$ se movió (en las bicicletas, el sistema creció 65 % de 2011 a 2012). Ningún monitor de entradas lo detecta; hace falta medir el error real con las etiquetas.
+- id: u08-p08
+  tipo: vf
+  enunciado: |
+    Un servicio compara un millón de predicciones de esta semana con un millón de la semana pasada y la prueba de Kolmogorov–Smirnov da $p < 10^{-10}$. Eso indica que el cambio es grande y que hay que reentrenar.
+  respuesta: false
+  explicacion: |
+    Falso. Con muestras tan grandes, el umbral de rechazo de KS es $1.358\sqrt{2/10^6} \approx 0.002$: cualquier diferencia minúscula es «significativa». Lo que hay que mirar es el tamaño del efecto (el estadístico $D$ o el PSI) y, sobre todo, si el error del modelo cambió.

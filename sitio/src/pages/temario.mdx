@@ -1,12 +1,10 @@
 ---
 layout: ../layouts/Pagina.astro
 titulo: Temario
-antetitulo: Propuesta 2027-1
+antetitulo: Semestre 2027-1
 subtitulo: Ocho unidades en dieciséis semanas. La columna «Cambios» indica qué se agregó o se movió respecto al temario anterior.
 seccion: temario
 ---
-
-<div class="aviso aviso--oro">**Propuesta en revisión.** Este temario reorganiza el anterior y todavía puede cambiar.</div>
 
 <div class="tabla-scroll">
 
@@ -62,7 +60,7 @@ seccion: temario
 1. Árboles de decisión: criterios de partición y poda.
 2. *Bagging* y bosques aleatorios.
 3. *Boosting*: AdaBoost y *gradient boosting* como descenso de gradiente funcional.
-4. XGBoost, LightGBM y CatBoost en la práctica.
+4. XGBoost y LightGBM: aproximación de segundo orden, histogramas y parada temprana.
 5. Interpretabilidad: importancia por permutación, dependencia parcial y SHAP.
 
 ## 6. Redes neuronales
@@ -78,13 +76,13 @@ seccion: temario
 
 1. Componentes de una serie, estacionariedad y autocorrelación.
 2. Validación temporal (*rolling origin*) y fugas temporales.
-3. Modelos AR, ARIMA y de suavizamiento exponencial.
-4. Pronóstico como regresión: atributos rezagados con *gradient boosting*.
+3. Modelos AR, MA, ARIMA y SARIMA; intervalos de predicción.
+4. Pronóstico como regresión: atributos rezagados con *gradient boosting*, estrategias recursiva y directa, pérdida cuantil.
 5. Modelos neuronales para series de tiempo.
 
 ## 8. MLOps y despliegue
 
 1. Reproducibilidad y seguimiento de experimentos con MLflow.
-2. Registro y empaquetado de modelos.
+2. Registro de modelos, versiones, firmas y fichas de modelo (*model cards*).
 3. Servir un modelo con FastAPI.
-4. Monitoreo: *data drift*, *concept drift* y reentrenamiento.
+4. Monitoreo: cambio de covariables y de concepto, PSI, prueba de Kolmogorov–Smirnov y reentrenamiento.

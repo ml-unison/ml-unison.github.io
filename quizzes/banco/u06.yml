@@ -1,0 +1,176 @@
+titulo: Unidad 6 · Redes neuronales
+unidad: 6
+preguntas:
+- id: u06-p01
+  tipo: opcion
+  enunciado: |
+    En una red con salida *softmax* y pérdida de entropía cruzada, $E = -\sum_k y_k \log \hat y_k$ con $\mathbf{y}$ en *one-hot*, ¿cuánto vale el error de la capa de salida $\boldsymbol\delta^{(L)} = \partial E / \partial \mathbf{z}^{(L)}$?
+  opciones:
+  - texto: $\hat{\mathbf{y}} - \mathbf{y}$
+    correcta: true
+  - texto: $(\hat{\mathbf{y}} - \mathbf{y}) \odot \hat{\mathbf{y}} \odot (1 - \hat{\mathbf{y}})$
+    retro: Ése sería el resultado con pérdida cuadrática y salidas sigmoides; con entropía cruzada el factor de la derivada se cancela.
+  - texto: $-\mathbf{y} / \hat{\mathbf{y}}$
+    retro: Ésa es la derivada respecto de $\hat{\mathbf{y}}$, no respecto de $\mathbf{z}^{(L)}$; falta aplicar la regla de la cadena a través de la *softmax*.
+  - texto: $W^{(L)\top}(\hat{\mathbf{y}} - \mathbf{y})$
+    retro: Multiplicar por $W^{(L)\top}$ es el paso que lleva el error a la capa anterior, no el error de la capa de salida.
+  explicacion: |
+    Como $\log \hat y_k = z_k - \log\sum_j e^{z_j}$, se obtiene $\partial E/\partial z_i = \hat y_i - y_i$: «predicción menos dato», igual que en la regresión logística.
+- id: u06-p02
+  tipo: numerica
+  enunciado: |
+    Una red de dos capas tiene 64 entradas, 64 neuronas ocultas y 10 salidas, con sesgos en ambas capas. ¿Cuántas evaluaciones de la pérdida necesita la verificación del gradiente completo con diferencias **centradas**?
+  respuesta: 9620
+  tolerancia: 0
+  explicacion: |
+    Hay $64 \times 64 + 64 + 64 \times 10 + 10 = 4{,}810$ parámetros y la diferencia centrada evalúa $E(\theta + h)$ y $E(\theta - h)$ para cada uno: $9{,}620$ evaluaciones. La retropropagación obtiene el mismo gradiente con una pasada hacia adelante y una hacia atrás.
+- id: u06-p03
+  tipo: vf
+  enunciado: |
+    Una red de diez capas ocultas **sin funciones de activación** ($\sigma(z) = z$) puede representar fronteras de decisión que una regresión *softmax* no puede representar.
+  respuesta: false
+  explicacion: |
+    Falso. La composición de funciones afines es afín: $W^{(2)}(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}) + \mathbf{b}^{(2)} = W\mathbf{x} + \mathbf{b}$, y lo mismo con cualquier número de capas. Sin no linealidad, la red es una regresión *softmax* con otra parametrización.
+- id: u06-p04
+  tipo: opcion
+  enunciado: |
+    En una red profunda con activaciones ReLU, cada capa tiene $n_{\text{in}} = 256$ entradas. ¿Qué varianza de los pesos iniciales mantiene aproximadamente constante la escala de las activaciones de capa en capa?
+  opciones:
+  - texto: $2/256$ (inicialización de He)
+    correcta: true
+  - texto: $1/256$
+    retro: Con ReLU la mitad de las entradas se anulan, $\mathbb{E}[\mathrm{ReLU}(z)^2] = \tfrac12\mathrm{Var}(z)$; con $1/n_{\text{in}}$ la varianza se divide entre 2 en cada capa.
+  - texto: $1$
+    retro: 'Con $\mathrm{Var}(w) = 1$, cada capa multiplica la varianza por $n_{\text{in}}/2 = 128$: las activaciones explotan.'
+  - texto: $0.01^2$
+    retro: 'Con pesos tan chicos el factor por capa es $256 \times 10^{-4}/2 \approx 0.013$: la señal desaparece en unas cuantas capas.'
+  explicacion: |
+    $\mathrm{Var}(z) = n_{\text{in}}\,\mathrm{Var}(w)\,\mathbb{E}[a^2]$ y con ReLU $\mathbb{E}[a^2] = \tfrac12\mathrm{Var}(z_{\text{anterior}})$. Para que el factor sea 1 hace falta $\mathrm{Var}(w) = 2/n_{\text{in}}$ (He et al., 2015).
+- id: u06-p05
+  tipo: numerica
+  enunciado: |
+    Con minilotes de tamaño $B = 16$, el error cuadrático medio del gradiente del minilote, $\mathbb{E}\lVert\mathbf{g}_B - \mathbf{g}\rVert^2$, vale 12. Si los índices se toman independientes, ¿cuánto vale con $B = 64$?
+  respuesta: 3
+  tolerancia: 0.01
+  explicacion: |
+    $\mathbb{E}\lVert\mathbf{g}_B - \mathbf{g}\rVert^2 = \sigma^2/B$: multiplicar $B$ por 4 divide el ruido entre 4, $12/4 = 3$. Ojo: la desviación estándar solo baja a la mitad, por eso agrandar el minilote rinde cada vez menos.
+- id: u06-p06
+  tipo: opcion
+  enunciado: |
+    En un cuadrático con número de condición $\kappa = 100$, el descenso por gradiente con la mejor tasa converge con factor $(\kappa-1)/(\kappa+1) \approx 0.98$ por paso. ¿Qué factor logra el método de la bola pesada con $\eta$ y $\beta$ óptimos?
+  opciones:
+  - texto: $(\sqrt{\kappa}-1)/(\sqrt{\kappa}+1) \approx 0.82$
+    correcta: true
+  - texto: $0.98^2 \approx 0.96$
+    retro: El momento no equivale a dar dos pasos de gradiente; cambia la dependencia de $\kappa$ a $\sqrt{\kappa}$.
+  - texto: $\beta = 0.9$, sin importar $\kappa$
+    retro: 'La tasa es $\sqrt{\beta}$, y el $\beta$ óptimo depende de $\kappa$: $\sqrt{\beta} = (\sqrt{\kappa}-1)/(\sqrt{\kappa}+1)$.'
+  - texto: El mismo, 0.98; el momento solo reduce el ruido.
+    retro: En un problema determinista, sin ruido, el momento sí acelera.
+  explicacion: |
+    Con raíces complejas, el error en cada dirección decae como $\sqrt{\beta}$. Ajustando $\eta$ y $\beta$ para que todo el espectro quede en esa zona, $\sqrt{\beta} = (\sqrt{\kappa}-1)/(\sqrt{\kappa}+1)$: el número de iteraciones crece como $\sqrt{\kappa}$ y ya no como $\kappa$.
+- id: u06-p07
+  tipo: opcion
+  enunciado: |
+    En Adam, $\mathbf{m}_t = \beta_1\mathbf{m}_{t-1} + (1-\beta_1)\mathbf{g}_t$ con $\mathbf{m}_0 = 0$. Si todos los gradientes tienen esperanza $\mathbb{E}[\mathbf{g}]$, ¿cuánto vale $\mathbb{E}[\mathbf{m}_t]$?
+  opciones:
+  - texto: $(1-\beta_1^t)\,\mathbb{E}[\mathbf{g}]$
+    correcta: true
+  - texto: $\mathbb{E}[\mathbf{g}]$
+    retro: Eso sería cierto si $\mathbf{m}_0$ fuera $\mathbb{E}[\mathbf{g}]$; al empezar en cero, el promedio está sesgado hacia cero.
+  - texto: $\beta_1^t\,\mathbb{E}[\mathbf{g}]$
+    retro: 'Suma la serie geométrica: $(1-\beta_1)\sum_{i=1}^t \beta_1^{t-i} = 1 - \beta_1^t$.'
+  - texto: $\mathbb{E}[\mathbf{g}]/(1-\beta_1)$
+    retro: Esa es la velocidad límite de la bola pesada, no la del promedio exponencial de Adam.
+  explicacion: |
+    $\mathbf{m}_t = (1-\beta_1)\sum_{i=1}^t\beta_1^{t-i}\mathbf{g}_i$, y la suma geométrica da $1-\beta_1^t$. Por eso Adam usa $\hat{\mathbf{m}}_t = \mathbf{m}_t/(1-\beta_1^t)$, y lo mismo con $\mathbf{v}_t$ y $\beta_2$.
+- id: u06-p08
+  tipo: vf
+  enunciado: |
+    Con *dropout* invertido (el de PyTorch), al pasar el modelo a evaluación hay que multiplicar los pesos por $1-p$ para que la escala de las activaciones sea la misma que en el entrenamiento.
+  respuesta: false
+  explicacion: |
+    Falso. El *dropout* invertido divide entre $1-p$ **durante el entrenamiento**, así que $\mathbb{E}[\tilde{\mathbf{a}}] = \mathbf{a}$ y en evaluación la red se usa tal cual. Multiplicar por $1-p$ es lo que hacía la versión original, que no escalaba al entrenar.
+- id: u06-p09
+  tipo: numerica
+  enunciado: |
+    Una capa convolucional recibe un mapa de $32 \times 32$ con 64 canales y aplica 128 filtros de $3 \times 3$ (con sesgo). ¿Cuántos parámetros tiene?
+  respuesta: 73856
+  tolerancia: 0
+  explicacion: |
+    Cada filtro abarca todos los canales de entrada: $64 \cdot 3 \cdot 3 = 576$ pesos más un sesgo. Con 128 filtros: $(576 + 1) \cdot 128 = 73{,}856$. El tamaño del mapa ($32 \times 32$) no interviene.
+- id: u06-p10
+  tipo: opcion
+  enunciado: |
+    Una imagen de $28 \times 28$ pasa por una convolución de $5 \times 5$ con relleno 2 y paso 2. ¿De qué tamaño es el mapa de salida?
+  opciones:
+  - texto: $14 \times 14$
+    correcta: true
+  - texto: $12 \times 12$
+    retro: 'Eso sería sin relleno: $\lfloor (28 - 5)/2 \rfloor + 1 = 12$. Con relleno 2 la cuenta es $\lfloor (28 + 4 - 5)/2 \rfloor + 1$.'
+  - texto: $28 \times 28$
+    retro: El relleno 2 conservaría el tamaño con paso 1, pero aquí el paso es 2.
+  - texto: $24 \times 24$
+    retro: 'Es $28 - 5 + 1$: ignora tanto el relleno como el paso.'
+  explicacion: |
+    $n_{\text{sal}} = \lfloor (n + 2p - k)/s \rfloor + 1 = \lfloor (28 + 4 - 5)/2 \rfloor + 1 = 13 + 1 = 14$.
+- id: u06-p11
+  tipo: vf
+  enunciado: |
+    Una capa convolucional seguida de *max-pooling* de $2 \times 2$ con paso 2 es exactamente invariante a cualquier traslación de un pixel de la imagen de entrada.
+  respuesta: false
+  explicacion: |
+    Falso. La convolución es equivariante (el mapa se mueve con la imagen) y el *max-pooling* solo da una invariancia aproximada: si el máximo de un bloque cruza la frontera hacia el bloque vecino, la salida cambia. En la libreta, tras dos *poolings* la representación todavía cambia un 14 % al mover la imagen un pixel.
+- id: u06-p12
+  tipo: opcion
+  enunciado: |
+    En EuroSAT, con 10 imágenes etiquetadas por clase, una regresión logística sobre los atributos de una ResNet-18 entrenada en ImageNet acertó el 77 % de las veces; una red pequeña entrenada desde cero con las mismas imágenes, el 55 %. ¿Cuál es la mejor explicación?
+  opciones:
+  - texto: Las capas de la red preentrenada ya aprendieron rasgos generales de imágenes (bordes, texturas, patrones) que también describen el uso de suelo, y con 100 imágenes no se pueden aprender desde cero.
+    correcta: true
+  - texto: ImageNet contiene imágenes de satélite de las mismas 10 clases.
+    retro: ImageNet son fotografías de objetos cotidianos (animales, vehículos, alimentos…); la red nunca vio estas imágenes de satélite.
+  - texto: La regresión logística es un clasificador más flexible que una red convolucional.
+    retro: Es al revés, la logística es lineal. La diferencia está en los atributos sobre los que se ajusta.
+  - texto: La red desde cero tiene más parámetros que la ResNet-18.
+    retro: La red desde cero tiene unos 24,000 parámetros; la ResNet-18, unos 11.7 millones.
+  explicacion: |
+    Es transferencia: los atributos aprendidos con millones de imágenes de otro problema son una buena representación inicial. Con pocas etiquetas, eso vale más que una arquitectura entrenada solo con los datos nuevos. El precio es heredar también los sesgos de los datos de origen.
+- id: u06-p13
+  tipo: numerica
+  enunciado: |
+    Un modelo de lenguaje de caracteres tiene, en validación, una entropía cruzada promedio de 1.36 nats por carácter. ¿Cuál es su perplejidad? (Redondea a dos decimales.)
+  respuesta: 3.9
+  tolerancia: 0.02
+  explicacion: |
+    La perplejidad es $e^{H} = e^{1.36} \approx 3.90$: el modelo duda, en promedio, como si eligiera uniformemente entre unas 3.9 letras. En bits por carácter es $1.36/\ln 2 \approx 1.96$. Es la cifra del *transformer* del *Quijote*.
+- id: u06-p14
+  tipo: opcion
+  enunciado: |
+    En la atención de producto punto se divide $\mathbf{q}^\top\mathbf{k}$ entre $\sqrt{d_k}$. Si las componentes de $\mathbf{q}$ y $\mathbf{k}$ son independientes, con media 0 y varianza 1, ¿cuál es la razón?
+  opciones:
+  - texto: $\operatorname{Var}(\mathbf{q}^\top\mathbf{k}) = d_k$; sin escalar, el softmax se satura y su jacobiana se acerca a cero.
+    correcta: true
+  - texto: Para que los pesos $\alpha_{ts}$ sumen 1.
+    retro: El softmax ya suma 1 con o sin la división; la escala cambia qué tan concentrados quedan los pesos, no su suma.
+  - texto: Porque $\mathbb{E}[\mathbf{q}^\top\mathbf{k}] = \sqrt{d_k}$ y hay que centrar los puntajes.
+    retro: La media del producto punto es 0; lo que crece con $d_k$ es la varianza.
+  - texto: Para reducir el costo de $O(T^2 d)$ a $O(T d)$.
+    retro: Dividir entre una constante no cambia el número de operaciones.
+  explicacion: |
+    Cada término $q_ik_i$ tiene varianza 1 y son $d_k$ términos independientes: $\operatorname{Var}(\mathbf{q}^\top\mathbf{k}) = d_k$. Con puntajes de desviación estándar $\sqrt{d_k}$ el softmax pone casi todo el peso en una clave (con $d_k = 1024$, el 95 %), y la jacobiana $\operatorname{diag}(\mathbf{p}) - \mathbf{p}\mathbf{p}^\top$ se encoge. Dividir entre $\sqrt{d_k}$ devuelve la varianza a 1.
+- id: u06-p15
+  tipo: numerica
+  enunciado: |
+    En una red recurrente $\mathbf{h}_t = \tanh(W\mathbf{h}_{t-1} + U\mathbf{x}_t)$ con $\sigma_{\max}(W) = 0.9$, ¿cuál es la cota superior de $\lVert\partial\mathbf{h}_T/\partial\mathbf{h}_t\rVert_2$ cuando $T - t = 50$? (Da el valor con tres cifras significativas.)
+  respuesta: 0.00515
+  tolerancia: 0.0001
+  explicacion: |
+    $\partial\mathbf{h}_T/\partial\mathbf{h}_t = \prod_{s=t+1}^{T}\operatorname{diag}(1 - \mathbf{h}_s^2)\,W$ y cada factor tiene norma a lo más $\sigma_{\max}(W)$, porque $0 < 1 - h^2 \le 1$. La cota es $0.9^{50} \approx 0.00515$: a 50 pasos, el gradiente ya se redujo a medio por ciento como mínimo. Es el desvanecimiento del gradiente.
+- id: u06-p16
+  tipo: vf
+  enunciado: |
+    Sin encaje de posición y sin máscara causal, si se permutan las posiciones de la entrada de una capa de autoatención, sus salidas quedan permutadas de la misma manera.
+  respuesta: true
+  explicacion: |
+    Verdadero. Con $X' = PX$, $Q' = PQ$, $K' = PK$, $V' = PV$, y $\operatorname{softmax}(PQK^\top P^\top/\sqrt{d_k})PV = P\operatorname{softmax}(QK^\top/\sqrt{d_k})V$, porque el softmax por renglones conmuta con permutar renglones y columnas. La atención no sabe en qué orden están las letras: por eso hay que sumarles un encaje de posición.

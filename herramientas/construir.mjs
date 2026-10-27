@@ -36,7 +36,7 @@ for (const f of decks) {
     join(RAIZ, 'presentaciones'))
 }
 
-for (const [origen, destino] of [['examenes/archivo', 'examenes/archivo'], ['quizzes/exportados', 'quizzes/exportados']]) {
+for (const [origen, destino] of [['examenes/archivo', 'examenes/archivo'], ['examenes/ejemplos', 'examenes/ejemplos'], ['quizzes/exportados', 'quizzes/exportados']]) {
   if (existsSync(join(RAIZ, origen)))
     cpSync(join(RAIZ, origen), join(SALIDA, destino), { recursive: true, filter: s => !/\.(tex|md|png)$/.test(s) || s.endsWith('.pdf') })
 }

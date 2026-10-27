@@ -58,3 +58,13 @@ def cargar(nombre: str, rama: str | None = None, **kwargs) -> pd.DataFrame:
             if e.code != 404:
                 raise
     raise FileNotFoundError(f"No encuentro '{nombre}' en datos/ (rama {rama or RAMA}).")
+
+
+def texto(nombre: str, rama: str | None = None) -> str:
+    """Lee datos/<nombre> (por ejemplo 'quijote.txt') como texto UTF-8."""
+    archivo = nombre if Path(nombre).suffix else nombre + ".txt"
+    local = _local(archivo)
+    if local is not None:
+        return local.read_text(encoding="utf-8")
+    with urllib.request.urlopen(url(archivo, rama), timeout=60) as r:
+        return r.read().decode("utf-8")

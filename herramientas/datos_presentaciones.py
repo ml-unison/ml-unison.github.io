@@ -2,9 +2,13 @@
 
 Las presentaciones dibujan las gráficas en el navegador (con la tipografía y la
 escala de la lámina), pero los números salen de aquí, con el mismo NumPy que las
-libretas. Cada unidad escribe `presentaciones/datos/uNN.json`.
+libretas. Las unidades 1–4 escriben `presentaciones/datos/uNN.json` desde este
+archivo; a partir de la Unidad 5, cada presentación tiene su propio módulo
+`herramientas/laminas/uNN_MM.py` con una función `datos() -> dict`, que escribe
+`presentaciones/datos/uNN-MM.json`.
 
-    uv run python herramientas/datos_presentaciones.py
+    uv run python herramientas/datos_presentaciones.py            # todo
+    uv run python herramientas/datos_presentaciones.py u04 u05_02 # solo esos
 """
 
 from __future__ import annotations
@@ -786,11 +790,33 @@ def u04() -> dict:
     return out
 
 
+def _modulos() -> dict:
+    """Módulos de herramientas/laminas/ (uno por presentación, desde la Unidad 5)."""
+    import importlib.util
+
+    carpeta = Path(__file__).parent / "laminas"
+    if str(carpeta) not in sys.path:
+        sys.path.insert(0, str(carpeta))  # para `from _comun import r`
+    fns = {}
+    for f in sorted((Path(__file__).parent / "laminas").glob("u[0-9][0-9]_[0-9][0-9].py")):
+        spec = importlib.util.spec_from_file_location(f.stem, f)
+        fns[f.stem] = lambda spec=spec: _cargar(spec).datos()
+    return fns
+
+
+def _cargar(spec):
+    import importlib.util
+
+    m = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(m)
+    return m
+
+
 if __name__ == "__main__":
     DESTINO.mkdir(parents=True, exist_ok=True)
-    for nombre, fn in {"u01": u01, "u02": u02, "u03": u03, "u04": u04}.items():
+    for nombre, fn in ({"u01": u01, "u02": u02, "u03": u03, "u04": u04} | _modulos()).items():
         if len(sys.argv) > 1 and nombre not in sys.argv[1:]:
             continue
-        ruta = DESTINO / f"{nombre}.json"
+        ruta = DESTINO / f"{nombre.replace('_', '-')}.json"
         ruta.write_text(json.dumps(fn(), separators=(",", ":")), encoding="utf-8")
         print(f"✓ {ruta.relative_to(DESTINO.parents[1])}")

@@ -129,4 +129,123 @@ export const materiales: Record<string, Material> = {
     ],
     quiz: 'u04',
   },
+  '05-arboles-ensambles': {
+    objetivos: [
+      'Explicar y programar la construcción voraz de un árbol con Gini o entropía, y justificar por qué el error de clasificación es mala guía.',
+      'Controlar la complejidad de un árbol con poda por costo–complejidad y validación cruzada, e identificar su alta varianza como motivación de los ensambles.',
+      'Derivar y usar $\\rho\\sigma^2 + \\frac{1-\\rho}{B}\\sigma^2$ para explicar por qué funcionan el bagging y los bosques, y elegir sus hiperparámetros con el error fuera de la bolsa.',
+      'Derivar el voto de AdaBoost, los pseudo-residuos y el peso y la ganancia de una hoja en XGBoost, y programar gradient boosting desde cero.',
+      'Entrenar y ajustar modelos de boosting (tasa de aprendizaje, número de árboles, parada temprana) y detectar fugas de información antes de comparar modelos.',
+      'Calcular e interpretar la importancia por permutación, la dependencia parcial y las curvas ICE, y reconocer cómo las afectan los atributos correlacionados.',
+      'Definir los valores de Shapley por sus axiomas, calcularlos por enumeración y explicar predicciones con SHAP, distinguiendo explicar el modelo de explicar el mundo.',
+    ],
+    presentaciones: [
+      { id: 'u05-01-arboles', titulo: 'Árboles de decisión', descripcion: 'Cómo un árbol parte el espacio con preguntas de sí o no: impureza, el algoritmo voraz CART, árboles de regresión, poda por costo–complejidad y por qué los árboles son inestables.' },
+      { id: 'u05-02-bosques', titulo: 'Bagging y bosques aleatorios', descripcion: 'Por qué promediar árboles reduce la varianza (y cuánto no), bootstrap, bagging, bosques aleatorios, error fuera de la bolsa e importancia de atributos.' },
+      { id: 'u05-03-boosting', titulo: 'Boosting: de AdaBoost a XGBoost', descripcion: 'Pesos que se concentran en los errores, descenso por gradiente en el espacio de funciones, parada temprana y la ganancia de segundo orden de XGBoost.' },
+      { id: 'u05-04-interpretabilidad', titulo: 'Interpretabilidad: qué aprendió el modelo', descripcion: 'Por qué y cómo mirar dentro de un modelo: del asma que «protegía» a los valores de Shapley, con sus límites.' },
+    ],
+    libretas: [
+      { ruta: 'unidades/05-arboles-ensambles/ejemplos/u05-e01-arboles.ipynb', titulo: 'Árboles de decisión: de los pingüinos a las bicicletas', descripcion: 'Un árbol de clasificación desde cero con Gini y árboles de regresión podados con validación cruzada que les ganan a los modelos lineales de la Unidad 4.' },
+      { ruta: 'unidades/05-arboles-ensambles/ejemplos/u05-e02-bosques.ipynb', titulo: 'Bosques aleatorios: la sabiduría de muchos árboles', descripcion: 'Bagging y bosque desde cero en el censo, error fuera de la bolsa, sesgo y varianza medidos en las bicicletas, y la trampa de la importancia MDI.' },
+      { ruta: 'unidades/05-arboles-ensambles/ejemplos/u05-e03-boosting.ipynb', titulo: 'Boosting y una campaña de mercadeo bancario', descripcion: 'AdaBoost y gradient boosting desde cero; una fuga de información a propósito; logística, bosque, HistGradientBoosting, XGBoost y LightGBM comparados.' },
+      { ruta: 'unidades/05-arboles-ensambles/ejemplos/u05-e04-interpretabilidad.ipynb', titulo: 'Interpretar un modelo de precios de casas', descripcion: 'Importancia por permutación, dependencia parcial, curvas ICE y valores de Shapley a mano, por enumeración exacta y con SHAP.' },
+    ],
+    laboratorios: [
+      { ruta: 'unidades/05-arboles-ensambles/laboratorios/u05-lab05-arboles-boosting.ipynb', titulo: 'Laboratorio 5 · Árboles y boosting desde cero', descripcion: 'Impureza, la mejor división en O(N log N) y un árbol de regresión completo; bagging con error fuera de la bolsa, gradient boosting y las fórmulas de hoja y ganancia de XGBoost, en las bicicletas de Washington. Se verifica automáticamente.' },
+    ],
+    lecturas: [
+      { obra: 'Hastie, Tibshirani y Friedman (2009). The Elements of Statistical Learning.', detalle: 'Secciones 9.2, 8.7, capítulo 10 y secciones 15.1–15.3.' },
+      { obra: 'Breiman (2001). Random forests. Machine Learning 45.', detalle: 'Artículo completo.' },
+      { obra: 'Chen y Guestrin (2016). XGBoost: A scalable tree boosting system. KDD.', detalle: 'Secciones 1–3.' },
+      { obra: 'Molnar (2022). Interpretable Machine Learning, 2.ª ed.', detalle: 'Capítulos de dependencia parcial, importancia por permutación, ICE, valores de Shapley y SHAP.' },
+    ],
+    quiz: 'u05',
+  },
+  '08-mlops': {
+    objetivos: [
+      'Registrar experimentos de modo que cualquier corrida pueda compararse y reproducirse: código, datos, entorno, parámetros, métricas y artefactos.',
+      'Administrar el ciclo de vida de un modelo con un registro (versiones, alias campeón/retador, firma) y documentarlo con una ficha que incluya métricas desagregadas por grupo.',
+      'Construir y probar un servicio de predicción que valide entradas, reporte la versión del modelo y registre lo que predice.',
+      'Distinguir los tipos de cambio de distribución, detectarlos con PSI y Kolmogorov–Smirnov, y explicar por qué el cambio de concepto exige medir el error con las etiquetas.',
+    ],
+    presentaciones: [
+      { id: 'u08-01-experimentos', titulo: 'Experimentos reproducibles y registro de modelos', descripcion: 'Por qué el mismo código da números distintos, qué guardar de cada corrida, y cómo MLflow organiza experimentos, versiones, alias y firmas; más los riesgos de pickle y las fichas de modelo.' },
+      { id: 'u08-02-despliegue-monitoreo', titulo: 'Despliegue y monitoreo', descripcion: 'Del caso Zillow a un servicio con FastAPI; cambio de covariables, de concepto y de prevalencia; PSI, la prueba de Kolmogorov–Smirnov y políticas de reentrenamiento.' },
+    ],
+    libretas: [
+      { ruta: 'unidades/08-mlops/ejemplos/u08-e01-mlflow.ipynb', titulo: 'Seguimiento de experimentos con MLflow', descripcion: 'Siete modelos de riesgo de crédito registrados en MLflow, comparados con una consulta, promovidos con versiones y alias, reproducidos y documentados con su ficha.' },
+      { ruta: 'unidades/08-mlops/ejemplos/u08-e02-despliegue-monitoreo.ipynb', titulo: 'Un servicio de predicción y la vigilancia del cambio', descripcion: 'Un modelo de bicicletas entrenado con 2011, servido con FastAPI y vigilado durante 2012 con PSI y Kolmogorov–Smirnov; políticas de reentrenamiento con y sin retraso de etiquetas.' },
+    ],
+    laboratorios: [
+      { ruta: 'unidades/08-mlops/laboratorios/u08-lab08-servicio-monitoreo.ipynb', titulo: 'Laboratorio 8 · Un servicio de predicción vigilado', descripcion: 'PSI y Kolmogorov–Smirnov desde cero, un reporte de cambio por atributo, una API con FastAPI que valida su entrada y una política de reentrenamiento con ventana móvil. Se verifica automáticamente.' },
+    ],
+    lecturas: [
+      { obra: 'Sculley et al. (2015). Hidden technical debt in machine learning systems. NeurIPS.', detalle: 'Artículo completo.' },
+      { obra: 'Mitchell et al. (2019). Model cards for model reporting. FAT*.', detalle: 'Secciones 3 y 4.' },
+      { obra: 'Huyen (2022). Designing Machine Learning Systems. O\'Reilly.', detalle: 'Capítulos 7 a 9.' },
+      { obra: 'Documentación de MLflow y de FastAPI.', detalle: 'Tracking, Model Registry y el tutorial de FastAPI.' },
+    ],
+    quiz: 'u08',
+  },
+  '07-series-tiempo': {
+    objetivos: [
+      'Descomponer una serie y usar la autocorrelación para reconocer estacionalidad, memoria y no estacionariedad.',
+      'Evaluar un pronóstico honestamente: contra referencias sencillas, por horizonte, con métricas adecuadas (MASE) y con validación de origen móvil, nunca barajando el tiempo.',
+      'Identificar, ajustar y diagnosticar un modelo ARIMA o SARIMA con la ACF, la PACF, el AIC y la prueba de Ljung–Box, entendiendo un AR(p) como una regresión sobre los rezagos.',
+      'Derivar la varianza del error de pronóstico de un AR(1) y de una caminata aleatoria, y evaluar intervalos de predicción.',
+      'Construir atributos rezagados sin fuga, comparar estrategias multipaso por horizonte y obtener intervalos con la pérdida cuantil.',
+    ],
+    presentaciones: [
+      { id: 'u07-01-series-validacion', titulo: 'Series de tiempo: estructura y validación', descripcion: 'Componentes y STL, autocorrelación, estacionariedad, pronósticos de referencia, MASE contra MAPE y validación hacia adelante, con la temperatura de Hermosillo y el caso de Google Flu Trends.' },
+      { id: 'u07-02-arima', titulo: 'Modelos ARIMA', descripcion: 'Modelos con memoria: AR(1), un AR(p) como regresión sobre los rezagos, ACF y PACF, diferenciación, SARIMA por máxima verosimilitud y cómo crece la incertidumbre con el horizonte.' },
+      { id: 'u07-03-aprendizaje-series', titulo: 'Pronosticar con aprendizaje automático', descripcion: 'Rezagos y calendario, la fuga de las variables exógenas, estrategias recursiva y directa, LightGBM y redes, e intervalos con pérdida cuantil.' },
+    ],
+    libretas: [
+      { ruta: 'unidades/07-series-tiempo/ejemplos/u07-e01-series-validacion.ipynb', titulo: 'El clima de Hermosillo: tendencia, estacionalidad y cómo validar un pronóstico', descripcion: '33 años de temperatura diaria: ciclo anual, anomalías, autocorrelación, pronósticos de referencia por horizonte y por qué la validación cruzada aleatoria engaña con series.' },
+      { ruta: 'unidades/07-series-tiempo/ejemplos/u07-e02-arima.ipynb', titulo: 'La curva de Keeling: pronosticar el CO₂ con ARIMA', descripcion: 'AR, MA y SARIMA desde sus propiedades con el CO₂ de Mauna Loa hasta 2014, elegidos por AIC, diagnosticados y comparados con lo que pasó hasta 2026.' },
+      { ruta: 'unidades/07-series-tiempo/ejemplos/u07-e03-aprendizaje-series.ipynb', titulo: 'Pronosticar la demanda de bicicletas hora por hora', descripcion: 'Las próximas 24 horas con atributos rezagados sin fuga, origen móvil, LightGBM y una red en PyTorch, estrategias multipaso e intervalos con pérdida cuantil.' },
+    ],
+    laboratorios: [
+      { ruta: 'unidades/07-series-tiempo/laboratorios/u07-lab07-pronosticos.ipynb', titulo: 'Laboratorio 7 · Validación temporal y modelos autorregresivos desde cero', descripcion: 'Origen móvil, pronósticos ingenuos, MASE, autocorrelación y un AR(p) con pronóstico recursivo para la temperatura de Hermosillo; cuánto engaña la validación cruzada barajada. Se verifica automáticamente.' },
+    ],
+    lecturas: [
+      { obra: 'Hyndman y Athanasopoulos (2021). Forecasting: Principles and Practice, 3.ª ed. OTexts.', detalle: 'Capítulos 2, 3, 5, 9 y 10–12.' },
+      { obra: 'Box, Jenkins, Reinsel y Ljung (2015). Time Series Analysis: Forecasting and Control, 5.ª ed.', detalle: 'Capítulos 3, 4 y 9.' },
+      { obra: 'Makridakis, Spiliotis y Assimakopoulos (2022). M5 accuracy competition. International Journal of Forecasting 38.', detalle: 'Secciones 3 y 4.' },
+    ],
+    quiz: 'u07',
+  },
+  '06-redes-neuronales': {
+    objetivos: [
+      'Derivar e implementar la retropropagación en forma matricial para una red con softmax y entropía cruzada, y verificarla numéricamente.',
+      'Explicar con argumentos de varianza por qué hacen falta la no linealidad y una buena inicialización (Xavier o He), y reconocer el desvanecimiento del gradiente.',
+      'Explicar por qué el momento acelera en problemas mal condicionados y por qué Adam corrige el sesgo; elegir la tasa de aprendizaje con un barrido.',
+      'Diagnosticar el sobreajuste con las curvas de validación y aplicar parada temprana, dropout y normalización por lotes.',
+      'Calcular el tamaño de salida, los parámetros y el campo receptivo de una red convolucional, y explicar su ventaja sobre un perceptrón multicapa.',
+      'Aplicar la transferencia con un modelo preentrenado, compararla con entrenar desde cero y reconocer los sesgos que se heredan.',
+      'Medir un modelo de lenguaje con perplejidad, explicar el desvanecimiento del gradiente en las redes recurrentes y derivar la atención de producto punto escalado.',
+    ],
+    presentaciones: [
+      { id: 'u06-01-mlp-backprop', titulo: 'Perceptrón multicapa y retropropagación', descripcion: 'Del perceptrón de 1958 a la retropropagación: qué hace una capa oculta, qué promete y qué no la aproximación universal, el gradiente en forma matricial y la inicialización.' },
+      { id: 'u06-02-optimizacion', titulo: 'Entrenar redes: optimización y regularización', descripcion: 'Minilotes, tasa de aprendizaje, momento, Adam y calendarios; parada temprana, dropout, normalización por lotes y aumento de datos; el costo energético de entrenar.' },
+      { id: 'u06-03-convolucionales', titulo: 'Redes convolucionales y transferencia', descripcion: 'Localidad y pesos compartidos: convolución, campo receptivo, pooling, conexiones residuales y transferencia, con Fashion-MNIST, EuroSAT y el caso Gender Shades.' },
+      { id: 'u06-04-secuencias-atencion', titulo: 'Secuencias: redes recurrentes, atención y transformers', descripcion: 'Predecir la siguiente letra: perplejidad, n-gramas, el gradiente de las redes recurrentes, la LSTM, la atención y la razón del √d, y qué aprenden las cabezas de un transformer.' },
+    ],
+    libretas: [
+      { ruta: 'unidades/06-redes-neuronales/ejemplos/u06-e01-mlp-backprop.ipynb', titulo: 'Una red neuronal desde cero, y luego con PyTorch', descripcion: 'Un perceptrón multicapa en NumPy con su retropropagación verificada con diferencias finitas, comparado con PyTorch en los dígitos; por qué importa la inicialización.' },
+      { ruta: 'unidades/06-redes-neuronales/ejemplos/u06-e02-optimizacion.ipynb', titulo: 'Entrenar una red con Fashion-MNIST', descripcion: 'SGD, momento y Adam; el ruido del gradiente, el momento en un valle mal condicionado, parada temprana, dropout, normalización por lotes y más datos.' },
+      { ruta: 'unidades/06-redes-neuronales/ejemplos/u06-e03-convolucionales.ipynb', titulo: 'Convoluciones con Fashion-MNIST y transferencia a imágenes de satélite', descripcion: 'La convolución programada y su equivariancia, una red convolucional contra un perceptrón multicapa, y una ResNet-18 de ImageNet aplicada a EuroSAT con pocos ejemplos.' },
+      { ruta: 'unidades/06-redes-neuronales/ejemplos/u06-e04-secuencias-atencion.ipynb', titulo: 'Un modelo de lenguaje del Quijote, letra por letra', descripcion: 'De los n-gramas con suavizado de Laplace a una LSTM y un transformer mínimo escrito a mano, con perplejidad, temperatura y mapas de atención.' },
+    ],
+    laboratorios: [
+      { ruta: 'unidades/06-redes-neuronales/laboratorios/u06-lab06-backprop.ipynb', titulo: 'Laboratorio 6 · Retropropagación desde cero y entrenamiento con PyTorch', descripcion: 'Capa lineal, ReLU y softmax con sus pasadas hacia atrás, verificación con diferencias finitas y un perceptrón multicapa con SGD; el ciclo de entrenamiento en PyTorch y una red convolucional pequeña. Se verifica automáticamente.' },
+    ],
+    lecturas: [
+      { obra: 'Goodfellow, Bengio y Courville (2016). Deep Learning. MIT Press.', detalle: 'Capítulos 6–10.' },
+      { obra: 'Prince (2023). Understanding Deep Learning. MIT Press.', detalle: 'Capítulos 6, 9, 10, 11 y 12.' },
+      { obra: 'Vaswani et al. (2017). Attention is all you need. NeurIPS.', detalle: 'Secciones 3 y 4.' },
+    ],
+    quiz: 'u06',
+  },
 }

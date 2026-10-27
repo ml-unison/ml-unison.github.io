@@ -1,0 +1,114 @@
+\documentclass[11pt]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{lmodern}
+\usepackage[spanish]{babel}
+\usepackage{amsmath,amssymb}
+\usepackage{graphicx}
+\usepackage[left=2cm,right=2cm,top=2cm,bottom=2cm]{geometry}
+\usepackage{enumitem}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{xcolor}
+\usepackage{framed}
+
+\spanishdecimal{.}
+
+\setlist[enumerate,1]{label=\textbf{\arabic*.}, leftmargin=*, itemsep=6pt}
+\setlist[enumerate,2]{label=(\alph*), itemsep=4pt}
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{4pt}
+\pagestyle{plain}
+
+\newcommand{\Ein}{E_{\text{in}}}
+\newcommand{\Eout}{E_{\text{out}}}
+\newcommand{\Hyp}{\mathcal{H}}
+\newcommand{\dvc}{d_{\text{VC}}}
+\newcommand{\vx}{\mathbf{x}}
+\newcommand{\vw}{\mathbf{w}}
+\newcommand{\vy}{\mathbf{y}}
+\newcommand{\R}{\mathbb{R}}
+\newcommand{\T}{^{\top}}
+\newcommand{\E}{\mathbb{E}}
+\newcommand{\Prob}{\mathbb{P}}
+\newcommand{\pts}[1]{\hfill\textbf{(#1~puntos)}}
+\newcommand{\linea}[1]{\rule{#1}{0.4pt}}
+\newcommand{\ptsinc}[1]{{\unskip\nobreak\hfil\penalty50\hskip1em\hbox{}\nobreak\hfill(#1)\parfillskip=0pt\finalhyphendemerits=0\par}}
+
+\newcommand{\encabezado}[2]{%
+\begin{center}
+{\large\bfseries Reconocimiento de Patrones}\\[2pt]
+Universidad de Sonora \textperiodcentered{} Licenciatura en Ciencias de la Computación\\
+Semestre 2027-1 \textperiodcentered{} Prof.\ Julio Waissman Vilanova\\[10pt]
+{\Large\bfseries #1}%
+\ifdefined\tipodoc\\[4pt]{\large\itshape\tipodoc}\fi
+\end{center}
+\ifdefined\tipodoc\else
+\vspace{6pt}
+\textbf{Nombre:} \hrulefill\quad \textbf{Expediente:} \rule{3.5cm}{0.4pt}\par
+\vspace{6pt}
+\fi
+#2
+\par\medskip\hrule\medskip
+}
+
+\newcommand{\espacio}[1]{\par\vspace{#1}}
+\newcommand{\nuevapagina}{\newpage}
+
+
+\begin{document}
+
+\encabezado{Examen rápido 7 \textperiodcentered{} Series de tiempo}{%
+Tiempo: 20 minutos. Responde en esta hoja. Puedes usar calculadora; no se permiten apuntes. Deja indicadas las operaciones.}
+
+\begin{enumerate}
+
+%% ---------------------------------------------------------------
+\item \textbf{Un AR(1).} La serie sigue $y_t = 2 + 0.6\, y_{t-1} + \varepsilon_t$, con $\varepsilon_t$ ruido blanco de varianza $\sigma^2 = 0.64$.
+\begin{enumerate}
+  \item ¿Es estacionaria? Calcula su media $\mu$, su varianza $\gamma_0$ y las autocorrelaciones $\rho_1$, $\rho_2$ y $\rho_3$.
+  \espacio{3.2cm}
+
+  \item El último dato es $y_T = 8$. Pronostica $y_{T+1}$ y $y_{T+2}$, y da un intervalo del 95\,\% para cada uno (supón errores gaussianos y parámetros conocidos).
+  \espacio{3.5cm}
+
+  \item ¿A qué tienden el pronóstico y el ancho del intervalo cuando el horizonte $h$ crece? ¿Qué cambiaría si $\phi = 1$?
+  \espacio{2.2cm}
+\end{enumerate}
+
+\nuevapagina
+%% ---------------------------------------------------------------
+\item \textbf{Ingenuo, estacional y MASE.} Ventas trimestrales (en miles) de dos años de entrenamiento y del año de prueba:
+\begin{center}
+\begin{tabular}{l|cccc|cccc|cccc}
+ & \multicolumn{4}{c|}{año 1} & \multicolumn{4}{c|}{año 2} & \multicolumn{4}{c}{prueba} \\
+trimestre & 1 & 2 & 3 & 4 & 1 & 2 & 3 & 4 & 1 & 2 & 3 & 4 \\ \hline
+ventas & 10 & 14 & 18 & 12 & 12 & 16 & 21 & 13 & 14 & 17 & 22 & 15
+\end{tabular}
+\end{center}
+Con información hasta el final del año 2 se pronostican los cuatro trimestres de prueba.
+\begin{enumerate}
+  \item Escribe los pronósticos del método ingenuo y del estacional ingenuo ($m = 4$) y calcula el MAE de cada uno.
+  \espacio{3cm}
+
+  \item Calcula la escala $q = \frac{1}{T-m}\sum_{t > m} |y_t - y_{t-m}|$ con el entrenamiento, y el MASE de los dos métodos. ¿Qué significa un MASE menor que 1?
+  \espacio{3cm}
+
+  \item Un modelo nuevo obtiene MASE de 0.9 en estos cuatro trimestres de prueba. «Es menor que 1, así que le gana a la referencia estacional», dice su autor. ¿Tiene razón? ¿Qué modelo usarías?
+  \espacio{2cm}
+\end{enumerate}
+
+%% ---------------------------------------------------------------
+\item \textbf{Un AR(1) a mano, e identificación.}
+\begin{enumerate}
+  \item Con la serie $3, 5, 4, 6, 5$, ajusta $y_t = c + \phi\, y_{t-1}$ por mínimos cuadrados (usa los cuatro pares $(y_{t-1}, y_t)$) y pronostica el siguiente valor.
+  \espacio{3.5cm}
+
+  \item Para cada serie, propón un modelo: (i) la ACF decae como $0.8^k$ y la PACF solo tiene una barra, en el rezago 1; (ii) la ACF solo tiene barras en los rezagos 1 y 2 y la PACF decae; (iii) la ACF apenas baja: $0.99, 0.98, 0.97, \dots$
+  \espacio{2.5cm}
+\end{enumerate}
+
+\end{enumerate}
+
+
+\end{document}

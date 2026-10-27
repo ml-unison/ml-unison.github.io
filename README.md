@@ -15,12 +15,13 @@ Sitio y material del curso de aprendizaje automático de la Licenciatura en Cien
 | `quizzes/banco/` | Banco de preguntas, uno por unidad |
 | `paquete/` | Paquete `rdp`: estilo de gráficas, carga de datos y quizzes en las libretas |
 | `datos/` | Conjuntos de datos pequeños del curso |
+| `examenes/ejemplos/` | Exámenes de ejemplo de este semestre (LaTeX y PDF, sin soluciones) |
 | `examenes/archivo/` | Exámenes de semestres anteriores |
 | `herramientas/` | Scripts de construcción, libretas, laboratorios, quizzes y datos de las presentaciones |
 
 ## Trabajo local
 
-Requisitos: [uv](https://docs.astral.sh/uv/) y Node.js ≥ 24.
+Requisitos: [uv](https://docs.astral.sh/uv/) y Node.js ≥ 24. En macOS, XGBoost necesita OpenMP: `brew install libomp`.
 
 ```bash
 uv sync --group dev && npm install
@@ -28,7 +29,7 @@ npm run sitio                                         # sitio con recarga autom�
 npm run presentacion -- u01-01-aprender-de-datos.md   # una presentación con recarga automática
 node herramientas/construir.mjs                       # todo junto en _construccion/
 uv run pytest -q                                      # pruebas de consistencia
-uv run pytest --nbmake unidades/                      # ejecuta todas las libretas
+uv run pytest --nbmake -n 4 unidades/*/ejemplos       # ejecuta todas las libretas de ejemplo
 ```
 
 `BASE=/preview/ node herramientas/construir.mjs` construye igual que la vista previa publicada.
@@ -50,7 +51,7 @@ Cada presentación es un archivo Markdown de Slidev sobre un lienzo de 1280 × 7
 
 - cajas académicas: `<Caja tipo="definicion" nombre="...">`, con los tipos `teorema`, `algoritmo`, `idea`, `cuidado`, `pregunta` y `correcto`;
 - ecuaciones con KaTeX y las macros de `presentaciones/setup/katex.ts` (`\Ein`, `\Eout`, `\Hyp`, `\vx`…);
-- gráficas como componentes Vue en `presentaciones/components/`. Los números los calcula Python (`uv run python herramientas/datos_presentaciones.py` → `presentaciones/datos/uNN.json`) y el navegador los dibuja con la tipografía de la lámina.
+- gráficas como componentes Vue en `presentaciones/components/`. Los números los calcula Python y el navegador los dibuja con la tipografía de la lámina: las unidades 1–4 en `herramientas/datos_presentaciones.py` (→ `presentaciones/datos/uNN.json`) y, desde la Unidad 5, un módulo por presentación en `herramientas/laminas/uNN_MM.py` (→ `presentaciones/datos/uNN-MM.json`). Los JSON se versionan; se regeneran con `uv run python herramientas/datos_presentaciones.py [uNN_MM]` (los de redes neuronales tardan unos minutos porque reentrenan los modelos).
 
 Para agregar una presentación a una unidad, crea el `.md` y regístralo en `sitio/src/datos/materiales.ts`. Se abre en una pestaña nueva; para el PDF, abre `…/#/export` en la presentación (o el menú «Exportar») e imprime desde el navegador. Cada presentación nueva debe tener `browserExporter: true` en su encabezado.
 
@@ -67,6 +68,14 @@ En los bancos solo se permite LaTeX estándar, sin las macros de las presentacio
 ### Laboratorios
 
 Las versiones con solución viven en el repositorio privado `ml-unison/soluciones`, que usa [otter-grader](https://otter-grader.readthedocs.io). Aquí solo se publica la versión para estudiantes.
+
+### Publicación
+
+La rama `rediseno-2027` se publica en la vista previa con cada *push*. Para pasar el rediseño a producción:
+
+1. `uv run python herramientas/libretas.py rama main` (las libretas instalan `rdp` y descargan datos de `main`), commit.
+2. Merge de `rediseno-2027` en `main` (reemplaza por completo el sitio Jekyll anterior, que queda en la etiqueta `legado-2026`).
+3. En GitHub, *Settings → Pages → Source* = «GitHub Actions» (o `gh api -X PUT repos/ml-unison/ml-unison.github.io/pages -f build_type=workflow`). El flujo `publicar.yml` construye y publica `main`.
 
 ## Licencias
 

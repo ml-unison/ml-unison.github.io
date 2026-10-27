@@ -25,6 +25,7 @@ jobs:
       - uses: astral-sh/setup-uv@v6
         with:
           python-version: "3.12"
+          enable-cache: true
       - uses: actions/setup-node@v4
         with:
           node-version: 24
@@ -33,7 +34,6 @@ jobs:
           uv sync --group dev
           npm ci
       - run: |
-          uv run python herramientas/datos_presentaciones.py
           uv run python herramientas/exportar_quizzes.py
       - name: Construir (producción)
         env:

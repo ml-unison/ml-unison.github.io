@@ -41,7 +41,7 @@ export const unidades: Unidad[] = [
     num: 3, slug: '03-fundamentos', titulo: 'Fundamentos del aprendizaje supervisado', semanas: '2.5',
     resumen: 'Por qué es posible generalizar y cómo medirlo con honestidad.',
     temas: ['Hoeffding y dimensión VC', 'Sesgo y varianza', 'Regularización', 'Validación cruzada', 'Métricas, ROC y calibración'],
-    disponible: false,
+    disponible: true,
   },
   {
     num: 4, slug: '04-lineales', titulo: 'Modelos lineales', semanas: '2',

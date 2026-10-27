@@ -66,4 +66,35 @@ export const materiales: Record<string, Material> = {
     ],
     quiz: 'u02',
   },
+  '03-fundamentos': {
+    objetivos: [
+      'Enunciar la desigualdad de Hoeffding, esbozar su demostración y explicar por qué no basta para una hipótesis elegida con los datos.',
+      'Calcular funciones de crecimiento y dimensiones VC sencillas, e interpretar la cota VC.',
+      'Derivar la descomposición en sesgo, varianza y ruido, y diagnosticar con curvas de aprendizaje.',
+      'Derivar ridge, explicar por qué lasso selecciona variables y elegir la regularización con validación cruzada.',
+      'Diseñar una validación honesta: validación cruzada, CV anidada y particiones por grupo.',
+      'Elegir métricas y umbrales según los costos, evaluar la calibración y reconocer los límites de las métricas de equidad.',
+    ],
+    presentaciones: [
+      { id: 'u03-01-factibilidad', titulo: '¿Es posible aprender?', descripcion: 'Hoeffding y su demostración, las 1,000 monedas, la cota de la unión, dicotomías, Sauer y la dimensión VC.' },
+      { id: 'u03-02-sesgo-varianza', titulo: 'Sesgo, varianza y regularización', descripcion: 'La descomposición derivada paso a paso, curvas de aprendizaje, ridge, lasso y su lectura bayesiana.' },
+      { id: 'u03-03-validacion', titulo: 'Validación', descripcion: 'El conjunto de validación, el optimismo de elegir, validación cruzada, LOO sin reentrenar, CV anidada y datos agrupados.' },
+      { id: 'u03-04-metricas', titulo: 'Métricas', descripcion: 'Matriz de confusión, ROC y AUC, umbral de Bayes por costos, calibración y el resultado de imposibilidad en equidad.' },
+    ],
+    libretas: [
+      { ruta: 'unidades/03-fundamentos/ejemplos/u03-e01-factibilidad.ipynb', titulo: '¿Es posible aprender? Hoeffding y dimensión VC, con simulaciones', descripcion: 'La urna, las 1,000 monedas, dicotomías contadas con programación lineal y la cota VC contra la brecha real.' },
+      { ruta: 'unidades/03-fundamentos/ejemplos/u03-e02-sesgo-varianza.ipynb', titulo: 'Sesgo, varianza y regularización', descripcion: 'La descomposición simulada, curvas de aprendizaje, ridge y lasso con los datos de diabetes.' },
+      { ruta: 'unidades/03-fundamentos/ejemplos/u03-e03-validacion.ipynb', titulo: 'Validación: estimar E_out sin hacer trampa', descripcion: 'Casas de Ames y facturas de una tienda: varianza de la validación, fórmula de LOO, regla de una desviación, CV anidada y GroupKFold.' },
+      { ruta: 'unidades/03-fundamentos/ejemplos/u03-e04-metricas-credito.ipynb', titulo: 'Métricas de clasificación: el riesgo de crédito', descripcion: 'ROC, AUC por parejas, curva PR, umbral por costos, calibración y equidad por sexo con 30,000 clientes de Taiwán.' },
+    ],
+    laboratorios: [
+      { ruta: 'unidades/03-fundamentos/laboratorios/u03-lab03-validacion-metricas.ipynb', titulo: 'Laboratorio 3 · Validación cruzada y métricas desde cero', descripcion: 'Ridge en forma cerrada, validación cruzada con la regla de una desviación, curva ROC, AUC por rangos y umbral por costos. Se verifica automáticamente.' },
+    ],
+    lecturas: [
+      { obra: 'Abu-Mostafa, Magdon-Ismail y Lin (2012). Learning From Data.', detalle: 'Capítulos 1.3, 2 y 4.' },
+      { obra: 'Hastie, Tibshirani y Friedman (2009). The Elements of Statistical Learning.', detalle: 'Secciones 3.4 y 7.10.' },
+      { obra: 'Fawcett (2006). An introduction to ROC analysis. Pattern Recognition Letters 27.', detalle: 'Artículo completo.' },
+    ],
+    quiz: 'u03',
+  },
 }

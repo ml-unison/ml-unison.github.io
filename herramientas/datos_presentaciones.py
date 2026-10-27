@@ -359,9 +359,194 @@ def u02() -> dict:
     return out
 
 
+# ---------------------------------------------------------------- Unidad 3
+
+def u03() -> dict:
+    import pandas as pd
+    from scipy.optimize import linprog
+    from scipy.stats import binom
+    from sklearn.calibration import calibration_curve
+    from sklearn.compose import ColumnTransformer
+    from sklearn.datasets import load_diabetes
+    from sklearn.ensemble import HistGradientBoostingClassifier
+    from sklearn.linear_model import LogisticRegression, lasso_path
+    from sklearn.metrics import brier_score_loss, precision_recall_curve, roc_auc_score, roc_curve
+    from sklearn.model_selection import train_test_split
+    from sklearn.pipeline import make_pipeline
+    from sklearn.preprocessing import OneHotEncoder, StandardScaler
+
+    out: dict = {}
+    rng = np.random.default_rng(2027)
+
+    # --- Hoeffding exacto: P[|nu - mu| > eps] con nu ~ Bin(N, mu)/N, contra 2 exp(-2 eps^2 N)
+    Ns = list(range(10, 401, 10))
+    hoef = {}
+    for eps in (0.05, 0.1):
+        exacto = []
+        for N in Ns:
+            k = np.arange(N + 1)
+            exacto.append(float(binom.pmf(k, N, 0.5)[np.abs(k / N - 0.5) > eps].sum()))
+        hoef[str(eps)] = {"exacto": r(exacto, 6), "cota": r([min(1, 2 * np.exp(-2 * eps**2 * N)) for N in Ns], 6)}
+    out["hoeffding"] = {"N": Ns, "eps": hoef}
+
+    # --- las 1,000 monedas, 10 lanzamientos cada una, 20,000 repeticiones
+    caras = rng.binomial(10, 0.5, size=(20000, 1000))
+    nu1, nurand, numin = caras[:, 0] / 10, caras[np.arange(20000), rng.integers(0, 1000, 20000)] / 10, caras.min(1) / 10
+    epss = np.round(np.arange(0, 0.55, 0.05), 2)
+    frec = lambda v: [float(np.mean(np.abs(v - 0.5) > e)) for e in epss]
+    out["monedas"] = {"hist": {n: [int(np.sum(np.isclose(v, j / 10))) for j in range(11)] for n, v in [("primera", nu1), ("azar", nurand), ("minima", numin)]},
+                      "eps": epss.tolist(), "primera": r(frec(nu1), 4), "azar": r(frec(nurand), 4), "minima": r(frec(numin), 4),
+                      "cota": r([min(1, 2 * np.exp(-2 * e**2 * 10)) for e in epss], 4)}
+
+    # --- dicotomías de 3 puntos con un perceptrón: una recta separadora para cada etiquetado
+    P3 = np.array([[0.2, 0.25], [0.8, 0.3], [0.45, 0.8]])
+    rectas = []
+    for m in range(8):
+        y = np.array([1 if (m >> i) & 1 else -1 for i in range(3)])
+        # máximo margen aproximado: max t s.a. y_i (w·x_i + b) >= t, |w|_inf <= 1
+        c = np.array([0, 0, 0, -1.0])
+        A = np.column_stack([-y[:, None] * P3, -y, np.ones(3)])
+        res = linprog(c, A_ub=A, b_ub=np.zeros(3), bounds=[(-1, 1), (-1, 1), (-5, 5), (0, None)])
+        w = res.x[:3]
+        rectas.append({"y": y.tolist(), "w": r(w, 4)})
+    out["dicotomias"] = {"puntos": P3.tolist(), "rectas": rectas,
+                         "xor": [[0.25, 0.25, 1], [0.75, 0.75, 1], [0.25, 0.75, -1], [0.75, 0.25, -1]]}
+    Nm = list(range(1, 13))
+    out["crecimiento"] = {"N": Nm, "todas": [2**n for n in Nm], "rayos": [n + 1 for n in Nm],
+                          "intervalos": [n * (n + 1) // 2 + 1 for n in Nm], "perceptron": [n * (n - 1) + 2 for n in Nm]}
+
+    # --- cota VC (forma de Learning From Data) para d_VC = 3, delta = 0.05; m_H(2N) <= (2N)^d + 1
+    NV = np.unique(np.round(np.logspace(2, 6, 60))).astype(float)
+    omega = lambda N, d=3, delta=0.05: np.sqrt(8 / N * np.log(4 * ((2 * N) ** d + 1) / delta))
+    out["cota_vc"] = {"N": NV.tolist(), "omega": r(omega(NV), 4),
+                      "N_para_01": int(next(n for n in range(1000, 10**7, 100) if omega(n) <= 0.1))}
+
+    # --- sesgo y varianza: sin(2 pi x) + ruido 0.25, N = 15 (como en la Unidad 1)
+    f = lambda x: np.sin(2 * np.pi * x)
+    xg = np.linspace(0, 1, 101)
+    # x estratificada (una por cada N-ésimo de [0, 1]), como en la libreta u03-e02: con x libres a veces
+    # quedan huecos en los extremos y la varianza de los polinomios de grado alto es infinita en la práctica
+    estrat = lambda N: (np.arange(N) + rng.uniform(0, 1, N)) / N
+    def ajustes(grado, N=15, R=2000, lam=0.0):
+        G = np.empty((R, len(xg)))
+        for t in range(R):
+            x = estrat(N); y = f(x) + rng.normal(0, 0.25, N)
+            V = np.vander(2 * x - 1, grado + 1); Vg = np.vander(2 * xg - 1, grado + 1)
+            w = np.linalg.solve(V.T @ V + lam * np.eye(grado + 1) + 1e-10 * np.eye(grado + 1), V.T @ y)
+            G[t] = Vg @ w
+        return G
+    sv = {"grado": list(range(0, 11)), "sesgo2": [], "var": []}
+    muestras = {}
+    for gdo in range(0, 11):
+        G = ajustes(gdo)
+        gbar = G.mean(0)
+        sv["sesgo2"].append(float(np.mean((gbar - f(xg)) ** 2)))
+        sv["var"].append(float(np.mean(G.var(0))))
+        if gdo in (1, 3, 9):
+            muestras[gdo] = {"curvas": r(np.clip(G[:25], -2.5, 2.5), 3), "media": r(gbar, 3)}
+    sv["sesgo2"] = r(sv["sesgo2"], 4); sv["var"] = r(np.minimum(sv["var"], 50), 4)
+    out["sesgo_varianza"] = {**sv, "x": r(xg, 3), "f": r(f(xg), 3), "muestras": muestras, "ruido": 0.0625}
+
+    # curvas de aprendizaje: E_in y E_out esperados contra N para grados 1 y 5
+    curvas = {}
+    for gdo in (1, 5):
+        Ein, Eout = [], []
+        for N in range(gdo + 2, 61, 2):
+            ei = eo = 0.0
+            for _ in range(300):
+                x = estrat(N); y = f(x) + rng.normal(0, 0.25, N)
+                V = np.vander(2 * x - 1, gdo + 1); w = np.linalg.lstsq(V, y, rcond=None)[0]
+                xt = rng.uniform(0, 1, 400); yt = f(xt) + rng.normal(0, 0.25, 400)
+                ei += np.mean((V @ w - y) ** 2); eo += np.mean((np.vander(2 * xt - 1, gdo + 1) @ w - yt) ** 2)
+            Ein.append(ei / 300); Eout.append(min(eo / 300, 3))
+        curvas[gdo] = {"N": list(range(gdo + 2, 61, 2)), "ein": r(Ein, 4), "eout": r(Eout, 4)}
+    out["aprendizaje"] = curvas
+
+    # regularización: grado 12 con distintos lambda (un mismo conjunto) y sesgo/varianza contra lambda
+    x = estrat(15); y = f(x) + rng.normal(0, 0.25, 15)
+    V = np.vander(2 * x - 1, 13); Vg = np.vander(2 * xg - 1, 13)
+    reg = {}
+    for lam in (0.0, 1e-4, 1e-2, 1.0):
+        w = np.linalg.solve(V.T @ V + lam * np.eye(13) + 1e-12 * np.eye(13), V.T @ y)
+        reg[str(lam)] = r(np.clip(Vg @ w, -3, 3), 3)
+    lams = np.logspace(-6, 1, 15)
+    bl, vl = [], []
+    for lam in lams:
+        G = ajustes(12, lam=lam, R=800); gbar = G.mean(0)
+        bl.append(float(np.mean((gbar - f(xg)) ** 2))); vl.append(float(np.mean(G.var(0))))
+    out["regularizacion"] = {"xtr": r(x, 3), "ytr": r(y, 3), "curvas": reg, "lam": r(lams, 8), "sesgo2": r(bl, 4), "var": r(np.minimum(vl, 50), 4)}
+
+    # caminos de ridge y lasso en diabetes (estandarizada)
+    db = load_diabetes()
+    Xd = StandardScaler().fit_transform(db.data); yd = db.target - db.target.mean()
+    lr = np.logspace(-2, 5, 50)
+    U, sd_, Vt = np.linalg.svd(Xd, full_matrices=False)
+    ridge = np.array([Vt.T @ np.diag(sd_ / (sd_**2 + l)) @ U.T @ yd for l in lr])
+    la, coefs, _ = lasso_path(Xd, yd, alphas=np.logspace(-1.5, 1.7, 50))
+    out["caminos"] = {"nombres": ["edad", "sexo", "IMC", "presión", "s1", "s2", "s3", "s4", "s5", "s6"],
+                      "lam_ridge": r(lr, 4), "ridge": r(ridge.T, 2), "lam_lasso": r(la, 4), "lasso": r(coefs, 2)}
+
+    # --- validación: optimismo de quedarse con el mejor de M modelos sin poder predictivo
+    Ms = [1, 2, 5, 10, 20, 50, 100, 200, 500]
+    K = 100
+    mejor = [float(np.mean(rng.binomial(K, 0.5, size=(3000, M)).min(1) / K)) for M in Ms]
+    out["optimismo"] = {"M": Ms, "mejor": r(mejor, 4), "K": K}
+
+    # --- métricas con el crédito de Taiwán
+    cr = pd.read_csv(DESTINO.parents[1] / "datos" / "credito_taiwan.csv")
+    y = cr.pop("incumple").to_numpy()
+    cat = ["sexo", "escolaridad", "estado_civil"]
+    # misma partición y modelos que la libreta u03-e04
+    Xtr, Xte, ytr, yte = train_test_split(cr, y, test_size=0.25, stratify=y, random_state=2011)
+    prep = ColumnTransformer([("cat", OneHotEncoder(handle_unknown="ignore"), cat)], remainder=StandardScaler())
+    log = make_pipeline(prep, LogisticRegression(max_iter=2000)).fit(Xtr, ytr)
+    from sklearn.calibration import CalibratedClassifierCV
+    from sklearn.ensemble import RandomForestClassifier
+    bosque = RandomForestClassifier(n_estimators=300, min_samples_leaf=20, n_jobs=-1, random_state=2011)
+    hgb = bosque.fit(Xtr, ytr)
+    pl, ph = log.predict_proba(Xte)[:, 1], hgb.predict_proba(Xte)[:, 1]
+    piso = CalibratedClassifierCV(RandomForestClassifier(n_estimators=300, min_samples_leaf=20, n_jobs=-1, random_state=2011),
+                                  method="isotonic", cv=5).fit(Xtr, ytr).predict_proba(Xte)[:, 1]
+    def roc_red(p):
+        fpr, tpr, thr = roc_curve(yte, p)
+        idx = np.unique(np.linspace(0, len(fpr) - 1, 150).astype(int))
+        return {"fpr": r(fpr[idx], 4), "tpr": r(tpr[idx], 4), "auc": round(float(roc_auc_score(yte, p)), 3)}
+    def pr_red(p):
+        pr, rc, _ = precision_recall_curve(yte, p)
+        idx = np.unique(np.linspace(0, len(pr) - 1, 150).astype(int))
+        return {"precision": r(pr[idx], 4), "exhaustividad": r(rc[idx], 4)}
+    bins = np.linspace(0, 1, 41)
+    out["credito"] = {
+        "n_prueba": int(len(yte)), "prevalencia": round(float(yte.mean()), 4), "exactitud_base": round(float(1 - yte.mean()), 4),
+        "hist_pos": np.histogram(ph[yte == 1], bins)[0].tolist(), "hist_neg": np.histogram(ph[yte == 0], bins)[0].tolist(),
+        "puntajes_pos": r(np.sort(ph[yte == 1]), 4), "puntajes_neg": r(np.sort(ph[yte == 0]), 4),
+        "roc": {"logistica": roc_red(pl), "bosque": roc_red(ph)}, "pr": {"logistica": pr_red(pl), "bosque": pr_red(ph)},
+    }
+    # costos: c_FP = 1 (llamar o reducir el límite a quien sí paga), c_FN = 5 (pérdida esperada por incumplimiento)
+    ts = np.round(np.linspace(0.02, 0.9, 89), 3)
+    costo = lambda p, t, cfp=1, cfn=5: float((cfp * np.sum((p >= t) & (yte == 0)) + cfn * np.sum((p < t) & (yte == 1))) / len(yte))
+    out["costos"] = {"t": ts.tolist(), "logistica": r([costo(pl, t) for t in ts], 4), "bosque": r([costo(ph, t) for t in ts], 4),
+                     "t_bayes": round(1 / 6, 4), "cfp": 1, "cfn": 5}
+    cal = {}
+    for nombre, p in (("logistica", pl), ("bosque", ph), ("bosque_iso", piso)):
+        pv, pp = calibration_curve(yte, p, n_bins=10, strategy="quantile")
+        cal[nombre] = {"predicha": r(pp, 4), "observada": r(pv, 4), "brier": round(float(brier_score_loss(yte, p)), 4)}
+    out["calibracion"] = cal
+    t = 1 / 6
+    grupos = {}
+    sexo = Xte.sexo.to_numpy()
+    for g, nombre in ((1, "hombres"), (2, "mujeres")):
+        m = sexo == g; yy, pp = yte[m], piso[m] >= t
+        grupos[nombre] = {"n": int(m.sum()), "prevalencia": round(float(yy.mean()), 4),
+                          "seleccion": round(float(pp.mean()), 4), "tpr": round(float(pp[yy == 1].mean()), 4),
+                          "fpr": round(float(pp[yy == 0].mean()), 4), "vpp": round(float(yy[pp].mean()), 4)}
+    out["equidad"] = grupos
+    return out
+
+
 if __name__ == "__main__":
     DESTINO.mkdir(parents=True, exist_ok=True)
-    for nombre, fn in {"u01": u01, "u02": u02}.items():
+    for nombre, fn in {"u01": u01, "u02": u02, "u03": u03}.items():
         if len(sys.argv) > 1 and nombre not in sys.argv[1:]:
             continue
         ruta = DESTINO / f"{nombre}.json"

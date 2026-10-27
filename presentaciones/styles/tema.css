@@ -385,3 +385,6 @@
 .comparacion__cifra.tenue { color: var(--azul-tenue); }
 .comparacion__nota { font-size: 22px; color: var(--tenue); }
 .comparacion__nota b { color: #3F7F2E; }
+
+/* Las fórmulas no heredan las mayúsculas de títulos y encabezados de tabla (σ ≠ Σ, λ ≠ Λ). */
+.katex, .katex * { text-transform: none !important; }

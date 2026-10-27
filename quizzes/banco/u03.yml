@@ -1,0 +1,172 @@
+titulo: "Unidad 3 · Fundamentos del aprendizaje supervisado"
+unidad: 3
+preguntas:
+  - id: u03-p01
+    tipo: opcion
+    enunciado: |
+      La desigualdad de Hoeffding $\mathbb{P}[|\nu-\mu|>\varepsilon] \le 2e^{-2\varepsilon^2 N}$ aplicada a una hipótesis $h$, ¿bajo qué condición es válida?
+    opciones:
+      - texto: "Si $h$ se fijó antes de ver los datos y los $N$ datos son independientes y de la misma distribución."
+        correcta: true
+      - texto: Si $h$ es la hipótesis con menor $E_{\text{in}}$ del conjunto $\mathcal{H}$.
+        retro: "Elegir $h$ después de ver los datos rompe la hipótesis de la desigualdad: es el experimento de las 1,000 monedas."
+      - texto: Si $N$ es mayor que la dimensión VC.
+        retro: Hoeffding no habla de la dimensión VC; es una cota para una sola hipótesis fija.
+      - texto: "Solo si $\\mu = 0.5$."
+        retro: La cota no depende de $\mu$.
+    explicacion: |
+      Hoeffding acota la desviación de un promedio de variables independientes y acotadas respecto a su media. La media $\mu = E_{\text{out}}(h)$ debe estar fija antes de muestrear.
+
+  - id: u03-p02
+    tipo: numerica
+    enunciado: |
+      Mil personas lanzan una moneda justa 10 veces cada una. ¿Cuál es la probabilidad de que **al menos una** saque 10 águilas? (escribe un decimal con dos cifras)
+    respuesta: 0.62
+    tolerancia: 0.01
+    explicacion: |
+      $1 - (1 - 2^{-10})^{1000} \approx 1 - e^{-0.977} \approx 0.62$. Elegir la mejor de muchas hipótesis produce resultados extremos aunque todas sean iguales.
+
+  - id: u03-p03
+    tipo: opcion
+    enunciado: |
+      ¿Cuántas dicotomías puede producir un perceptrón en $\mathbb{R}^2$ sobre 4 puntos en posición general (la función de crecimiento $m_{\mathcal{H}}(4)$)?
+    opciones:
+      - texto: "14"
+        correcta: true
+      - texto: "16"
+        retro: "Serían todas las $2^4$; pero la dicotomía tipo «XOR» (esquinas opuestas con la misma etiqueta) no se puede separar con una recta."
+      - texto: "8"
+        retro: Ese es $m_{\mathcal{H}}(3) = 2^3$.
+      - texto: "5"
+        retro: Ese es $m_{\mathcal{H}}(4)$ para rayos positivos ($N+1$).
+    explicacion: |
+      $m_{\mathcal{H}}(N) = N(N-1) + 2$ para el perceptrón en el plano: $4 \cdot 3 + 2 = 14$. Como $14 < 16$, $k = 4$ es un punto de quiebre y $d_{\text{VC}} = 3$.
+
+  - id: u03-p04
+    tipo: numerica
+    enunciado: |
+      ¿Cuál es la dimensión VC de un perceptrón en $\mathbb{R}^5$ (con término de sesgo)?
+    respuesta: 6
+    tolerancia: 0
+    explicacion: |
+      $d_{\text{VC}} = d + 1 = 6$: coincide con el número de parámetros $(w_0, w_1, \dots, w_5)$.
+
+  - id: u03-p05
+    tipo: vf
+    enunciado: |
+      La cota VC garantiza que, con suficientes datos, el error fuera de la muestra $E_{\text{out}}$ será pequeño.
+    respuesta: false
+    explicacion: |
+      Falso. Garantiza que $E_{\text{out}}$ estará **cerca de** $E_{\text{in}}$. Si ningún elemento de $\mathcal{H}$ aproxima bien a $f$, $E_{\text{in}}$ será grande y $E_{\text{out}}$ también.
+
+  - id: u03-p06
+    tipo: opcion
+    enunciado: |
+      En la descomposición $\mathbb{E}_{\mathcal{D}}[E_{\text{out}}] = \text{sesgo}^2 + \text{varianza} + \sigma^2$, ¿qué pasa típicamente al aumentar la complejidad del modelo?
+    opciones:
+      - texto: El sesgo baja y la varianza sube.
+        correcta: true
+      - texto: El sesgo sube y la varianza baja.
+        retro: Es al revés; eso pasa al aumentar la regularización.
+      - texto: Bajan los dos.
+        retro: Si bajaran los dos, siempre convendría el modelo más complejo.
+      - texto: Baja el ruido $\sigma^2$.
+        retro: El ruido es una propiedad de los datos, no del modelo.
+
+  - id: u03-p07
+    tipo: opcion
+    enunciado: |
+      Las curvas de aprendizaje de un modelo muestran $E_{\text{in}}$ y $E_{\text{val}}$ muy cercanos entre sí y ambos altos, aun con muchos datos. ¿Qué conviene hacer?
+    opciones:
+      - texto: Usar un modelo más flexible o agregar atributos.
+        correcta: true
+        retro: Es un problema de sesgo.
+      - texto: Conseguir más datos.
+        retro: Con mucho sesgo, más datos no ayudan; las curvas ya convergieron.
+      - texto: Aumentar la regularización.
+        retro: Eso aumenta el sesgo todavía más.
+      - texto: Usar validación cruzada con más particiones.
+        retro: Mejorar la estimación del error no cambia el modelo.
+
+  - id: u03-p08
+    tipo: opcion
+    enunciado: |
+      ¿Cuál es la solución de ridge, $\min_{\mathbf{w}} \lVert X\mathbf{w}-\mathbf{y}\rVert^2 + \lambda \lVert \mathbf{w} \rVert^2$?
+    opciones:
+      - texto: $(X^\top X + \lambda I)^{-1} X^\top \mathbf{y}$
+        correcta: true
+      - texto: $(X^\top X)^{-1} X^\top \mathbf{y} - \lambda \mathbf{w}$
+        retro: Al derivar, el término $\lambda \mathbf{w}$ se suma a $X^\top X \mathbf{w}$ y se factoriza.
+      - texto: $(X^\top X)^{-1} (X^\top \mathbf{y} + \lambda I)$
+        retro: Las dimensiones ni siquiera coinciden.
+      - texto: $X^\top (X X^\top + \lambda)^{-1}$
+        retro: Falta $\mathbf{y}$; además ese no es el gradiente igualado a cero.
+
+  - id: u03-p09
+    tipo: vf
+    enunciado: |
+      Lasso tiende a producir coeficientes exactamente iguales a cero; ridge, en general, no.
+    respuesta: true
+    explicacion: |
+      Verdadero. La región $\lVert \mathbf{w} \rVert_1 \le C$ tiene esquinas sobre los ejes, y las curvas de nivel del error suelen tocarla ahí. La región de ridge es redonda.
+
+  - id: u03-p10
+    tipo: opcion
+    enunciado: |
+      Comparas 500 configuraciones de hiperparámetros con validación cruzada y reportas el $E_{\text{cv}}$ de la mejor como estimación de su error fuera de la muestra. ¿Qué problema tiene?
+    opciones:
+      - texto: Es optimista, porque ese mismo error se usó para elegir.
+        correcta: true
+      - texto: Es pesimista, porque cada modelo se entrenó con menos datos.
+        retro: Ese efecto existe, pero es pequeño comparado con el de elegir entre 500 opciones.
+      - texto: Ninguno, la validación cruzada es insesgada.
+        retro: Es insesgada para un modelo fijado de antemano, no para el que se eligió con ella.
+      - texto: Que hay que usar dejar-uno-fuera.
+        retro: El problema es el sesgo de selección, no el número de particiones.
+    explicacion: |
+      Para estimar el error del procedimiento completo se usa CV anidada o un conjunto de prueba que no se tocó para elegir.
+
+  - id: u03-p11
+    tipo: opcion
+    enunciado: |
+      Tienes varias consultas médicas por paciente y el modelo se usará con pacientes **nuevos**. ¿Cómo deberías hacer la validación cruzada?
+    opciones:
+      - texto: Partir por paciente (GroupKFold), para que ninguno quede en entrenamiento y validación a la vez.
+        correcta: true
+      - texto: Partir las consultas al azar (KFold).
+        retro: El modelo vería otras consultas del mismo paciente y la estimación sería optimista.
+      - texto: Dejar una consulta fuera cada vez.
+        retro: Tiene el mismo problema que la partición al azar.
+      - texto: Estratificar por diagnóstico.
+        retro: Estratificar ayuda con clases raras, pero no evita que un paciente aparezca de los dos lados.
+
+  - id: u03-p12
+    tipo: numerica
+    enunciado: |
+      Un falso positivo cuesta 1 y un falso negativo cuesta 4. Con probabilidades bien calibradas, ¿a partir de qué probabilidad conviene marcar un caso como positivo? (decimal)
+    respuesta: 0.2
+    tolerancia: 0.001
+    explicacion: |
+      $t^* = c_{FP}/(c_{FP} + c_{FN}) = 1/5 = 0.2$. Se marca si $p\,c_{FN} > (1-p)\,c_{FP}$.
+
+  - id: u03-p13
+    tipo: opcion
+    enunciado: |
+      Un modelo tiene AUC de 0.8. ¿Cuál interpretación es correcta?
+    opciones:
+      - texto: Si se toma un positivo y un negativo al azar, en 80 % de los casos el positivo recibe un puntaje mayor.
+        correcta: true
+      - texto: El modelo acierta en 80 % de los casos.
+        retro: Eso sería la exactitud con un umbral particular; el AUC no depende del umbral.
+      - texto: 80 % de los casos marcados como positivos son positivos.
+        retro: Esa es la precisión, que depende del umbral y de la prevalencia.
+      - texto: Las probabilidades del modelo están calibradas al 80 %.
+        retro: El AUC solo mide el orden; un modelo puede tener buen AUC y probabilidades muy mal calibradas.
+
+  - id: u03-p14
+    tipo: vf
+    enunciado: |
+      Si dos grupos tienen prevalencias distintas, un clasificador imperfecto puede tener a la vez la misma precisión (VPP), la misma tasa de verdaderos positivos y la misma tasa de falsos positivos en ambos grupos.
+    respuesta: false
+    explicacion: |
+      Falso. $\text{TFP} = \frac{\pi}{1-\pi}\cdot\frac{1-\text{VPP}}{\text{VPP}}\cdot\text{TVP}$: si $\pi$ difiere y se igualan VPP y TVP, la TFP tiene que diferir (Chouldechova, 2017; Kleinberg et al., 2017).

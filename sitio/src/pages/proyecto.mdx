@@ -11,21 +11,23 @@ En el proyecto tu equipo entra a una competencia de [Kaggle](https://www.kaggle.
 
 ## Las competencias
 
-Escoge **una** de estas competencias. Son de aprendizaje automático clásico (no de modelos de lenguaje), son difíciles y usan lo que vemos en el curso.
+Escoge **una** de estas cinco competencias. Son de aprendizaje automático clásico (no de modelos de lenguaje), son difíciles y usan lo que vemos en el curso.
 
 | Competencia | Datos | Métrica | Unidades | Por qué |
 |---|---|---|:-:|---|
 | [RSNA Knee Abnormality Detection](https://www.kaggle.com/competitions/rsna-knee-abnormality-detection) | Resonancias magnéticas de rodilla | AUC ROC promedio de 12 hallazgos | 3, 6 | Clasificación multietiqueta de imágenes médicas con redes convolucionales y transferencia. Es una competencia de código: la libreta corre en Kaggle con GPU, sin internet y en menos de 9 horas. |
 | [ROGII: Wellbore Geology Prediction](https://www.kaggle.com/competitions/rogii-wellbore-geology-prediction) | Registros de pozos horizontales (rayos gamma y trayectoria) | RMSE | 1, 5, 7 | Predecir, pie por pie, la posición geológica de un pozo a partir de su señal de rayos gamma y la de un pozo de referencia. Pide pensar con cuidado en la validación (por pozo) y en atributos de señales. |
 | [Predicting Soil Grain Size Distributions from Images](https://www.kaggle.com/competitions/soil-grain-size-from-photos) | Fotos de muestras de suelo | Distancia de Wasserstein (EMD) entre curvas | 3, 6 | Predecir la curva granulométrica de un suelo a partir de fotos de celular. Hay solo 24 muestras para entrenar y la prueba usa otras cámaras: aquí la validación y el sobreajuste son el problema. |
+| [Enveda CASMI 2026: Molecule ID from Mass Spectra](https://www.kaggle.com/competitions/enveda-CASMI26-molecule-id-mass-spectra) | Espectros de masas | MRR@25 | 3, 5, 6 | Identificar una molécula a partir de su espectro: para cada espectro se propone una lista ordenada de 25 candidatas. Sigue abierta hasta el 14 de diciembre de 2026. Es una competencia de código (la libreta corre en Kaggle, sin internet, en menos de 9 horas). |
+| [M5 Forecasting: Accuracy](https://www.kaggle.com/competitions/m5-forecasting-accuracy) | Ventas diarias de Walmart (series de tiempo) | WRMSSE | 1, 5, 7 | Pronosticar 28 días de 30 490 series jerárquicas de productos y tiendas. Es de los problemas de pronóstico más estudiados: los ganadores usaron boosting con atributos rezagados, lo que vemos en la Unidad 7. |
 
-Las tres competencias ya cerraron, pero aceptan envíos tardíos (*late submissions*). Un envío tardío recibe su puntuación pública y privada, aunque no aparece en la tabla. Tu **lugar** es el que tendrías en la tabla privada final con tu puntuación privada. La tabla se descarga desde la pestaña *Leaderboard*.
+**El lugar en la tabla.** Enveda sigue abierta: tu lugar es el de tu equipo en la tabla pública el día de la entrega. Las otras cuatro ya cerraron, pero aceptan envíos tardíos (*late submissions*), que reciben su puntuación pública y privada aunque no aparecen en la tabla. En ese caso tu lugar es el **lugar equivalente**: el que tendrías en la tabla privada final con tu puntuación privada. La tabla se descarga desde la pestaña *Leaderboard*.
 
 ## Entrega
 
 | | Cuándo | Qué se sube a Teams |
 |---|---|---|
-| Entrega | **30 de noviembre de 2026** | Liga al repositorio **público** en GitHub, captura de tu mejor envío con su puntuación privada y captura de la tabla privada donde se vea el lugar equivalente. |
+| Entrega | **30 de noviembre de 2026** | Liga al repositorio **público** en GitHub, captura de tu mejor envío con su puntuación y captura de la tabla donde se vea tu lugar (o el lugar equivalente). |
 | Defensa oral | Después de la entrega | Nada. Se agenda una cita por equipo. |
 
 Se califica el repositorio tal como está el 30 de noviembre de 2026 (el último *commit* antes de las 23:59).
@@ -62,7 +64,7 @@ El `README.md` es el reporte. Debe contestar, en este orden:
 3. **La validación.** Cómo separaron los datos para validar, por qué esa partición imita a la de la competencia, y una tabla que compare la puntuación en validación con la del *leaderboard* público en varios envíos. Si no se parecen, qué creen que pasa.
 4. **La línea base y la ruta de mejora.** El modelo más simple razonable y cada mejora importante después, con su puntuación en validación. Incluye lo que **no** funcionó.
 5. **El modelo final.** Qué es, sus hiperparámetros y cómo se eligieron, y cuánto tarda en entrenar.
-6. **El resultado.** Puntuación pública y privada del envío final, lugar equivalente en la tabla privada, número de equipos y las capturas correspondientes.
+6. **El resultado.** Puntuación del envío final (pública y privada, si la hay), lugar en la tabla o lugar equivalente, número de equipos y las capturas correspondientes.
 7. **Qué harían con más tiempo.**
 8. **Equipo y uso de IA.** Qué hizo cada integrante y para qué usaron asistentes de IA.
 9. **Cómo reproducirlo.** Los comandos, en orden, para pasar de un repositorio recién clonado al archivo `submission.csv`.
@@ -83,7 +85,7 @@ El proyecto vale 100 puntos: 60 por el repositorio, 15 por el resultado en la co
 
 ### Resultado en la competencia (15 puntos)
 
-Se cuenta por el lugar equivalente en la tabla **privada**, como porcentaje del total de equipos:
+Se cuenta por tu lugar (o lugar equivalente) como porcentaje del total de equipos de la tabla:
 
 | Lugar | Puntos |
 |---|:-:|

@@ -4,7 +4,7 @@ export const curso = {
   programa: 'Licenciatura en Ciencias de la Computación',
   departamento: 'Departamento de Matemáticas',
   universidad: 'Universidad de Sonora',
-  semestre: '2027-1',
+  semestre: '2026-2',
   profesor: 'Julio Waissman',
   correo: 'julio.waissman@unison.mx',
   horario: 'Lunes a viernes, 13:00–14:00',

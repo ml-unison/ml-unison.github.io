@@ -4,7 +4,7 @@ title: Modelos ARIMA
 unidad: Unidad 7
 layout: portada
 subtitulo: "La curva de Keeling: memoria, diferencias y pronósticos con incertidumbre"
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

@@ -1,36 +1,66 @@
 ---
 layout: ../layouts/Pagina.astro
 titulo: Evaluación
-antetitulo: Cómo se califica
+antetitulo: Cómo se califica · Semestre 2026-2
 seccion: evaluacion
 ---
 import { url as ruta } from '../lib/rutas'
+import { unidades } from '../datos/curso'
+import { datacamp, rutaCompleta, extra } from '../datos/datacamp'
+import DataCamp from '../components/DataCamp.astro'
 
-| Componente | Peso | Descripción |
-|---|:-:|---|
-| Laboratorios | 35 % | Libretas para completar de cada unidad, con verificación automática de las respuestas. |
-| Exámenes | 35 % | Exámenes rápidos en clase y un examen intermedio para llevar. |
-| Proyecto integrador | 30 % | Cuatro entregas ligadas a las unidades del curso. Ver <a href={ruta('proyecto/')}>Proyecto</a>. |
+| Componente | Peso | Dónde | Descripción |
+|---|:-:|:-:|---|
+| DataCamp | 30 % | DataCamp | Cursos y miniproyectos de cada unidad (lista abajo). |
+| Exámenes rápidos | 20 % | Teams | Un examen corto al terminar cada unidad. |
+| Examen intermedio | 20 % | Teams | Examen para llevar con **defensa oral**. |
+| Proyecto integrador | 30 % | Kaggle, GitHub y Teams | Competencia de Kaggle con **defensa oral**. Ver <a href={ruta('proyecto/')}>Proyecto</a>. |
 
-Los cuestionarios de autoevaluación del sitio **no cuentan** para la calificación: sirven para que compruebes tu comprensión antes de los exámenes.
+Los **laboratorios** y los **cuestionarios de autoevaluación** del sitio no cuentan para la calificación. Son el mejor entrenamiento para los exámenes y el proyecto: los laboratorios te obligan a programar los métodos desde cero y se verifican solos.
 
-## Reglas generales
+## Defensa oral
 
-- Los laboratorios se entregan como la libreta `.ipynb` **ejecutada de principio a fin**: todas las celdas deben correr en orden y sin errores.
-- Puedes discutir las ideas con tus compañeros, pero el código y las respuestas que entregas deben ser tuyos.
-- Si usas asistentes de IA, indica en la libreta para qué los usaste. Eres responsable de entender y poder explicar todo lo que entregas.
+El examen intermedio y el proyecto tienen una parte oral breve e individual. Te voy a pedir que expliques lo que entregaste: por qué elegiste un método, qué hace una línea de tu código, qué pasaría si cambias un hiperparámetro, cómo validaste.
 
-## Exámenes de ejemplo
+Puedes usar asistentes de IA para estudiar y para programar, y debes declarar para qué los usaste. Pero **si en la defensa oral no puedes explicar lo que entregaste, asumiré que lo hizo una IA generativa y que no lo estudiaste ni intentaste entenderlo**, y esa entrega vale cero para ti.
 
-Exámenes de práctica con el formato y el nivel de este semestre.
+## DataCamp
 
-- Exámenes rápidos (15–20 minutos, en clase): <a href={ruta('examenes/ejemplos/rapido-u01.pdf')}>Unidad 1</a> · <a href={ruta('examenes/ejemplos/rapido-u02.pdf')}>Unidad 2</a> · <a href={ruta('examenes/ejemplos/rapido-u03.pdf')}>Unidad 3</a> · <a href={ruta('examenes/ejemplos/rapido-u04.pdf')}>Unidad 4</a> · <a href={ruta('examenes/ejemplos/rapido-u05.pdf')}>Unidad 5</a> · <a href={ruta('examenes/ejemplos/rapido-u06.pdf')}>Unidad 6</a> · <a href={ruta('examenes/ejemplos/rapido-u07.pdf')}>Unidad 7</a> · <a href={ruta('examenes/ejemplos/rapido-u08.pdf')}>Unidad 8</a>
-- <a href={ruta('examenes/ejemplos/parcial-1.pdf')}>Examen en clase, unidades 1–4</a> (PDF)
-- <a href={ruta('examenes/ejemplos/parcial-2.pdf')}>Examen en clase, unidades 5–8</a> (PDF)
-- <a href={ruta('examenes/ejemplos/intermedio-para-llevar.pdf')}>Examen intermedio para llevar</a> (PDF)
+<a class="dc-logo" href="https://www.datacamp.com" target="_blank" rel="noopener"><img src={ruta('marca/datacamp.png')} alt="DataCamp" width="160" height="60" /></a>
 
-## Exámenes de semestres anteriores
+Cada unidad tiene cursos y miniproyectos de DataCamp que complementan las clases con ejercicios guiados. Se califica el porcentaje de actividades que terminas antes del cierre de cada unidad, que se anuncia en Teams.
 
+{unidades.map(u => (datacamp[u.slug] ?? []).length > 0 && (
+  <section class="dc-unidad">
+    <h3>Unidad {u.num} · <a href={ruta(`unidades/${u.slug}/`)}>{u.titulo}</a></h3>
+    <DataCamp actividades={datacamp[u.slug]} logo={false} />
+  </section>
+))}
+
+### Puntos extra
+
+Hay puntos extra si terminas completa la ruta profesional **<a href={rutaCompleta.url} target="_blank" rel="noopener">{rutaCompleta.titulo}</a>** (unas {rutaCompleta.horas} horas). Incluye todos los cursos y miniproyectos de arriba y la evaluación *Machine Learning Fundamentals in Python*. Además tienes que terminar estos cursos:
+
+<DataCamp actividades={extra} logo={false} />
+
+## Exámenes
+
+Los exámenes rápidos y el examen intermedio se publican y se entregan en el equipo del curso en Microsoft Teams. Aquí quedan exámenes de semestres anteriores y dos exámenes de práctica para repasar.
+
+- <a href={ruta('examenes/ejemplos/parcial-1.pdf')}>Examen de práctica, unidades 1–4</a> (PDF)
+- <a href={ruta('examenes/ejemplos/parcial-2.pdf')}>Examen de práctica, unidades 5–8</a> (PDF)
 - <a href={ruta('examenes/archivo/e1-2024-2.pdf')}>Examen en clase, 2024-2</a> (PDF)
 - <a href={ruta('examenes/archivo/e2-2024-2.pdf')}>Examen para llevar, 2024-2</a> (PDF)
 - <a href={ruta('examenes/archivo/intermedio-2025-2.pdf')}>Examen intermedio para llevar, 2025-2</a> (PDF)
+
+## Reglas generales
+
+- Puedes discutir las ideas con tus compañeros, pero el código y las respuestas que entregas deben ser tuyos (o de tu equipo, en el proyecto).
+- Si usas asistentes de IA, declara para qué los usaste. Eres responsable de entender y poder explicar todo lo que entregas.
+
+<style>{`
+  .dc-unidad { margin: 28px 0; }
+  .dc-logo { display: inline-block; line-height: 0; border-radius: 8px; overflow: hidden; }
+  .dc-logo img { width: 160px; height: auto; display: block; }
+  .dc-unidad h3 { font-size: 1.02rem; margin-bottom: 0; }
+`}</style>

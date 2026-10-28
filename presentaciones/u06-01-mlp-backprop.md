@@ -4,7 +4,7 @@ title: "Redes neuronales: perceptrón multicapa y retropropagación"
 unidad: Unidad 6
 layout: portada
 subtitulo: "Capas que aprenden su propia representación, y cómo calcular su gradiente"
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

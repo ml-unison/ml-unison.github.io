@@ -1,114 +1,101 @@
 ---
 layout: ../layouts/Pagina.astro
 titulo: Proyecto integrador
-antetitulo: En equipos de 1 a 3 personas · 30 % de la calificación
-subtitulo: El ciclo completo de un problema real de aprendizaje automático, en cuatro entregas ligadas a las unidades.
+antetitulo: Una competencia de Kaggle · En equipos de 1 a 3 personas · 30 % de la calificación
+subtitulo: Participar en serio en una competencia de aprendizaje automático, documentarlo en un repositorio abierto y defenderlo en persona.
 seccion: proyecto
 ---
+import { url as ruta } from '../lib/rutas'
 
-El proyecto es donde se junta todo lo del curso. Durante el semestre tu equipo va a tomar un problema real, entender sus datos, construir una línea base honesta, mejorarla con modelos más flexibles, explicar qué aprendió el modelo y dejarlo funcionando como un servicio mínimo. Se califica sobre todo **el razonamiento**: qué decidieron, por qué, y cómo saben que funciona. Un modelo modesto bien validado y bien explicado vale más que uno espectacular cuyo desempeño nadie puede creer.
+En el proyecto tu equipo entra a una competencia de [Kaggle](https://www.kaggle.com) y trata de hacerlo lo mejor posible. Lo difícil de una competencia no es entrenar un modelo, sino saber **si de verdad es mejor** que el anterior sin sobreajustar el *leaderboard*. Por eso, además del lugar en la tabla, se califica cómo trabajaron: cómo validaron, qué probaron, qué funcionó, qué no y por qué.
+
+## Las competencias
+
+Escoge **una** de estas competencias. Se eligieron porque son de aprendizaje automático clásico (no de modelos de lenguaje) y porque usan lo que vemos en el curso.
+
+| Competencia | Tipo de datos | Métrica | Unidades | Por qué |
+|---|---|---|:-:|---|
+| [Enveda CASMI 2026: Molecule ID from Mass Spectra](https://www.kaggle.com/competitions/enveda-CASMI26-molecule-id-mass-spectra) | Espectros de masas (señales) | MRR@25 | 3, 5, 6 | Competencia abierta y difícil: identificar una molécula a partir de su espectro. Es de código (la libreta corre en Kaggle). Cierra el 14 de diciembre de 2026. |
+| [Playground Series, temporada 6, episodio 11](https://www.kaggle.com/competitions/playground-series-s6e11) | Tabulares | La que fije la competencia | 1, 3, 4, 5 | Competencia abierta en noviembre con miles de equipos. Los datos son sencillos, así que la diferencia entre equipos la hacen la validación, los atributos y los ensambles. |
+| [M5 Forecasting: Accuracy](https://www.kaggle.com/competitions/m5-forecasting-accuracy) | Series de tiempo (ventas de Walmart) | WRMSSE | 1, 5, 7 | Competencia cerrada con envíos tardíos. Pronosticar 30 490 series jerárquicas a 28 días es de los problemas de pronóstico más estudiados. |
+
+Si la competencia ya cerró, el envío tardío (*late submission*) recibe su puntuación pública y privada pero no aparece en la tabla. En ese caso, tu **lugar** es el que tendrías en la tabla privada final con tu puntuación privada. La tabla se descarga desde la pestaña *Leaderboard*.
 
 ## Calendario
 
-| Entrega | Semana | Después de | Contenido | Peso |
-|:-:|:-:|:-:|---|:-:|
-| A | 4 | Unidad 2 | Problema, datos, análisis exploratorio y exploración no supervisada. | 20 % |
-| B | 9 | Unidad 4 | Protocolo de validación, línea base y modelos lineales en un `Pipeline`. | 25 % |
-| C | 14 | Unidad 6 | Ensambles o redes, búsqueda de hiperparámetros, análisis de errores e interpretabilidad. | 30 % |
-| D | 16 | Unidad 8 | Experimentos en MLflow, servicio del modelo, monitoreo, reporte final y presentación. | 25 % |
+| Paso | Cuándo | Qué se sube a Teams |
+|---|---|---|
+| 1. Registro | Primera semana del proyecto | Integrantes, competencia elegida, nombre del equipo en Kaggle y liga al repositorio (puede estar casi vacío). |
+| 2. Entrega | Cierre del proyecto | Liga al repositorio **público** y captura del *leaderboard* con el lugar del equipo. |
+| 3. Defensa oral | La semana siguiente | Nada. Se agenda una cita de 15 minutos por equipo. |
 
-Las fechas exactas se anuncian en clase. Cada entrega se hace con una **etiqueta** (*tag*) en el repositorio del equipo: `entrega-a`, `entrega-b`, etc. Lo que no esté en la etiqueta no se califica.
+Las fechas exactas se anuncian en Teams. Se califica el repositorio tal como está en la fecha de entrega (el último *commit* antes del cierre).
 
-## Elegir los datos
+## Reglas
 
-El problema lo propone el equipo y lo aprueba el profesor antes de la semana 3. Requisitos:
+- **Equipo en Kaggle.** El nombre del equipo empieza con `UNISON-RP-` para que pueda encontrarlo en la tabla. Todos los integrantes están en el equipo de Kaggle.
+- **Las reglas de Kaggle se respetan.** Si la competencia no permite publicar los datos, el repositorio trae un script que los descarga con la API de Kaggle en lugar de los datos.
+- **Repositorio abierto** en GitHub, con licencia abierta (MIT o similar). Cada integrante sube sus propios *commits*.
+- **Código propio.** Puedes leer y aprender de las libretas y discusiones públicas de la competencia, pero si usas una idea o un fragmento de código de alguien, lo citas con su liga. Copiar una libreta pública y enviarla no es un proyecto.
+- **Uso de IA declarado** en el `README`: para qué se usó y en qué partes.
 
-- Un problema **supervisado** con un objetivo claro (clasificación, regresión o pronóstico) y una razón para que a alguien le importe la respuesta.
-- Al menos unos miles de ejemplos y una docena de variables, o una serie de tiempo larga.
-- Datos con **licencia abierta** o de una competencia que permita su uso académico. Nada de datos personales que no estén anonimizados.
-- Que nadie del equipo lo haya resuelto ya en otro curso.
-
-Algunas ideas, de preferencia con datos de México:
-
-- **Presas de Sonora.** Pronosticar el almacenamiento con los datos del conjunto *Recursos Hídricos* del [portal de datos abiertos del Gobierno de Sonora](https://datos.sonora.gob.mx) (los usamos en la Unidad 1).
-- **Calidad del aire.** Pronosticar concentraciones de contaminantes con los datos del [SINAICA](https://sinaica.inecc.gob.mx) del INECC.
-- **Accidentes de tránsito.** Clasificar la gravedad de los accidentes con la estadística ATUS del [INEGI](https://www.inegi.org.mx).
-- **Ingreso de los hogares.** Modelar el ingreso o la pobreza con la ENIGH del INEGI, cuidando los pesos muestrales.
-- **Una competencia de Kaggle** (por ejemplo, las de la serie *Playground*), siempre que el equipo construya su propia validación y no se limite a copiar soluciones publicadas.
-
-## Reglas para todas las entregas
-
-- **Repositorio** en GitHub con la estructura de abajo; el profesor debe tener acceso.
-- **Reproducible**: entorno descrito con `uv` (o `requirements.txt` con versiones), semillas fijas, y libretas que corren de principio a fin. Si los datos son grandes, un script los descarga.
-- **Conjunto de prueba sellado.** Se separa en la entrega B y no se toca hasta la entrega C. Toda elección de modelos e hiperparámetros se hace con validación.
-- **Ética**: cada entrega incluye un párrafo sobre a quién afectan las decisiones del modelo, qué sesgos pueden tener los datos y qué errores son más graves.
-- **Uso de IA**: se permite, pero se declara en el `README` para qué se usó. Todos los integrantes deben poder explicar cualquier parte del proyecto.
+## Qué debe tener el repositorio
 
 ```
 proyecto/
-├── README.md        # problema, datos, cómo reproducir, uso de IA
-├── pyproject.toml   # entorno (uv)
-├── datos/           # datos pequeños o script que los descarga
-├── libretas/        # 01-exploracion.ipynb, 02-linea-base.ipynb…
-├── src/             # código reutilizable y servicio
-└── reportes/        # reporte de cada entrega
+├── README.md            # el reporte del proyecto (ver abajo)
+├── pyproject.toml       # entorno con uv (o requirements.txt con versiones)
+├── datos/descargar.py   # descarga los datos con la API de Kaggle
+├── libretas/
+│   ├── 01-exploracion.ipynb
+│   ├── 02-validacion-y-linea-base.ipynb
+│   ├── 03-modelos.ipynb
+│   └── 04-envio-final.ipynb
+├── src/                 # funciones reutilizables (atributos, validación, modelos)
+├── experimentos.csv     # bitácora: un renglón por experimento
+└── leaderboard/         # capturas de la tabla y de tus envíos
 ```
 
-## Entrega A · Problema y exploración
+El `README.md` es el reporte. Debe contestar, en este orden:
 
-**Contenido.** Planteamiento del problema (quién usaría el modelo y para qué decisión); origen, licencia y diccionario de los datos; análisis exploratorio (distribuciones, faltantes, valores raros, relaciones con el objetivo); al menos una técnica no supervisada (agrupamiento, PCA o UMAP) con una conclusión sobre los datos; riesgos de fuga de información identificados; métrica que se usará y por qué.
+1. **El problema.** Qué se predice, con qué datos, con qué métrica y por qué esa métrica tiene sentido para ese problema.
+2. **Los datos.** Qué encontraron en la exploración que cambió lo que hicieron: distribuciones, faltantes, desbalance, estructura temporal o por grupos, diferencias entre entrenamiento y prueba.
+3. **La validación.** Cómo separaron los datos para validar, por qué esa partición imita a la de la competencia, y una tabla que compare la puntuación en validación con la del *leaderboard* público en varios envíos. Si no se parecen, qué creen que pasa.
+4. **La línea base y la ruta de mejora.** El modelo más simple razonable y cada mejora importante después, con su puntuación en validación. Incluye lo que **no** funcionó.
+5. **El modelo final.** Qué es, sus hiperparámetros y cómo se eligieron, y cuánto tarda en entrenar.
+6. **El resultado.** Puntuación pública y privada, lugar en la tabla (o lugar equivalente, si fue un envío tardío), número de equipos y la captura correspondiente.
+7. **Qué harían con más tiempo.**
+8. **Equipo y uso de IA.** Qué hizo cada integrante y para qué usaron asistentes de IA.
+9. **Cómo reproducirlo.** Los comandos, en orden, para pasar de un repositorio recién clonado al archivo `submission.csv`.
 
-**Se entrega:** libreta de exploración y un reporte de 2–3 páginas.
+## Cómo se califica
 
-| Criterio | Peso | Excelente | Suficiente | Insuficiente |
+El proyecto vale 100 puntos: 60 por el repositorio, 15 por el resultado en la competencia y 25 por la defensa oral.
+
+### Repositorio (60 puntos)
+
+| Criterio | Puntos | Completo | Parcial | Insuficiente |
 |---|:-:|---|---|---|
-| Planteamiento | 20 % | Problema, usuario y decisión claros; métrica justificada por los costos de los errores. | Problema claro, métrica poco justificada. | Problema vago o sin métrica. |
-| Calidad de los datos | 25 % | Origen, licencia y diccionario completos; faltantes, duplicados y valores raros explicados y tratados. | Revisión superficial. | No se revisan. |
-| Exploración | 25 % | Gráficas que responden preguntas concretas y conclusiones escritas. | Muchas gráficas sin conclusiones. | Gráficas mínimas o mal hechas. |
-| No supervisado | 20 % | Método bien elegido y bien preprocesado (escalas), con interpretación crítica de lo que encuentra. | Se aplica sin interpretar. | No se aplica o se aplica mal. |
-| Fuga y ética | 10 % | Fugas posibles y riesgos éticos identificados con ejemplos de los datos. | Mención general. | No se considera. |
+| Validación | 15 | La partición imita a la de la competencia, sin fugas; la tabla de validación contra *leaderboard* está y se discute. | Validación razonable pero sin justificar o sin comparar con el *leaderboard*. | Se elige el modelo mirando el *leaderboard* o hay fuga de información. |
+| Ruta de modelado | 15 | Línea base, mejoras medidas una por una, bitácora completa con lo que no funcionó, búsqueda de hiperparámetros con validación. | Varios modelos sin bitácora o sin línea base. | Un solo modelo sin comparación. |
+| Exploración | 10 | Gráficas que responden preguntas concretas y conclusiones que se usan después en los atributos o la validación. | Exploración sin conclusiones. | Exploración mínima. |
+| Reproducibilidad | 10 | Se sigue el `README` y se obtiene el envío final sin tocar nada; entorno con versiones y semillas fijas. | Corre con arreglos menores. | No corre. |
+| Reporte | 10 | El `README` contesta los nueve puntos de forma clara y honesta. | Faltan puntos o es confuso. | Sin reporte. |
 
-## Entrega B · Validación y línea base
+### Resultado en la competencia (15 puntos)
 
-**Contenido.** Partición de prueba sellada y protocolo de validación justificado (estratificado, por grupos o temporal, según los datos); líneas base triviales (clase mayoritaria, promedio o pronóstico ingenuo); preprocesamiento completo dentro de un `Pipeline`; modelos lineales regularizados (lineal o logística, y otro de la Unidad 4) con búsqueda de hiperparámetros por validación cruzada; curvas de aprendizaje y un diagnóstico de sesgo y varianza; métricas con su incertidumbre.
+Se cuenta por el lugar en la tabla **privada** (o el lugar equivalente) como porcentaje del total de equipos:
 
-**Se entrega:** libreta de modelos y un reporte de 3–4 páginas.
+| Lugar | Puntos |
+|---|:-:|
+| 10 % superior | 15 |
+| 25 % superior | 12 |
+| 50 % superior | 9 |
+| Mejor que la libreta de ejemplo de la competencia | 6 |
+| Al menos un envío válido | 3 |
 
-| Criterio | Peso | Excelente | Suficiente | Insuficiente |
-|---|:-:|---|---|---|
-| Protocolo de validación | 30 % | La partición imita cómo se usará el modelo; no hay fuga; prueba sellada. | Partición razonable pero sin justificar. | Fuga de información o se elige con la prueba. |
-| Línea base y modelos | 25 % | Línea base trivial y modelos lineales bien ajustados dentro de un `Pipeline`. | Modelos correctos sin `Pipeline` o sin línea base. | Modelos mal planteados. |
-| Diagnóstico | 25 % | Curvas de aprendizaje y validación interpretadas; decisión sobre qué hacer después. | Curvas sin interpretar. | Sin diagnóstico. |
-| Comunicación | 20 % | Métricas con intervalos o desviaciones; reporte claro y conciso. | Métricas puntuales sin incertidumbre. | Resultados confusos. |
+### Defensa oral (25 puntos, individual)
 
-## Entrega C · Mejor modelo e interpretación
+Cada integrante contesta preguntas sobre **cualquier parte** del repositorio, no solo la que hizo: qué hace una función, por qué se eligió una validación, qué pasaría si se cambia algo, cómo se interpreta una gráfica.
 
-**Contenido.** Al menos un ensamble de árboles (*boosting* o bosque) y, si los datos lo justifican, una red neuronal o un modelo de series de tiempo; búsqueda de hiperparámetros con validación; comparación justa contra la entrega B; **una sola** evaluación en el conjunto de prueba; análisis de errores (en qué casos falla y por qué); interpretabilidad global y local (permutación, dependencia parcial, SHAP); análisis de equidad por grupos si aplica; calibración y umbral de decisión si es clasificación.
-
-**Se entrega:** libretas, código en `src/` y un reporte de 4–6 páginas.
-
-| Criterio | Peso | Excelente | Suficiente | Insuficiente |
-|---|:-:|---|---|---|
-| Modelado | 25 % | Modelos adecuados, hiperparámetros elegidos con validación, comparación justa. | Modelos razonables con búsqueda limitada. | Modelos elegidos sin validación. |
-| Evaluación en prueba | 20 % | Una sola evaluación final, reportada con honestidad aunque decepcione. | Evaluación correcta con poca discusión. | Varias evaluaciones en prueba o fuga. |
-| Análisis de errores | 20 % | Errores agrupados por tipo, con hipótesis y evidencia. | Matriz de confusión o residuos sin análisis. | Sin análisis. |
-| Interpretabilidad | 20 % | Explicaciones globales y locales interpretadas, con sus limitaciones (correlación, causalidad). | Gráficas de importancia sin discusión. | Sin interpretación. |
-| Equidad y decisión | 15 % | Métricas por grupo, umbral elegido por costos, discusión de compromisos. | Mención de equidad sin cifras. | No se considera. |
-
-## Entrega D · Producción y reporte final
-
-**Contenido.** Experimentos de las entregas B y C registrados en MLflow, con el modelo final en el registro de modelos; servicio con FastAPI que valida la entrada y devuelve la predicción y la versión del modelo, con pruebas automáticas; un plan de monitoreo con una simulación de cambio de distribución en los datos; ficha del modelo (*model card*); reporte final completo y una presentación de 10 minutos ante el grupo.
-
-**Se entrega:** el repositorio completo, el reporte final (8–12 páginas) y la presentación.
-
-| Criterio | Peso | Excelente | Suficiente | Insuficiente |
-|---|:-:|---|---|---|
-| Experimentos y registro | 20 % | Corridas comparables, reproducibles y registradas; modelo final versionado. | Registro incompleto. | Sin registro. |
-| Servicio | 20 % | API con validación, pruebas y documentación; se levanta siguiendo el `README`. | API funcional sin pruebas. | No funciona. |
-| Monitoreo | 15 % | Métricas de cambio elegidas y probadas con una simulación; política de reentrenamiento. | Plan sin simulación. | Sin plan. |
-| Reporte final y ficha | 25 % | Historia completa y honesta del proyecto, limitaciones y trabajo futuro; ficha del modelo útil. | Reporte que solo junta las entregas. | Reporte incompleto. |
-| Presentación | 20 % | Clara, a tiempo, con respuestas sólidas a las preguntas; todos participan. | Clara pero con respuestas débiles. | Confusa o fuera de tiempo. |
-
-## Cómo se califica a cada integrante
-
-La calificación del proyecto es del equipo, pero puede ajustarse a cada persona según su participación (historial del repositorio, presentación y una coevaluación anónima al final). Todos deben poder explicar cualquier parte del proyecto.
+**Si no puedes explicar lo que está en tu repositorio, asumiré que lo hizo una IA generativa y que no lo estudiaste ni intentaste entenderlo, y el proyecto completo vale cero para ti.** Lo mismo aplica a la parte oral del examen intermedio. Ver <a href={ruta('evaluacion/')}>Evaluación</a>.

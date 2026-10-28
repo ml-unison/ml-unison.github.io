@@ -4,7 +4,7 @@ title: Validación
 unidad: Unidad 3
 layout: portada
 subtitulo: Estimar el error fuera de la muestra, y elegir modelos, sin engañarnos
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

@@ -4,7 +4,7 @@ title: Bagging y bosques aleatorios
 unidad: Unidad 5
 layout: portada
 subtitulo: "La sabiduría de muchos árboles: promediar para quitar varianza"
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

@@ -4,6 +4,8 @@ import path from 'node:path'
 import Base from '../../layouts/Base.astro'
 import Icono from '../../components/Icono.astro'
 import Quiz from '../../components/Quiz.astro'
+import DataCamp from '../../components/DataCamp.astro'
+import { datacamp } from '../../datos/datacamp'
 import { unidades, dosDigitos, type Unidad } from '../../datos/curso'
 import { materiales } from '../../datos/materiales'
 import { url, colab, presentacion } from '../../lib/rutas'
@@ -14,6 +16,7 @@ export function getStaticPaths() {
 }
 const { u } = Astro.props as { u: Unidad }
 const m = materiales[u.slug]
+const dc = datacamp[u.slug] ?? []
 const i = unidades.findIndex(x => x.slug === u.slug)
 const anterior = unidades[i - 1], siguiente = unidades[i + 1]
 const raiz = path.resolve(process.cwd(), '..')
@@ -109,7 +112,16 @@ const existe = (rel: string) => fs.existsSync(path.join(raiz, rel))
                   ))}
                 </ul>
               ) : <p class="vacio">El laboratorio autocalificado de esta unidad se publicará en la siguiente fase.</p>}
+              <p class="ayuda">Los laboratorios son para practicar y no cuentan para la calificación.</p>
             </section>
+
+            {dc.length > 0 && (
+              <section class="seccion">
+                <h2><Icono nombre="externo" /> DataCamp</h2>
+                <p class="ayuda">Cursos y proyectos de esta unidad que forman parte de la calificación. Ver <a href={url('evaluacion/')}>Evaluación</a>.</p>
+                <DataCamp actividades={dc} />
+              </section>
+            )}
 
             <section class="seccion">
               <h2><Icono nombre="libro" /> Lecturas</h2>

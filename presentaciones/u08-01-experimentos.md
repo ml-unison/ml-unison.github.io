@@ -4,7 +4,7 @@ title: Experimentos reproducibles y registro de modelos
 unidad: Unidad 8
 layout: portada
 subtitulo: "Qué se probó, con qué resultado, cuál se eligió y por qué: MLflow, versiones, alias y fichas de modelo"
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

@@ -4,7 +4,7 @@ title: "Entrenar redes: optimización y regularización"
 unidad: Unidad 6
 layout: portada
 subtitulo: "Fashion-MNIST: minilotes, momento, Adam, dropout y la pregunta de cuándo parar"
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

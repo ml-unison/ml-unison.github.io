@@ -4,7 +4,7 @@ title: Métricas
 unidad: Unidad 3
 layout: portada
 subtitulo: Qué medir cuando equivocarse no cuesta lo mismo en los dos sentidos
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

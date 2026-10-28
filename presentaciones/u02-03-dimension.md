@@ -4,7 +4,7 @@ title: Reducción de dimensión
 unidad: Unidad 2
 layout: portada
 subtitulo: Pocas coordenadas que conserven lo importante, para ver, comprimir y preparar datos
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

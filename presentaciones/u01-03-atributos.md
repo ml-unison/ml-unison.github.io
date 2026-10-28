@@ -4,7 +4,7 @@ title: Ingeniería de atributos y pipelines
 unidad: Unidad 1
 layout: portada
 subtitulo: Convertir datos reales en una matriz que un modelo pueda usar, sin hacer trampa
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

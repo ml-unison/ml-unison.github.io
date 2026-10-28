@@ -1,0 +1,40 @@
+---
+// Lista de actividades de DataCamp con el logotipo y la liga a cada una.
+import { url } from '../lib/rutas'
+import type { ActividadDataCamp } from '../datos/datacamp'
+interface Props { actividades: ActividadDataCamp[]; logo?: boolean }
+const { actividades, logo = true } = Astro.props
+---
+<div class:list={["dc", { "dc--solo": !logo }]}>
+  {logo && (
+    <a class="dc__logo" href="https://www.datacamp.com" target="_blank" rel="noopener" aria-label="DataCamp">
+      <img src={url('marca/datacamp.png')} alt="DataCamp" width="120" height="45" loading="lazy" />
+    </a>
+  )}
+  <ul class="dc__lista">
+    {actividades.map(a => (
+      <li>
+        <span class={`dc__tipo dc__tipo--${a.tipo === 'Proyecto' ? 'proyecto' : a.tipo === 'Curso' ? 'curso' : 'otro'}`}>{a.tipo}</span>
+        {a.url ? <a href={a.url} target="_blank" rel="noopener">{a.titulo}</a> : <span>{a.titulo}</span>}
+        {a.horas && <span class="dc__horas">{a.horas} h</span>}
+      </li>
+    ))}
+  </ul>
+</div>
+
+<style>
+  .dc { display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: start; padding-top: 18px; }
+  @media (max-width: 560px) { .dc { grid-template-columns: 1fr; gap: 12px; } }
+  .dc--solo { grid-template-columns: 1fr; }
+  .dc__logo { display: block; line-height: 0; border-radius: 8px; overflow: hidden; }
+  .dc__logo img { width: 120px; height: auto; display: block; }
+  .dc__lista { list-style: none; margin: 0; padding: 0; }
+  .dc__lista li { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 8px 0; border-bottom: 1px solid var(--linea); }
+  .dc__lista li:first-child { padding-top: 0; }
+  .dc__tipo { font: 650 0.66rem/1 var(--f-titulo); letter-spacing: .08em; text-transform: uppercase; padding: 5px 9px; border-radius: 20px; background: var(--fondo-alt); color: var(--tenue); flex: none; }
+  .dc__tipo--curso { background: var(--tinte-azul); color: var(--azul); }
+  .dc__tipo--proyecto { background: var(--tinte-dorado); color: var(--dorado-osc); }
+  .dc__horas { color: var(--suave); font-size: 0.88rem; margin-left: auto; }
+  .dc__lista a { text-decoration: none; }
+  .dc__lista a:hover { text-decoration: underline; }
+</style>

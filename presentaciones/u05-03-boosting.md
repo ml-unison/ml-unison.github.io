@@ -4,7 +4,7 @@ title: "Boosting: de AdaBoost a XGBoost"
 unidad: Unidad 5
 layout: portada
 subtitulo: Sumar modelos débiles, uno tras otro, para corregir los errores de los anteriores
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

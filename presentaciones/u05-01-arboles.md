@@ -4,7 +4,7 @@ title: Árboles de decisión
 unidad: Unidad 5
 layout: portada
 subtitulo: "Preguntas de sí o no: partición recursiva, impureza y poda"
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

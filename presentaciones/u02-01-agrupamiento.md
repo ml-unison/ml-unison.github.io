@@ -4,7 +4,7 @@ title: Agrupamiento
 unidad: Unidad 2
 layout: portada
 subtitulo: Encontrar grupos cuando nadie nos dice las respuestas
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

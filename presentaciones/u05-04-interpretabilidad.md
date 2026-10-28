@@ -4,7 +4,7 @@ title: "Interpretabilidad: qué aprendió el modelo"
 unidad: Unidad 5
 layout: portada
 subtitulo: "Importancia por permutación, dependencia parcial y valores de Shapley, con las casas de Ames"
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

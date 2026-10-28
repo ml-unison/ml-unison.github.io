@@ -4,7 +4,7 @@ title: Redes convolucionales y transferencia
 unidad: Unidad 6
 layout: portada
 subtitulo: "Localidad, pesos compartidos y lo que una red aprendida en fotos sabe de imágenes de satélite"
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

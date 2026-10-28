@@ -15,7 +15,7 @@ Sitio y material del curso de aprendizaje automático de la Licenciatura en Cien
 | `quizzes/banco/` | Banco de preguntas, uno por unidad |
 | `paquete/` | Paquete `rdp`: estilo de gráficas, carga de datos y quizzes en las libretas |
 | `datos/` | Conjuntos de datos pequeños del curso |
-| `examenes/ejemplos/` | Exámenes de ejemplo de este semestre (LaTeX y PDF, sin soluciones) |
+| `examenes/ejemplos/` | Exámenes de práctica (LaTeX y PDF, sin soluciones). Los exámenes rápidos y el intermedio no se publican: están en el repositorio privado |
 | `examenes/archivo/` | Exámenes de semestres anteriores |
 | `herramientas/` | Scripts de construcción, libretas, laboratorios, quizzes y datos de las presentaciones |
 

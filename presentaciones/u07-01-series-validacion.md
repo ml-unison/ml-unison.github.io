@@ -4,7 +4,7 @@ title: "Series de tiempo: estructura y validación"
 unidad: Unidad 7
 layout: portada
 subtitulo: "El clima de Hermosillo: tendencia, estacionalidad, autocorrelación y cómo validar un pronóstico"
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

@@ -4,7 +4,7 @@ title: Pronosticar con aprendizaje automático
 unidad: Unidad 7
 layout: portada
 subtitulo: "Rezagos, boosting y redes: la demanda de bicicletas hora por hora"
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

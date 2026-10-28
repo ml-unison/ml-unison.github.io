@@ -4,7 +4,7 @@ title: Despliegue y monitoreo
 unidad: Unidad 8
 layout: portada
 subtitulo: "Servir un modelo, vigilar el cambio y decidir cuándo reentrenar"
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

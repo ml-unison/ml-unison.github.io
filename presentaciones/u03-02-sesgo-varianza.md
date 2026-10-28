@@ -4,7 +4,7 @@ title: Sesgo, varianza y regularización
 unidad: Unidad 3
 layout: portada
 subtitulo: De dónde viene el error fuera de la muestra y cómo domar la complejidad sin quitar flexibilidad
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

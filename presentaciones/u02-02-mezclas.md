@@ -4,7 +4,7 @@ title: Mezclas gaussianas y EM
 unidad: Unidad 2
 layout: portada
 subtitulo: Grupos con forma, asignaciones con incertidumbre y un algoritmo que aparece en todas partes
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

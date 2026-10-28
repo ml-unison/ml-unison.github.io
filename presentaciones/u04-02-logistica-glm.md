@@ -4,7 +4,7 @@ title: Regresión logística y modelos lineales generalizados
 unidad: Unidad 4
 layout: portada
 subtitulo: "Del Challenger a las bicicletas: probabilidades, conteos y la familia exponencial"
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

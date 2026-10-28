@@ -4,7 +4,7 @@ title: ¿Es posible aprender?
 unidad: Unidad 3
 layout: portada
 subtitulo: Hoeffding, la dimensión VC y lo que la teoría garantiza (y lo que no)
-fecha: 2027-1
+fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
 routerMode: hash

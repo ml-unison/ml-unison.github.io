@@ -27,7 +27,7 @@ const material = [
         <p class="portada__lema">Aprendizaje automático con fundamentos: de la teoría de la generalización a los modelos en producción.</p>
         <div class="portada__acciones">
           <a class="boton boton--oro" href={url('unidades/01-introduccion/')}>Empezar con la Unidad 1 <Icono nombre="flecha" /></a>
-          <a class="boton boton--contorno" href={url('temario/')}>Ver el temario</a>
+          <a class="boton boton--contorno" href={url('#unidades')}>Ver las unidades</a>
         </div>
       </div>
       <div class="portada__figura"><MotivoFrontera ancho={560} alto={520} /></div>
@@ -68,7 +68,6 @@ const material = [
         <div class="antetitulo">Contenido</div>
         <h2>Ocho unidades, dieciséis semanas</h2>
       </div>
-      <a class="bloque__enlace" href={url('temario/')}>Temario detallado <Icono nombre="flecha" /></a>
     </div>
     <ol class="unidades">
       {unidades.map(u => (

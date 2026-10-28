@@ -11,29 +11,28 @@ En el proyecto tu equipo entra a una competencia de [Kaggle](https://www.kaggle.
 
 ## Las competencias
 
-Escoge **una** de estas competencias. Se eligieron porque son de aprendizaje automático clásico (no de modelos de lenguaje) y porque usan lo que vemos en el curso.
+Escoge **una** de estas competencias. Son de aprendizaje automático clásico (no de modelos de lenguaje), son difíciles y usan lo que vemos en el curso.
 
-| Competencia | Tipo de datos | Métrica | Unidades | Por qué |
+| Competencia | Datos | Métrica | Unidades | Por qué |
 |---|---|---|:-:|---|
-| [Enveda CASMI 2026: Molecule ID from Mass Spectra](https://www.kaggle.com/competitions/enveda-CASMI26-molecule-id-mass-spectra) | Espectros de masas (señales) | MRR@25 | 3, 5, 6 | Competencia abierta y difícil: identificar una molécula a partir de su espectro. Es de código (la libreta corre en Kaggle). Cierra el 14 de diciembre de 2026. |
-| [Playground Series, temporada 6, episodio 11](https://www.kaggle.com/competitions/playground-series-s6e11) | Tabulares | La que fije la competencia | 1, 3, 4, 5 | Competencia abierta en noviembre con miles de equipos. Los datos son sencillos, así que la diferencia entre equipos la hacen la validación, los atributos y los ensambles. |
-| [M5 Forecasting: Accuracy](https://www.kaggle.com/competitions/m5-forecasting-accuracy) | Series de tiempo (ventas de Walmart) | WRMSSE | 1, 5, 7 | Competencia cerrada con envíos tardíos. Pronosticar 30 490 series jerárquicas a 28 días es de los problemas de pronóstico más estudiados. |
+| [RSNA Knee Abnormality Detection](https://www.kaggle.com/competitions/rsna-knee-abnormality-detection) | Resonancias magnéticas de rodilla | AUC ROC promedio de 12 hallazgos | 3, 6 | Clasificación multietiqueta de imágenes médicas con redes convolucionales y transferencia. Es una competencia de código: la libreta corre en Kaggle con GPU, sin internet y en menos de 9 horas. |
+| [ROGII: Wellbore Geology Prediction](https://www.kaggle.com/competitions/rogii-wellbore-geology-prediction) | Registros de pozos horizontales (rayos gamma y trayectoria) | RMSE | 1, 5, 7 | Predecir, pie por pie, la posición geológica de un pozo a partir de su señal de rayos gamma y la de un pozo de referencia. Pide pensar con cuidado en la validación (por pozo) y en atributos de señales. |
+| [Predicting Soil Grain Size Distributions from Images](https://www.kaggle.com/competitions/soil-grain-size-from-photos) | Fotos de muestras de suelo | Distancia de Wasserstein (EMD) entre curvas | 3, 6 | Predecir la curva granulométrica de un suelo a partir de fotos de celular. Hay solo 24 muestras para entrenar y la prueba usa otras cámaras: aquí la validación y el sobreajuste son el problema. |
 
-Si la competencia ya cerró, el envío tardío (*late submission*) recibe su puntuación pública y privada pero no aparece en la tabla. En ese caso, tu **lugar** es el que tendrías en la tabla privada final con tu puntuación privada. La tabla se descarga desde la pestaña *Leaderboard*.
+Las tres competencias ya cerraron, pero aceptan envíos tardíos (*late submissions*). Un envío tardío recibe su puntuación pública y privada, aunque no aparece en la tabla. Tu **lugar** es el que tendrías en la tabla privada final con tu puntuación privada. La tabla se descarga desde la pestaña *Leaderboard*.
 
-## Calendario
+## Entrega
 
-| Paso | Cuándo | Qué se sube a Teams |
+| | Cuándo | Qué se sube a Teams |
 |---|---|---|
-| 1. Registro | Primera semana del proyecto | Integrantes, competencia elegida, nombre del equipo en Kaggle y liga al repositorio (puede estar casi vacío). |
-| 2. Entrega | Cierre del proyecto | Liga al repositorio **público** y captura del *leaderboard* con el lugar del equipo. |
-| 3. Defensa oral | La semana siguiente | Nada. Se agenda una cita de 15 minutos por equipo. |
+| Entrega | **30 de noviembre de 2026** | Liga al repositorio **público** en GitHub, captura de tu mejor envío con su puntuación privada y captura de la tabla privada donde se vea el lugar equivalente. |
+| Defensa oral | Después de la entrega | Nada. Se agenda una cita por equipo. |
 
-Las fechas exactas se anuncian en Teams. Se califica el repositorio tal como está en la fecha de entrega (el último *commit* antes del cierre).
+Se califica el repositorio tal como está el 30 de noviembre de 2026 (el último *commit* antes de las 23:59).
 
 ## Reglas
 
-- **Equipo en Kaggle.** El nombre del equipo empieza con `UNISON-RP-` para que pueda encontrarlo en la tabla. Todos los integrantes están en el equipo de Kaggle.
+- **Cuenta de Kaggle.** El `README` dice el usuario de Kaggle de cada integrante, para poder verificar los envíos.
 - **Las reglas de Kaggle se respetan.** Si la competencia no permite publicar los datos, el repositorio trae un script que los descarga con la API de Kaggle en lugar de los datos.
 - **Repositorio abierto** en GitHub, con licencia abierta (MIT o similar). Cada integrante sube sus propios *commits*.
 - **Código propio.** Puedes leer y aprender de las libretas y discusiones públicas de la competencia, pero si usas una idea o un fragmento de código de alguien, lo citas con su liga. Copiar una libreta pública y enviarla no es un proyecto.
@@ -63,7 +62,7 @@ El `README.md` es el reporte. Debe contestar, en este orden:
 3. **La validación.** Cómo separaron los datos para validar, por qué esa partición imita a la de la competencia, y una tabla que compare la puntuación en validación con la del *leaderboard* público en varios envíos. Si no se parecen, qué creen que pasa.
 4. **La línea base y la ruta de mejora.** El modelo más simple razonable y cada mejora importante después, con su puntuación en validación. Incluye lo que **no** funcionó.
 5. **El modelo final.** Qué es, sus hiperparámetros y cómo se eligieron, y cuánto tarda en entrenar.
-6. **El resultado.** Puntuación pública y privada, lugar en la tabla (o lugar equivalente, si fue un envío tardío), número de equipos y la captura correspondiente.
+6. **El resultado.** Puntuación pública y privada del envío final, lugar equivalente en la tabla privada, número de equipos y las capturas correspondientes.
 7. **Qué harían con más tiempo.**
 8. **Equipo y uso de IA.** Qué hizo cada integrante y para qué usaron asistentes de IA.
 9. **Cómo reproducirlo.** Los comandos, en orden, para pasar de un repositorio recién clonado al archivo `submission.csv`.
@@ -84,14 +83,14 @@ El proyecto vale 100 puntos: 60 por el repositorio, 15 por el resultado en la co
 
 ### Resultado en la competencia (15 puntos)
 
-Se cuenta por el lugar en la tabla **privada** (o el lugar equivalente) como porcentaje del total de equipos:
+Se cuenta por el lugar equivalente en la tabla **privada**, como porcentaje del total de equipos:
 
 | Lugar | Puntos |
 |---|:-:|
 | 10 % superior | 15 |
 | 25 % superior | 12 |
 | 50 % superior | 9 |
-| Mejor que la libreta de ejemplo de la competencia | 6 |
+| Mejor que una línea base trivial (por ejemplo, predecir el promedio) | 6 |
 | Al menos un envío válido | 3 |
 
 ### Defensa oral (25 puntos, individual)

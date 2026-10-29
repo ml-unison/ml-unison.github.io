@@ -252,14 +252,14 @@ Una capa con ventana $k$ y paso $s$:
 
 $$
 \begin{aligned}
-r^{[\ell]} &= r^{[\ell-1]} + (k - 1)\, \Delta^{[\ell-1]} \\
-\Delta^{[\ell]} &= \Delta^{[\ell-1]}\, s
+r^{[l]} &= r^{[l-1]} + (k - 1)\, \Delta^{[l-1]} \\
+\Delta^{[l]} &= \Delta^{[l-1]}\, s
 \end{aligned}
 $$
 
 <div class="pequeno">
 
-$r^{[\ell]}$: lado del cuadro de la imagen que ve una neurona de la capa $\ell$; $\Delta^{[\ell]}$: distancia en pixeles entre posiciones vecinas de su mapa. Empieza con $r^{[0]} = \Delta^{[0]} = 1$.
+$r^{[l]}$: lado del cuadro de la imagen que ve una neurona de la capa $l$; $\Delta^{[l]}$: distancia en pixeles entre posiciones vecinas de su mapa. Empieza con $r^{[0]} = \Delta^{[0]} = 1$.
 
 </div>
 
@@ -490,21 +490,21 @@ El segundo lugar de 2012 usaba atributos diseñados a mano (SIFT, vectores de Fi
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 40px">
 <div>
 
-He, Zhang, Ren y Sun (2016): una red simple de 56 capas se ajustaba **peor** que una de 20 en sus propios datos de entrenamiento. En vez de su salida, cada bloque $\ell$ aprende una corrección $F^{[\ell]}$ que se suma a su entrada $\va^{[\ell]}$:
+He, Zhang, Ren y Sun (2016): una red simple de 56 capas se ajustaba **peor** que una de 20 en sus propios datos de entrenamiento. En vez de su salida, cada bloque $l$ aprende una corrección $F^{[l]}$ que se suma a su entrada $\va^{[l]}$:
 
 $$
-\va^{[\ell+1]} = \va^{[\ell]} + F^{[\ell]}\big(\va^{[\ell]}\big)
+\va^{[l+1]} = \va^{[l]} + F^{[l]}\big(\va^{[l]}\big)
 $$
 
 <v-click>
 
 $$
-\frac{\partial \ell}{\partial \va^{[\ell]}} = \frac{\partial \ell}{\partial \va^{[D]}}\prod_{m=\ell}^{D-1}\Big(\mathbf I + \frac{\partial F^{[m]}}{\partial \va^{[m]}}\Big)
+\frac{\partial \ell}{\partial \va^{[l]}} = \frac{\partial \ell}{\partial \va^{[D]}}\prod_{m=l}^{D-1}\Big(\mathbf I + \frac{\partial F^{[m]}}{\partial \va^{[m]}}\Big)
 $$
 
 <div class="pequeno">
 
-$\ell$: la pérdida; $D$: el número de bloques; $\mathbf I$: la identidad. Al desarrollar el producto aparece $\partial \ell/\partial \va^{[D]}$ **tal cual**: el gradiente llega a cualquier capa sin pasar por ninguna matriz de pesos. Y si lo mejor es no hacer nada, basta $F^{[\ell]} = 0$.
+$\ell$: la pérdida; $D$: el número de bloques; $\mathbf I$: la identidad. Al desarrollar el producto aparece $\partial \ell/\partial \va^{[D]}$ **tal cual**: el gradiente llega a cualquier capa sin pasar por ninguna matriz de pesos. Y si lo mejor es no hacer nada, basta $F^{[l]} = 0$.
 
 </div>
 

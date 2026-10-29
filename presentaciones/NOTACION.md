@@ -35,7 +35,7 @@ Los vectores van en minúscula negrita, las matrices en mayúscula negrita y los
 
 ## Redes neuronales
 
-La capa va entre corchetes: $\mathbf{W}^{[\ell]}$, $\mathbf{b}^{[\ell]}$, $\mathbf{z}^{[\ell]} = \mathbf{W}^{[\ell]}\mathbf{a}^{[\ell-1]} + \mathbf{b}^{[\ell]}$, $\mathbf{a}^{[\ell]} = g(\mathbf{z}^{[\ell]})$, con $\mathbf{a}^{[0]} = \mathbf{x}^{(i)}$. Si hace falta la instancia: $\mathbf{a}^{[\ell](i)}$.
+La capa va entre corchetes: $\mathbf{W}^{[l]}$, $\mathbf{b}^{[l]}$, $\mathbf{z}^{[l]} = \mathbf{W}^{[l]}\mathbf{a}^{[l-1]} + \mathbf{b}^{[l]}$, $\mathbf{a}^{[l]} = g(\mathbf{z}^{[l]})$, con $\mathbf{a}^{[0]} = \mathbf{x}^{(i)}$. Si hace falta la instancia: $\mathbf{a}^{[l](i)}$. El índice de capa es $l$ (letra normal), nunca $\ell$, que se reserva para la pérdida.
 
 ## Series de tiempo
 

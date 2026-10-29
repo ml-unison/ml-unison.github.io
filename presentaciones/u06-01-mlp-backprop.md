@@ -125,7 +125,7 @@ $$
 \vW^{[2]}\big(\vW^{[1]}\vx + \mathbf b^{[1]}\big) + \mathbf b^{[2]} = \vW\vx + \mathbf b ,
 $$
 
-con $\vW^{[\ell]}$ y $\mathbf b^{[\ell]}$ los pesos y sesgos de la capa $\ell$.
+con $\vW^{[l]}$ y $\mathbf b^{[l]}$ los pesos y sesgos de la capa $l$.
 
 <v-click>
 
@@ -253,7 +253,7 @@ $g$ es la activación oculta y $\ell$ la pérdida del ejemplo. La última capa e
 
 <v-click>
 
-Definimos el **error** de cada capa $\ell$: $\boldsymbol\delta^{[\ell]} = \partial \ell / \partial \vz^{[\ell]}$.
+Definimos el **error** de cada capa $l$: $\boldsymbol\delta^{[l]} = \partial \ell / \partial \vz^{[l]}$.
 
 </v-click>
 
@@ -286,10 +286,10 @@ $$
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-**Pesos.** $W^{[\ell]}_{pq}$, de la neurona $q$ de la capa $\ell-1$ a la $p$ de la capa $\ell$, solo afecta a $z^{[\ell]}_p$, con $\partial z^{[\ell]}_p / \partial W^{[\ell]}_{pq} = a^{[\ell-1]}_q$:
+**Pesos.** $W^{[l]}_{pq}$, de la neurona $q$ de la capa $l-1$ a la $p$ de la capa $l$, solo afecta a $z^{[l]}_p$, con $\partial z^{[l]}_p / \partial W^{[l]}_{pq} = a^{[l-1]}_q$:
 
 $$
-\frac{\partial \ell}{\partial \vW^{[\ell]}} = \boldsymbol\delta^{[\ell]}\, \va^{[\ell-1]\top}, \qquad \frac{\partial \ell}{\partial \mathbf b^{[\ell]}} = \boldsymbol\delta^{[\ell]} .
+\frac{\partial \ell}{\partial \vW^{[l]}} = \boldsymbol\delta^{[l]}\, \va^{[l-1]\top}, \qquad \frac{\partial \ell}{\partial \mathbf b^{[l]}} = \boldsymbol\delta^{[l]} .
 $$
 
 <div class="pequeno tenue">
@@ -300,10 +300,10 @@ Error que llega por activación que entra: un producto exterior.
 
 <v-click>
 
-**Errores.** $a^{[\ell]}_q$ afecta a **todas** las $z^{[\ell+1]}_p$: se suman y se multiplica ($\odot$, entrada por entrada) por la derivada $g'$ de la activación:
+**Errores.** $a^{[l]}_q$ afecta a **todas** las $z^{[l+1]}_p$: se suman y se multiplica ($\odot$, entrada por entrada) por la derivada $g'$ de la activación:
 
 $$
-\boldsymbol\delta^{[\ell]} = \Big(\vW^{[\ell+1]\top}\boldsymbol\delta^{[\ell+1]}\Big) \odot g'\big(\vz^{[\ell]}\big) .
+\boldsymbol\delta^{[l]} = \Big(\vW^{[l+1]\top}\boldsymbol\delta^{[l+1]}\Big) \odot g'\big(\vz^{[l]}\big) .
 $$
 
 </v-click>
@@ -600,7 +600,7 @@ Con He la desviación estándar se mantiene en 0.72 hasta la capa 20. Con Xavier
 <div class="cols" style="grid-template-columns: 5fr 6fr; gap: 36px">
 <div>
 
-Hacia atrás, cada capa $\ell$ multiplica por $\vW^{[\ell]\top}$ y por la derivada de la activación, $g'(\vz^{[\ell]})$. Con la sigmoide $\sigma(z) = 1/(1 + e^{-z})$,
+Hacia atrás, cada capa $l$ multiplica por $\vW^{[l]\top}$ y por la derivada de la activación, $g'(\vz^{[l]})$. Con la sigmoide $\sigma(z) = 1/(1 + e^{-z})$,
 
 $$
 \sigma'(z) = \sigma(z)\big(1 - \sigma(z)\big) \le \tfrac14 .
@@ -643,7 +643,7 @@ Norma del gradiente por capa en la inicialización, con 256 dígitos.
 
 1. Una capa oculta **aprende una representación** en la que el problema es lineal; sin no linealidad, todo se colapsa a un modelo lineal.
 2. Una capa ancha aproxima cualquier función continua, pero el teorema no dice cuántas neuronas, cómo encontrarlas ni si generalizan.
-3. Retropropagación: el error $\boldsymbol\delta^{[\ell]} = \partial \ell / \partial \vz^{[\ell]}$ viaja hacia atrás por $\vW^{[\ell]\top}$; el gradiente de los pesos $\vW^{[\ell]}$ es $\boldsymbol\delta^{[\ell]}\va^{[\ell-1]\top}$. Cuesta unas pocas pasadas hacia adelante.
+3. Retropropagación: el error $\boldsymbol\delta^{[l]} = \partial \ell / \partial \vz^{[l]}$ viaja hacia atrás por $\vW^{[l]\top}$; el gradiente de los pesos $\vW^{[l]}$ es $\boldsymbol\delta^{[l]}\va^{[l-1]\top}$. Cuesta unas pocas pasadas hacia adelante.
 4. Todo gradiente hecho a mano se **verifica** con diferencias centradas.
 5. La escala inicial de los pesos decide si la señal sobrevive: Xavier para $\tanh$, He para ReLU.
 

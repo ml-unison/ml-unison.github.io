@@ -37,7 +37,7 @@
 # %%
 import os, sys
 
-RAMA = "rediseno-2027"  # rama del repositorio del curso de la que se toman paquete y datos
+RAMA = "main"  # rama del repositorio del curso de la que se toman paquete y datos
 os.environ["RDP_RAMA"] = RAMA
 if "google.colab" in sys.modules:
     # %pip install -q "rdp @ git+https://github.com/ml-unison/ml-unison.github.io@{RAMA}#subdirectory=paquete"

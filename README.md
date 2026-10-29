@@ -72,11 +72,11 @@ Las versiones con solución viven en el repositorio privado `ml-unison/solucione
 
 ### Publicación
 
-La rama `rediseno-2027` se publica en la vista previa con cada *push*. Para pasar el rediseño a producción:
+Cada *push* a `main` construye y publica el sitio en https://ml-unison.github.io con el flujo `publicar.yml` (*Settings → Pages → Source* = «GitHub Actions»). Las libretas instalan `rdp` y descargan los datos de `main`.
 
-1. `uv run python herramientas/libretas.py rama main` (las libretas instalan `rdp` y descargan datos de `main`), commit.
-2. Merge de `rediseno-2027` en `main` (reemplaza por completo el sitio Jekyll anterior, que queda en la etiqueta `legado-2026`).
-3. En GitHub, *Settings → Pages → Source* = «GitHub Actions» (o `gh api -X PUT repos/ml-unison/ml-unison.github.io/pages -f build_type=workflow`). El flujo `publicar.yml` construye y publica `main`.
+Para probar un cambio grande antes de que lo vean los estudiantes, se trabaja en la rama `rediseno-2027`, que se publica en la vista previa (https://ml-unison.github.io/preview/) con cada *push*, y después se hace el merge a `main`. Las libretas de la vista previa siguen tomando `rdp` y los datos de `main`; para probar cambios en ellos, `uv run python herramientas/libretas.py rama rediseno-2027` en la rama (y de vuelta a `main` antes del merge).
+
+El rediseño reemplazó por completo el sitio Jekyll anterior, que queda en la etiqueta `legado-2026`.
 
 ## Licencias
 

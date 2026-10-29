@@ -123,7 +123,7 @@ Lo que guardamos en la libreta, como etiquetas de cada corrida:
 
 ```text
 codigo.commit       2bd5a59
-codigo.rama_curso   rediseno-2027
+codigo.rama_curso   main
 datos.nombre        credito_taiwan
 datos.huella        3cf212053ed7be44
 entorno.python      3.12.15

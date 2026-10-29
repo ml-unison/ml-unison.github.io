@@ -34,8 +34,8 @@ const pred = computed(() => A.mc[0] + A.mc[1] * s[t.value - 2] + A.mc[2] * s[t.v
       <line :x1="x(t) - 14" :x2="x(t) + 14" :y1="y(pred)" :y2="y(pred)" stroke="#C9971C" stroke-width="4" />
     </svg>
     <table class="ra">
-      <tr class="enc"><td>1</td><td>y<sub>t−1</sub></td><td>y<sub>t−2</sub></td><td></td><td>y<sub>t</sub></td><td>ŷ<sub>t</sub></td></tr>
-      <tr><td>1</td><td class="az">{{ f(s[t - 2]) }}</td><td class="az">{{ f(s[t - 3]) }}</td><td>→</td><td class="ro">{{ f(s[t - 1]) }}</td><td class="do">{{ f(pred) }}</td></tr>
+      <tr class="enc"><td>y<sub>t−1</sub></td><td>y<sub>t−2</sub></td><td></td><td>y<sub>t</sub></td><td>ŷ<sub>t</sub></td></tr>
+      <tr><td class="az">{{ f(s[t - 2]) }}</td><td class="az">{{ f(s[t - 3]) }}</td><td>→</td><td class="ro">{{ f(s[t - 1]) }}</td><td class="do">{{ f(pred) }}</td></tr>
     </table>
   </div>
 </template>
@@ -44,7 +44,6 @@ const pred = computed(() => A.mc[0] + A.mc[1] * s[t.value - 2] + A.mc[2] * s[t.v
 .ra { width: auto !important; font-size: 21px !important; margin-top: 4px; }
 .ra .enc td { color: var(--tenue) !important; font-style: italic; border-bottom: 2px solid var(--marino); }
 .ra td { padding: 4px 22px 4px 0 !important; text-align: right; font-variant-numeric: tabular-nums; }
-.ra td:first-child { color: var(--tinta) !important; font-weight: 400 !important; }
 .ra .az { color: #24398A; font-weight: 650; }
 .ra .ro { color: #D5433C; font-weight: 650; }
 .ra .do { color: #A87C12; font-weight: 650; }

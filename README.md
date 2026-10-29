@@ -29,9 +29,11 @@ npm run presentacion -- u01-01-aprender-de-datos.md   # una presentación con re
 node herramientas/construir.mjs                       # todo junto en _construccion/
 uv run pytest -q                                      # pruebas de consistencia
 uv run pytest --nbmake -n 4 unidades/*/ejemplos       # ejecuta todas las libretas de ejemplo
+node herramientas/revisar_katex.mjs [u04]             # todas las fórmulas de las presentaciones compilan
+uv run python herramientas/revisar_desborde.py [u04]  # ninguna lámina se sale del área visible
 ```
 
-`BASE=/preview/ node herramientas/construir.mjs` construye igual que la vista previa publicada.
+`BASE=/preview/ node herramientas/construir.mjs` construye igual que la vista previa publicada. Las presentaciones siguen la notación de [`presentaciones/NOTACION.md`](presentaciones/NOTACION.md).
 
 ### Libretas
 

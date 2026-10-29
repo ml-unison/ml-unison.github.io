@@ -15,6 +15,6 @@ const d = line<number>().x((_, i) => x(i + 1)).y(v => y(v))(R.normas)!
     <Ejes :x="x" :y="y" :x-ticks="[0, 300, 600, 900, 1200]" :y-ticks="[0.1, 0.2, 0.5, 1, 2]" x-titulo="paso de entrenamiento" y-titulo="‖g‖ antes de recortar" />
     <path :d="d" fill="none" stroke="#24398A" stroke-width="1.3" />
     <line :x1="m.l" :x2="W - m.r" :y1="y(1)" :y2="y(1)" stroke="#D5433C" stroke-width="2" stroke-dasharray="7 5" />
-    <text :x="W - m.r" :y="y(1) - 10" text-anchor="end" class="etiqueta" style="fill: #1A2133">umbral c = 1</text>
+    <text :x="W - m.r" :y="y(1) - 10" text-anchor="end" class="etiqueta" style="fill: #1A2133">umbral γ = 1</text>
   </svg>
 </template>

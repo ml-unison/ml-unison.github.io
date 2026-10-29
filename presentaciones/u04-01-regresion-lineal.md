@@ -80,12 +80,18 @@ El problema, su solución y su geometría.
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 40px">
 <div>
 
-Con $\vx = (1, x_1, \dots, x_d)$ y la matriz de datos $X \in \R^{N \times (d+1)}$:
+Con $M$ datos $(\vx^{(i)}, y^{(i)})$, $\vx^{(i)} \in \R^n$, pesos $\vw$ y sesgo $b$, el modelo y la pérdida cuadrática promedio son
 
 $$
-h(\vx) = \vw\T \vx, \qquad
-\Ein(\vw) = \frac1N \sum_{n=1}^N (\vw\T \vx_n - y_n)^2 = \frac1N \norm{X\vw - \mathbf{y}}^2 .
+h(\vx) = \vw\T \vx + b, \qquad
+L(\vw, b) = \frac1M \sum_{i=1}^M \big(\vw\T \vx^{(i)} + b - y^{(i)}\big)^2 .
 $$
+
+<div class="pequeno">
+
+Con matrices: a $\vX \in \R^{M \times n}$ le agregamos una columna de unos, $\tilde\vX = [\,\mathbf{1} \;\; \vX\,]$, y juntamos $\tilde\vw = (b, \vw)$. Así $\tilde\vX\tilde\vw = b\mathbf{1} + \vX\vw$ y $L = \frac1M \norm{\tilde\vX\tilde\vw - \vy}^2$.
+
+</div>
 
 <v-click>
 
@@ -107,10 +113,10 @@ Con una sola variable, la temperatura: cada grado más trae unas **9 bicicletas*
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-$\Ein$ es una cuadrática en $\vw$:
+Con $\tilde\vX = [\,\mathbf{1} \;\; \vX\,]$ (los datos y una columna de unos) y $\tilde\vw = (b, \vw)$, la pérdida $L$ es una cuadrática en $\tilde\vw$:
 
 $$
-\Ein(\vw) = \tfrac1N \big(\vw\T X\T X \vw - 2\,\vw\T X\T \mathbf{y} + \mathbf{y}\T\mathbf{y}\big)
+L(\tilde\vw) = \tfrac1M \big(\tilde\vw\T \tilde\vX\T \tilde\vX \tilde\vw - 2\,\tilde\vw\T \tilde\vX\T \vy + \vy\T\vy\big)
 $$
 
 <v-click>
@@ -118,7 +124,7 @@ $$
 Su gradiente y su hessiana:
 
 $$
-\nabla \Ein = \tfrac2N \big(X\T X \vw - X\T \mathbf{y}\big), \qquad \nabla^2 \Ein = \tfrac2N X\T X \succeq 0 .
+\nabla L = \tfrac2M \big(\tilde\vX\T \tilde\vX \tilde\vw - \tilde\vX\T \vy\big), \qquad \nabla^2 L = \tfrac2M \tilde\vX\T \tilde\vX \succeq 0 .
 $$
 
 </v-click>
@@ -129,11 +135,13 @@ $$
 
 <Caja tipo="proposicion">
 
-Si las columnas de $X$ son linealmente independientes, $X\T X$ es invertible y el único minimizador es
+Si las columnas de $\tilde\vX$ son linealmente independientes, $\tilde\vX\T \tilde\vX$ es invertible y el único minimizador es
 
 $$
-\vw_{\text{lin}} = (X\T X)^{-1} X\T \mathbf{y} = X^{\dagger} \mathbf{y} .
+(\hat b, \hat\vw) = (\tilde\vX\T \tilde\vX)^{-1} \tilde\vX\T \vy = \tilde\vX^{\dagger} \vy ,
 $$
+
+con $\tilde\vX^{\dagger}$ la pseudoinversa. La ecuación del sesgo da $\hat b = \bar y - \hat\vw\T \bar\vx$ (las medias): $b$ solo ajusta el nivel.
 
 </Caja>
 
@@ -141,7 +149,7 @@ $$
 
 <v-click>
 
-La hessiana es semidefinida positiva: $\Ein$ es **convexa** y el punto crítico es mínimo global. Es de los pocos modelos de este curso con **solución en forma cerrada**.
+La hessiana es semidefinida positiva: $L$ es **convexa** y el punto crítico es mínimo global. Es de los pocos modelos de este curso con **solución en forma cerrada**.
 
 </v-click>
 </div>
@@ -159,17 +167,16 @@ La hessiana es semidefinida positiva: $\Ein$ es **convexa** y el punto crítico 
 </div>
 <div>
 
-$\hat{\mathbf{y}} = X\vw$ recorre el **espacio columna** de $X$. El más cercano a $\mathbf{y}$ es su proyección ortogonal:
+$\hat\vy = \tilde\vX\tilde\vw$, con $\tilde\vX = [\,\mathbf{1} \;\; \vX\,]$ y $\tilde\vw = (b, \vw)$, recorre el **espacio columna** de $\tilde\vX$; el más cercano a $\vy$ es su proyección ortogonal:
 
 $$
-\hat{\mathbf{y}} = \underbrace{X (X\T X)^{-1} X\T}_{H} \, \mathbf{y} .
+\hat\vy = \underbrace{\tilde\vX (\tilde\vX\T \tilde\vX)^{-1} \tilde\vX\T}_{\mathbf{H}} \, \vy .
 $$
 
 <v-clicks>
 
-- Las ecuaciones normales dicen $X\T(\mathbf{y} - \hat{\mathbf{y}}) = 0$: **el residuo es perpendicular** a cada columna. Con intersección, los residuos suman cero.
-- La **matriz sombrero** $H$ es simétrica e idempotente ($H^2 = H$), con $\operatorname{tr} H = d + 1$: los grados de libertad del modelo.
-- Es la misma $H$ de la fórmula de dejar-uno-fuera de la Unidad 3.
+- Las ecuaciones normales dicen $\tilde\vX\T(\vy - \hat\vy) = \mathbf{0}$: **el residuo es perpendicular** a cada columna. Por la columna de unos (el sesgo), los residuos suman cero.
+- La **matriz sombrero** $\mathbf{H}$ es simétrica e idempotente ($\mathbf{H}^2 = \mathbf{H}$), con $\operatorname{tr} \mathbf{H} = n + 1$: los grados de libertad del modelo.
 
 </v-clicks>
 </div>
@@ -182,18 +189,20 @@ $$
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-Si $y = \vw\T \vx + \epsilon$ con $\epsilon \sim \mathcal{N}(0, \sigma^2)$ independientes, la log-verosimilitud es
+Si $y = \vw\T \vx + b + \epsilon$, con ruido $\epsilon \sim \mathcal{N}(0, \sigma^2)$ independiente en cada dato, la log-verosimilitud $\ln \mathcal{L}$ de los $M$ datos es
 
 $$
-\ell(\vw) = -\frac N2 \ln(2\pi\sigma^2) - \frac{1}{2\sigma^2} \norm{\mathbf{y} - X\vw}^2 .
+\ln \mathcal{L}(\tilde\vw) = -\frac M2 \ln(2\pi\sigma^2) - \frac{1}{2\sigma^2} \norm{\vy - \tilde\vX\tilde\vw}^2 ,
 $$
+
+con $\tilde\vX = [\,\mathbf{1} \;\; \vX\,]$ y $\tilde\vw = (b, \vw)$.
 
 <v-click>
 
 Maximizarla es **minimizar la suma de cuadrados**: mínimos cuadrados es el estimador de máxima verosimilitud con ruido gaussiano. Y entonces
 
 $$
-\hat\vw \sim \mathcal{N}\big(\vw,\; \sigma^2 (X\T X)^{-1}\big) .
+\hat{\tilde\vw} \sim \mathcal{N}\big(\tilde\vw,\; \sigma^2 (\tilde\vX\T \tilde\vX)^{-1}\big) .
 $$
 
 </v-click>
@@ -202,13 +211,13 @@ $$
 
 <Caja tipo="teorema">
 
-**Gauss–Markov.** Si $\E[\boldsymbol\epsilon] = 0$ y $\Var[\boldsymbol\epsilon] = \sigma^2 I$, entre todos los estimadores **lineales e insesgados** de $\vw$, el de mínimos cuadrados tiene la menor varianza.
+**Gauss–Markov.** Si el vector de ruidos cumple $\E[\boldsymbol\epsilon] = \mathbf{0}$ y $\Var[\boldsymbol\epsilon] = \sigma^2 \mathbf{I}$, entre todos los estimadores **lineales e insesgados** de $(b, \vw)$, el de mínimos cuadrados tiene la menor varianza.
 
 </Caja>
 
 <div class="pequeno" style="margin-top: 14px">
 
-No pide normalidad. Pero «insesgados» es una restricción fuerte: ridge (Unidad 3) es sesgado y puede tener menor error.
+No pide normalidad. Pero «insesgados» es una restricción fuerte: ridge, que además penaliza $\norm{\vw}^2$, es sesgado y puede tener menor error.
 
 </div>
 </div>
@@ -225,20 +234,20 @@ Lo que dice el álgebra no siempre es lo que conviene programar.
 
 ---
 
-# No inviertas $X\T X$
+# No inviertas $\tilde\vX\T \tilde\vX$
 
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-El **número de condición** $\kappa(A) = \sigma_{\max} / \sigma_{\min}$ mide cuánto se amplifican los errores de redondeo. Y
+El **número de condición** de una matriz $\mathbf{A}$, $\kappa(\mathbf{A}) = \sigma_{\max} / \sigma_{\min}$ (el cociente de sus valores singulares extremos), mide cuánto se amplifican los errores de redondeo. Con $\tilde\vX = [\,\mathbf{1} \;\; \vX\,]$,
 
 $$
-\kappa(X\T X) = \kappa(X)^2 .
+\kappa(\tilde\vX\T \tilde\vX) = \kappa(\tilde\vX)^2 .
 $$
 
 <v-click>
 
-Con $X = [\,1, \text{temp}, \text{sensación}\,]$ (correlación 0.985): $\kappa(X) \approx 104$, pero $\kappa(X\T X) \approx 10{,}700$. En doble precisión se pierden unos 4 dígitos en lugar de 2.
+Con $\tilde\vX = [\,\mathbf{1}, \text{temp}, \text{sensación}\,]$ (correlación 0.985): $\kappa(\tilde\vX) \approx 104$, pero $\kappa(\tilde\vX\T \tilde\vX) \approx 10{,}700$. En doble precisión se pierden unos 4 dígitos en lugar de 2.
 
 </v-click>
 </div>
@@ -246,14 +255,14 @@ Con $X = [\,1, \text{temp}, \text{sensación}\,]$ (correlación 0.985): $\kappa(
 
 | método | costo | estabilidad |
 |---|---|---|
-| ecuaciones normales (Cholesky) | $O(Nd^2 + d^3)$ | depende de $\kappa(X)^2$ |
-| QR de $X$ | $O(Nd^2)$ | depende de $\kappa(X)$ |
-| SVD de $X$ | $O(Nd^2)$, mayor constante | tolera rango deficiente |
-| descenso por gradiente | $O(Nd)$ por iteración | iteraciones $\propto \kappa$ |
+| ecuaciones normales (Cholesky) | $O(Mn^2 + n^3)$ | depende de $\kappa(\tilde\vX)^2$ |
+| QR de $\tilde\vX$ | $O(Mn^2)$ | depende de $\kappa(\tilde\vX)$ |
+| SVD de $\tilde\vX$ | $O(Mn^2)$, mayor constante | tolera rango deficiente |
+| descenso por gradiente | $O(Mn)$ por iteración | iteraciones $\propto \kappa$ |
 
 <div class="pequeno tenue">
 
-`np.linalg.lstsq` usa la SVD; `LinearRegression` de scikit-learn también resuelve por mínimos cuadrados sin formar $(X\T X)^{-1}$.
+$M$ datos, $n$ atributos. `np.linalg.lstsq` y `LinearRegression` no forman $(\tilde\vX\T \tilde\vX)^{-1}$.
 
 </div>
 </div>
@@ -267,15 +276,17 @@ Con $X = [\,1, \text{temp}, \text{sensación}\,]$ (correlación 0.985): $\kappa(
 <div>
 
 $$
-\vw_{t+1} = \vw_t - \eta\, \nabla \Ein(\vw_t)
+\tilde\vw_{t+1} = \tilde\vw_t - \eta\, \nabla L(\tilde\vw_t)
 $$
+
+con $\tilde\vw = (b, \vw)$, $t$ la iteración y $\eta$ la tasa de aprendizaje.
 
 <v-click>
 
-Con $\nabla^2\Ein = A$ y valores propios $\lambda_1 \ge \dots \ge \lambda_p > 0$, el error en la dirección propia $i$ se multiplica en cada paso por
+Si la hessiana $\nabla^2 L = \mathbf{A}$ tiene valores propios $\lambda_1 \ge \dots \ge \lambda_{n+1} > 0$, el error en la dirección del vector propio $r$ se multiplica en cada paso por
 
 $$
-1 - \eta \lambda_i .
+1 - \eta \lambda_r .
 $$
 
 </v-click>
@@ -284,8 +295,8 @@ $$
 
 <v-clicks>
 
-- Para no diverger hace falta $|1 - \eta\lambda_i| < 1$, es decir $\eta < 2 / \lambda_1$.
-- Con $\eta = 1/\lambda_1$, la dirección más plana se reduce por $1 - 1/\kappa$ en cada paso: se necesitan del orden de $\kappa \ln(1/\varepsilon)$ iteraciones.
+- Para no diverger hace falta $|1 - \eta\lambda_r| < 1$, es decir $\eta < 2 / \lambda_1$.
+- Con $\eta = 1/\lambda_1$, la dirección más plana se reduce por $1 - 1/\kappa$ en cada paso, con $\kappa = \lambda_1 / \lambda_{n+1}$: para reducir el error a una fracción $\varepsilon$ se necesitan del orden de $\kappa \ln(1/\varepsilon)$ iteraciones.
 - **Escalar los atributos** no cambia el modelo, pero cambia $\kappa$.
 
 </v-clicks>
@@ -301,7 +312,7 @@ $$
 
 <div class="pequeno" style="margin-top: 6px">
 
-Rentas contra temperatura, con $\eta = 0.9 \cdot 2/\lambda_{\max}$, hasta que $\Ein$ queda a una millonésima de su mínimo. Sin centrar, la intersección y la pendiente están acopladas (la temperatura media es 20 °C): los primeros pasos rebotan entre las paredes del valle y luego avanzan a paso de tortuga. Estandarizada, la hessiana es $2I$: con $\eta = 1/2$ bastaría un paso.
+Rentas contra temperatura, con paso $\eta = 0.9 \cdot 2/\lambda_{\max}$ ($\lambda_{\max}$: mayor valor propio de la hessiana). Sin centrar, $b$ y $w$ están acoplados (la temperatura media es 20 °C): los pasos rebotan entre las paredes del valle y luego avanzan a paso de tortuga. Estandarizada, con $\eta = 1/2$ bastaría un paso.
 
 </div>
 
@@ -321,11 +332,11 @@ No en los datos.
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-Con cualquier transformación fija $\Phi$, el modelo $h(\vx) = \vw\T \Phi(\vx)$ se ajusta con **los mismos** mínimos cuadrados, usando $Z = \Phi(X)$:
+Con cualquier transformación fija $\Phi$ de los atributos, el modelo $h(\vx) = \vw\T \Phi(\vx) + b$ se ajusta con **los mismos** mínimos cuadrados, usando la matriz $\mathbf{Z}$ cuyo renglón $i$ es $\Phi(\vx^{(i)})$:
 
 <v-clicks>
 
-- polinomios: $\Phi(x) = (1, x, x^2, \dots)$, como en la Unidad 1;
+- polinomios: $\Phi(x) = (x, x^2, x^3, \dots)$;
 - *one-hot*: una columna 0/1 por cada hora;
 - **interacciones**: $\text{hora} \times \text{laboral}$, una columna por pareja.
 
@@ -380,10 +391,10 @@ Días laborales de prueba, promedio por hora.
 <div>
 
 $$
-\Var[\hat w_j] = \frac{\sigma^2}{N\, \widehat{\Var}(x_j)} \cdot \frac{1}{1 - R_j^2}
+\Var[\hat w_j] = \frac{\sigma^2}{M\, \widehat{\Var}(x_j)} \cdot \frac{1}{1 - R_j^2}
 $$
 
-donde $R_j^2$ es el $R^2$ de predecir $x_j$ con los demás atributos. El segundo factor es el **factor de inflación de la varianza**.
+donde $\hat w_j$ es el peso estimado del atributo $x_j$, $\sigma^2$ la varianza del ruido, $M$ el número de datos, $\widehat{\Var}(x_j)$ la varianza del atributo en los datos y $R_j^2$ el $R^2$ de predecir $x_j$ con los demás atributos. El segundo factor es el **factor de inflación de la varianza**.
 
 <v-click>
 
@@ -397,7 +408,7 @@ Temperatura y sensación térmica tienen correlación 0.985: el factor es $1/(1 
 
 <div class="pequeno tenue">
 
-200 réplicas bootstrap. Juntas, una variable compensa a la otra (correlación negativa); la suma casi no cambia, y las predicciones tampoco.
+200 réplicas bootstrap: una variable compensa a la otra; la suma, y las predicciones, casi no cambian.
 
 </div>
 </div>
@@ -426,7 +437,7 @@ Lo que los residuos dicen del modelo.
 
 <v-clicks>
 
-- **Embudo:** la dispersión crece con el valor ajustado. El supuesto $\Var[\epsilon] = \sigma^2$ no se cumple.
+- **Embudo:** la dispersión crece con el valor ajustado. El supuesto de ruido con varianza constante, $\Var[\epsilon] = \sigma^2$, no se cumple.
 - **10 %** de las horas de prueba reciben una predicción **negativa**: el modelo cree que en la madrugada se devuelven bicicletas que nadie rentó.
 - Las rentas son **conteos**: no negativos, y con varianza que crece con la media.
 
@@ -434,7 +445,7 @@ Lo que los residuos dicen del modelo.
 
 <div v-click class="nota">
 
-En la siguiente presentación: un modelo lineal para la **media de un conteo**, la regresión de Poisson.
+Lo que hace falta: un modelo lineal para la **media de un conteo**, como la regresión de Poisson.
 
 </div>
 </div>
@@ -447,9 +458,9 @@ En la siguiente presentación: un modelo lineal para la **media de un conteo**, 
 <div class="cols cols-6-4" style="flex: 1">
 <div style="font-size: 25px; line-height: 1.4">
 
-1. Mínimos cuadrados = **proyección** de $\mathbf{y}$ sobre el espacio columna = máxima verosimilitud con ruido gaussiano.
-2. Se resuelve con QR o SVD, no invirtiendo $X\T X$.
-3. El descenso por gradiente tarda del orden de $\kappa$ iteraciones: **escala los atributos**.
+1. Mínimos cuadrados = **proyección** del vector de salidas $\vy$ sobre el espacio columna de los datos = máxima verosimilitud con ruido gaussiano.
+2. Se resuelve con QR o SVD, no invirtiendo la matriz de las ecuaciones normales.
+3. El descenso por gradiente tarda del orden del número de condición $\kappa$ en iteraciones: **escala los atributos**.
 4. «Lineal» es en los parámetros: *one-hot* e interacciones cambian todo.
 5. Con colinealidad, no interpretes coeficientes aislados.
 

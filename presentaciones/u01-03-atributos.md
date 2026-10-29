@@ -57,12 +57,12 @@ $\phi$
 ### Un vector de números
 
 $$
-\vx = \big(\, 0.52,\; -1.01,\; 0,\, 1,\, 0, \dots,\; 2,\; 0,\; -0.21,\; 0 \,\big)
+\vx^{(i)} = \big(\, 0.52,\; -1.01,\; 0,\, 1,\, 0, \dots,\; 2,\; 0,\; -0.21,\; 0 \,\big)
 $$
 
 <div v-click class="pequeno" style="margin-top: 24px">
 
-La **ingeniería de atributos** es diseñar $\phi$: la función que convierte cada registro en un vector de números. Los modelos de todo el curso trabajan sobre la matriz $X \in \R^{n \times d}$ cuyas filas son esos vectores.
+La **ingeniería de atributos** es diseñar $\phi$: la función que convierte cada registro $i$ en un vector de números $\vx^{(i)}$. Los modelos de todo el curso trabajan sobre la matriz $\vX \in \R^{M \times n}$ cuyas filas son esos vectores: $M$ registros con $n$ atributos cada uno.
 
 </div>
 </div>
@@ -142,11 +142,13 @@ Escalas, sesgos y fechas.
 <div class="cols cols-6-4" style="gap: 56px">
 <div>
 
-Para cada columna $j$, con $\bar x_j$ y $s_j$ calculadas **en el entrenamiento**:
+Para cada columna $j$, con su media $\bar x_j$ y su desviación estándar $s_j$ calculadas **en el entrenamiento**:
 
 $$
-z_{ij} = \frac{x_{ij} - \bar{x}_j}{s_j}
+z^{(i)}_j = \frac{x^{(i)}_j - \bar{x}_j}{s_j}
 $$
+
+donde $x^{(i)}_j$ es el valor de la columna $j$ en la casa $i$ y $z^{(i)}_j$ el valor estandarizado.
 
 Cada columna queda con media 0 y desviación 1 (en el entrenamiento; en la prueba, aproximadamente).
 
@@ -185,7 +187,7 @@ Muchas casas modestas y pocas muy caras. Con el logaritmo, la distribución es c
 </div>
 <div class="pequeno">
 
-Y los errores se vuelven **relativos**: $\;\log \hat y - \log y \approx \dfrac{\hat y - y}{y}$. Equivocarse por 20 mil dólares pesa distinto en una casa de 100 mil que en una de 500 mil.
+Y los errores se vuelven **relativos**: $\;\log \hat y - \log y \approx \dfrac{\hat y - y}{y}$, con $y$ el precio real y $\hat y$ el predicho. Equivocarse por 20 mil dólares pesa distinto en una casa de 100 mil que en una de 500 mil.
 
 </div>
 </div>
@@ -244,13 +246,13 @@ Con orden y sin orden.
 </div>
 <div class="pequeno">
 
-Una columna binaria por categoría: $k$ categorías → $k$ columnas.
+Una columna binaria por categoría: $K$ categorías → $K$ columnas.
 
 <v-click>
 
 - `handle_unknown="ignore"`: un barrio nuevo queda en ceros.
 - `min_frequency=10`: los barrios con pocas casas se agrupan.
-- Sin regularización, las $k$ columnas suman 1 y son colineales con el intercepto: se quita una (`drop="first"`).
+- Sin regularización, las $K$ columnas suman 1 y son colineales con el sesgo $b$ (el término constante del modelo): se quita una (`drop="first"`).
 
 </v-click>
 </div>
@@ -409,7 +411,7 @@ modelo.predict(X_nuevo)                        # aplica TODO, en el mismo orden
 
 <div class="nota">
 
-Un solo objeto: se entrena, se valida, se guarda y se despliega completo. En la Unidad 8 lo serviremos así.
+Un solo objeto: se entrena, se valida, se guarda y se despliega completo.
 
 </div>
 
@@ -494,7 +496,7 @@ Error mediano, con validación cruzada, del **mismo modelo**.
 
 <div class="pequeno">
 
-**Libretas:** *Preprocesamiento: preparar datos reales para un modelo* y *Un primer pipeline sin trampas* (Unidad 1, ejemplos 2 y 3).
+**Libretas:** *Preprocesamiento: preparar datos reales para un modelo* y *Un primer pipeline sin trampas* (ejemplos 2 y 3).
 
 **Laboratorio 1:** construir y evaluar un `Pipeline` completo.
 

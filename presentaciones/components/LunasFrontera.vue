@@ -24,7 +24,7 @@ const epocaSel = computed(() => L.epocas[sel.value])
         <Regiones :datos="reg" :x="x" :y="y" :colores="['#C0CEE3', '#F3C7C4']" :opacidad="0.8" />
         <circle v-for="(v, i) in L.x" :key="i" :cx="x(v)" :cy="y(L.y[i])" r="3.6" :fill="L.g[i] ? '#D5433C' : '#24398A'" stroke="#fff" stroke-width="0.6" />
       </svg>
-      <div class="lf__t">{{ k === 0 ? `σ(z) = z · exactitud ${L.exac_lineal.toFixed(3)}` : `tanh · exactitud ${L.exac_red.toFixed(3)}` }}</div>
+      <div class="lf__t">{{ k === 0 ? `g(z) = z · exactitud ${L.exac_lineal.toFixed(3)}` : `tanh · exactitud ${L.exac_red.toFixed(3)}` }}</div>
     </div>
   </div>
   <div v-else class="lf">

@@ -71,11 +71,13 @@ Cada imagen es un vector de **64 números**. No podemos dibujar 64 dimensiones, 
 <div class="cols cols-centro" style="flex: 1; gap: 56px">
 <div>
 
-500 puntos al azar en el cubo $[0,1]^d$. Para un punto cualquiera, ¿cuánto más lejos está el vecino **más lejano** que el **más cercano**?
+500 puntos al azar en el cubo $[0,1]^n$, con $n$ la dimensión. Para un punto cualquiera, ¿cuánto más lejos está el vecino **más lejano** que el **más cercano**?
 
 $$
 \frac{d_{\max} - d_{\min}}{d_{\min}}
 $$
+
+con $d_{\max}$ y $d_{\min}$ las distancias a esos dos vecinos.
 
 </div>
 <div>
@@ -84,7 +86,7 @@ $$
 
 <div v-click class="pequeno" style="margin-top: 26px">
 
-En dimensión alta **todos los puntos están casi a la misma distancia**. «Vecino más cercano» y «grupo compacto» pierden sentido, justo lo que usan k-medias y DBSCAN.
+En dimensión alta **todos los puntos están casi a la misma distancia**. «Vecino más cercano» y «grupo compacto» pierden sentido, justo lo que usan los métodos de agrupamiento como k-medias y DBSCAN.
 
 </div>
 </div>
@@ -134,14 +136,14 @@ Como elegir desde dónde fotografiar un objeto para que su sombra muestre lo má
 <div class="cols" style="gap: 48px">
 <div>
 
-Datos centrados $\vx_1, \dots, \vx_n \in \R^d$. Buscamos una dirección unitaria $\mathbf{u}$.
+$M$ datos centrados (con media cero) $\vx^{(1)}, \dots, \vx^{(M)} \in \R^n$. Buscamos una dirección unitaria $\mathbf{u} \in \R^n$; la sombra de $\vx^{(i)}$ sobre ella mide $\mathbf u\T \vx^{(i)}$.
 
 <Caja tipo="idea" nombre="máxima varianza">
 
 Que la sombra quede lo más **extendida** posible:
 
 $$
-\max_{\norm{\mathbf u} = 1} \; \frac{1}{n} \sum_i (\mathbf u\T \vx_i)^2
+\max_{\norm{\mathbf u} = 1} \; \frac{1}{M} \sum_{i=1}^{M} (\mathbf u\T \vx^{(i)})^2
 $$
 
 </Caja>
@@ -154,14 +156,14 @@ $$
 Que los puntos queden lo más **cerca** de su sombra:
 
 $$
-\min_{\norm{\mathbf u} = 1} \; \frac{1}{n} \sum_i \norm{\vx_i - (\mathbf u\T \vx_i)\, \mathbf u}^2
+\min_{\norm{\mathbf u} = 1} \; \frac{1}{M} \sum_{i=1}^{M} \norm{\vx^{(i)} - (\mathbf u\T \vx^{(i)})\, \mathbf u}^2
 $$
 
 </Caja>
 
 <div class="pequeno" style="margin-top: 16px">
 
-Son lo mismo por Pitágoras: $\;\norm{\vx_i}^2 = (\mathbf u\T\vx_i)^2 + \norm{\vx_i - (\mathbf u\T\vx_i)\mathbf u}^2$, y el lado izquierdo no depende de $\mathbf u$.
+Son lo mismo por Pitágoras: $\;\norm{\vx^{(i)}}^2 = (\mathbf u\T\vx^{(i)})^2 + \norm{\vx^{(i)} - (\mathbf u\T\vx^{(i)})\mathbf u}^2$, y el lado izquierdo no depende de $\mathbf u$.
 
 </div>
 </div>
@@ -174,15 +176,15 @@ Son lo mismo por Pitágoras: $\;\norm{\vx_i}^2 = (\mathbf u\T\vx_i)^2 + \norm{\v
 <div class="cols" style="gap: 48px">
 <div>
 
-Con $S = \frac{1}{n} \sum_i \vx_i \vx_i\T$, la varianza de la sombra es $\mathbf u\T S \mathbf u$. Con un multiplicador de Lagrange:
+Con la matriz de covarianza $\mathbf S = \frac{1}{M} \sum_{i=1}^{M} \vx^{(i)} \vx^{(i)\top}$ de los $M$ datos centrados, la varianza de la sombra sobre la dirección $\mathbf u$ es $\mathbf u\T \mathbf S \mathbf u$. Con un multiplicador de Lagrange $\lambda$:
 
 $$
-\nabla_{\mathbf u}\big[\mathbf u\T S \mathbf u - \lambda(\mathbf u\T \mathbf u - 1)\big] = 0 \;\Rightarrow\; S\mathbf u = \lambda \mathbf u .
+\nabla_{\mathbf u}\big[\mathbf u\T \mathbf S \mathbf u - \lambda(\mathbf u\T \mathbf u - 1)\big] = 0 \;\Rightarrow\; \mathbf S\mathbf u = \lambda \mathbf u .
 $$
 
 <v-click>
 
-$\mathbf u$ es un **vector propio** de $S$, y la varianza que conserva es $\mathbf u\T S \mathbf u = \lambda$. Gana el de **mayor valor propio**.
+$\mathbf u$ es un **vector propio** de $\mathbf S$, con valor propio $\lambda$, y la varianza que conserva es $\mathbf u\T \mathbf S \mathbf u = \lambda$. Gana el de **mayor valor propio**.
 
 </v-click>
 </div>
@@ -191,15 +193,15 @@ $\mathbf u$ es un **vector propio** de $S$, y la varianza que conserva es $\math
 <Caja tipo="algoritmo" nombre="PCA con la SVD">
 
 1. Centrar: restar la media de cada columna.
-2. Descomponer $X = U \Sigma V\T$.
-3. Las filas de $V\T$ son las componentes; la varianza de la $j$-ésima es $\sigma_j^2 / (n-1)$.
-4. Coordenadas nuevas: $Z = X V_m$ (las primeras $m$ columnas de $V$).
+2. Descomponer la matriz de datos $\vX = \mathbf U \boldsymbol\Sigma \mathbf V\T$, con $\mathbf U$ y $\mathbf V$ ortogonales y $\boldsymbol\Sigma$ diagonal con los valores singulares $\sigma_j$.
+3. Las filas de $\mathbf V\T$ son las componentes; la varianza de la $j$-ésima es $\sigma_j^2 / (M-1)$.
+4. Coordenadas nuevas: $\mathbf Z = \vX \mathbf V_r$ (las primeras $r$ columnas de $\mathbf V$), una fila de $r$ números por dato.
 
 </Caja>
 
 <div class="pequeno tenue">
 
-La SVD evita formar $S$ y es más estable numéricamente.
+La SVD evita formar $\mathbf S$ y es más estable numéricamente.
 
 </div>
 
@@ -218,7 +220,7 @@ La SVD evita formar $S$ y es más estable numéricamente.
 </div>
 <div>
 
-De 64 dimensiones, **21** conservan el 90 % de la varianza.
+De 64 dimensiones, las primeras $r = 21$ componentes conservan el 90 % de la varianza.
 
 <v-click>
 
@@ -255,22 +257,24 @@ Cada componente es una dirección en $\R^{64}$: un patrón de píxeles. En **azu
 Todo dígito se escribe como el promedio más una combinación de estos patrones:
 
 $$
-\vx \approx \bar\vx + z_1 \mathbf u_1 + z_2 \mathbf u_2 + \dots + z_m \mathbf u_m .
+\vx \approx \bar\vx + z_1 \mathbf u_1 + z_2 \mathbf u_2 + \dots + z_r \mathbf u_r ,
 $$
+
+con $\bar\vx$ el dígito promedio, $\mathbf u_1, \dots, \mathbf u_r$ las primeras $r$ componentes y $z_1, \dots, z_r$ las coordenadas del dígito en ellas.
 
 </div>
 </div>
 
 ---
 
-# Reconstruir con $m$ componentes
+# Reconstruir con $r$ componentes
 
 <Reconstrucciones />
 
 <div class="cols" style="gap: 40px; margin-top: 36px">
 <div class="pequeno">
 
-Con 10 números ya se reconoce el dígito; con 40 casi no se distingue del original.
+Cada imagen usa solo las primeras $r$ componentes. Con 10 números ya se reconoce el dígito; con 40 casi no se distingue del original.
 
 </div>
 <div class="pequeno" v-click>
@@ -319,7 +323,7 @@ Cada medida con media 0 y desviación 1.
 
 <div v-click class="nota">
 
-PCA busca varianza, y la varianza depende de las unidades. Igual que en k-medias: estandarizar es una decisión de modelado, no un detalle técnico.
+PCA busca varianza, y la varianza depende de las unidades. Igual que al agrupar por distancias: estandarizar es una decisión de modelado, no un detalle técnico.
 
 </div>
 
@@ -369,15 +373,14 @@ Conservar a los vecinos, no las distancias.
 
 <v-clicks>
 
-1. En el espacio original, convertir distancias en probabilidades de ser vecinos: $p_{j \mid i} \propto \exp\!\big(-\norm{\vx_i - \vx_j}^2 / 2\sigma_i^2\big)$.
-2. Colocar puntos $\mathbf y_i$ en el plano, con probabilidades $q_{ij} \propto \big(1 + \norm{\mathbf y_i - \mathbf y_j}^2\big)^{-1}$.
-3. Mover los $\mathbf y_i$ para que $q$ se parezca a $p$: minimizar $\mathrm{KL}(P \,\|\, Q)$ por descenso de gradiente.
+1. En el espacio original, convertir distancias en probabilidades de que $\vx^{(l)}$ sea vecino de $\vx^{(i)}$: $p_{l \mid i} \propto \exp\!\big(-\norm{\vx^{(i)} - \vx^{(l)}}^2 / 2\sigma_i^2\big)$, con $\sigma_i$ un ancho propio de cada punto.
+2. Colocar un punto $\vz^{(i)}$ en el plano por cada dato, con probabilidades $q_{il} \propto \big(1 + \norm{\vz^{(i)} - \vz^{(l)}}^2\big)^{-1}$.
+3. Mover los $\vz^{(i)}$ para que las $q$ se parezcan a las $p$: minimizar por descenso de gradiente la divergencia $\mathrm{KL}(P \,\|\, Q)$, que mide qué tan distintas son las dos distribuciones $P$ (las $p$) y $Q$ (las $q$).
 
 </v-clicks>
 
-<p class="pequeno tenue" style="margin-top: 20px">L. van der Maaten y G. Hinton, <em>JMLR</em> 9 (2008).</p>
-
 </div>
+<div>
 <div v-click>
 
 <Caja tipo="idea">
@@ -387,6 +390,10 @@ La distribución $t$ de colas pesadas en el plano deja que los puntos **no vecin
 La **perplejidad** fija $\sigma_i$: es, aproximadamente, cuántos vecinos considera cada punto.
 
 </Caja>
+
+</div>
+
+<p class="pequeno tenue" style="margin-top: 20px">L. van der Maaten y G. Hinton, <em>JMLR</em> 9 (2008).</p>
 
 </div>
 </div>
@@ -436,7 +443,7 @@ Dos nubes en 10 dimensiones, la de la derecha **8 veces más dispersa**. t-SNE l
 
 # UMAP
 
-<div class="cols" style="grid-template-columns: 5fr 3fr; gap: 40px">
+<div class="cols" style="grid-template-columns: 3fr 2fr; gap: 40px">
 <div>
 
 <Embebido metodo="umap" :ancho="620" :alto="460" />
@@ -450,7 +457,7 @@ La misma idea, con otra matemática: construir un **grafo de vecinos** y buscar 
 
 - Suele conservar mejor la estructura **global**.
 - Escala mejor a cientos de miles de puntos.
-- Tiene `transform`: proyecta **puntos nuevos** sin rehacer todo. t-SNE no.
+- Tiene `transform`: proyecta **puntos nuevos** sin rehacer todo (t-SNE no).
 
 </v-clicks>
 

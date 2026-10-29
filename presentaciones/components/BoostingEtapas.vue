@@ -24,7 +24,7 @@ const ultimo = computed(() => sel.value === etapas[etapas.length - 1])
 <template>
   <div class="be">
     <div class="be__botones">
-      <span>tocones sumados <i>m</i></span>
+      <span>tocones sumados <i>t</i></span>
       <button v-for="k in etapas" :key="k" :class="{ activo: k === sel }" @click="sel = k">{{ k }}</button>
     </div>
     <div class="be__paneles">
@@ -35,16 +35,16 @@ const ultimo = computed(() => sel.value === etapas[etapas.length - 1])
           <template v-if="ultimo"><circle v-for="(v, h) in E.promedio" :key="`p${h}`" :cx="x(h)" :cy="yA(v)" r="5" fill="#C9971C" /></template>
           <path :d="escalon(S.F, yA)" fill="none" stroke="#24398A" stroke-width="3.5" />
         </svg>
-        <div class="be__t"><i>F</i><sub>m</sub> = promedio + η · (suma de {{ sel }} {{ sel === '1' ? 'tocón' : 'tocones' }})<template v-if="ultimo"> · <span style="color: #A87C12">● promedio por hora</span></template></div>
+        <div class="be__t"><i>F</i><sub>t</sub> = promedio + η · (suma de {{ sel }} {{ sel === '1' ? 'tocón' : 'tocones' }})<template v-if="ultimo"> · <span style="color: #A87C12">● promedio por hora</span></template></div>
       </div>
       <div>
         <svg class="grafica" :viewBox="`0 0 ${W} ${H}`">
-          <Ejes :x="x" :y="yB" :x-ticks="[0, 6, 12, 18, 23]" :y-ticks="[-500, -250, 0, 250, 500]" x-titulo="hora (días laborales)" y-titulo="residuo y − Fₘ" />
+          <Ejes :x="x" :y="yB" :x-ticks="[0, 6, 12, 18, 23]" :y-ticks="[-500, -250, 0, 250, 500]" x-titulo="hora (días laborales)" y-titulo="residuo y − Fₜ" />
           <line :x1="m.l" :x2="W - m.r" :y1="yB(0)" :y2="yB(0)" stroke="#5E6678" stroke-width="1.2" />
           <circle v-for="(v, i) in E.x" :key="i" :cx="x(v)" :cy="yB(residuos[i])" r="2.4" fill="#6B7385" opacity="0.28" />
           <path v-if="!ultimo" :d="escalon(S.h, yB)" fill="none" stroke="#D5433C" stroke-width="3.5" />
         </svg>
-        <div class="be__t">residuos (pseudo-residuos) <span v-if="!ultimo" style="color: #D5433C">y el tocón <i>h</i><sub>m+1</sub> que se les ajusta</span></div>
+        <div class="be__t">residuos (pseudo-residuos) <span v-if="!ultimo" style="color: #D5433C">y el tocón <i>h</i><sub>t+1</sub> que se les ajusta</span></div>
       </div>
     </div>
   </div>

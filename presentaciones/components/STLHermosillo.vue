@@ -4,7 +4,7 @@ import { scaleLinear } from 'd3-scale'
 import { line } from 'd3-shape'
 import datos from '../datos/u07-01.json'
 const S = (datos as any).stl
-const W = 1120, alto = 92, sep = 10, m = { l: 190, r: 20 }
+const W = 1120, alto = 86, sep = 10, m = { l: 190, r: 20 }
 const anio = (i: number) => 1992 + (i * S.paso) / 365.2425
 const x = scaleLinear().domain([1992, 2025]).range([m.l, W - m.r])
 const paneles = [

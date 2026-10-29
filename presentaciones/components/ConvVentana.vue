@@ -21,9 +21,9 @@ const terminos = computed(() => {
 <template>
   <div class="cv">
     <svg :viewBox="`-2 -34 ${W} ${H + 36}`" class="grafica">
-      <text :x="ox" y="-12" class="cv__t">imagen X</text>
-      <text :x="kx" y="-12" class="cv__t">filtro K</text>
-      <text :x="yx" y="-12" class="cv__t">salida Y</text>
+      <text :x="ox" y="-12" class="cv__t">imagen A</text>
+      <text :x="kx" y="-12" class="cv__t">filtro W</text>
+      <text :x="yx" y="-12" class="cv__t">salida Z</text>
       <g v-for="(fila, a) in X" :key="`x${a}`">
         <g v-for="(v, b) in fila" :key="b">
           <rect :x="ox + b * t" :y="a * t" :width="t" :height="t" :fill="v ? '#C0CEE3' : '#F6F7FA'" stroke="#fff" stroke-width="2" />
@@ -50,7 +50,7 @@ const terminos = computed(() => {
     <div class="cv__abajo">
       <button @click="p = (p + 8) % 9">◀</button>
       <button @click="p = (p + 1) % 9">▶</button>
-      <span>Y[{{ i }}, {{ j }}] = <template v-if="terminos.length">{{ terminos.join(' + ') }}</template><template v-else>0</template> = <b>{{ Y[i][j] }}</b></span>
+      <span>Z[{{ i }}, {{ j }}] = <template v-if="terminos.length">{{ terminos.join(' + ') }}</template><template v-else>0</template> = <b>{{ Y[i][j] }}</b></span>
     </div>
   </div>
 </template>

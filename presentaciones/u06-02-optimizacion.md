@@ -71,11 +71,11 @@ Dejar que el grupo proponga. Casi siempre salen «sobreajuste» y «que no conve
 
 - Perceptrón multicapa 784 → 512 → 256 → 10, ReLU, *softmax* + entropía cruzada: **535,818 parámetros**.
 - **10,000** imágenes para entrenar, otras 10,000 para validar, las 10,000 oficiales de prueba al final.
-- Minilotes de $B = 128$; 30 épocas = 2,370 pasos.
+- Minilotes $\mathcal B$ de $|\mathcal B| = 128$ imágenes; 30 épocas = 2,370 pasos.
 
 <div class="pequeno tenue" v-click="1">
 
-Referencia: la regresión *softmax* de la Unidad 4 (sin capas ocultas) llega a **0.828** de exactitud de prueba.
+Referencia: la regresión *softmax* (logística de 10 clases, sin capas ocultas) llega a **0.828** de exactitud de prueba.
 
 </div>
 </div>
@@ -121,10 +121,10 @@ Un gradiente ruidoso, pero barato.
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 40px">
 <div>
 
-$E(\vw) = \frac1N\sum_n \ell_n(\vw)$. En lugar de $\mathbf{g} = \nabla E$ usamos
+La pérdida es $L(\vth) = \frac1M\sum_{i=1}^{M} \ell^{(i)}(\vth)$, con $\vth$ los parámetros de la red y $\ell^{(i)}$ la pérdida del ejemplo $i$. En lugar del gradiente completo $\mathbf{g} = \nabla L(\vth)$ usamos el de un minilote $\mathcal B$ de $|\mathcal B|$ índices:
 
 $$
-\mathbf{g}_{\mathcal{B}} = \frac1B \sum_{n \in \mathcal{B}} \nabla\ell_n(\vw), \qquad \vw \leftarrow \vw - \eta\, \mathbf{g}_{\mathcal{B}} .
+\mathbf{g}_{\mathcal{B}} = \frac{1}{|\mathcal B|} \sum_{i \in \mathcal{B}} \nabla\ell^{(i)}(\vth), \qquad \vth \leftarrow \vth - \eta\, \mathbf{g}_{\mathcal{B}} .
 $$
 
 <v-click>
@@ -132,20 +132,13 @@ $$
 Con índices uniformes, $\E[\mathbf{g}_{\mathcal{B}}] = \mathbf{g}$: **insesgado**. Y con índices independientes,
 
 $$
-\E\,\norm{\mathbf{g}_{\mathcal{B}} - \mathbf{g}}^2 = \frac{\sigma^2}{B} .
+\E\,\norm{\mathbf{g}_{\mathcal{B}} - \mathbf{g}}^2 = \frac{\sigma^2}{|\mathcal B|} ,
 $$
 
-</v-click>
-
-<v-click>
-
-<div class="pequeno">
-
-Con un solo ejemplo, el ruido es **75 veces** la señal. Con $B = 128$, del mismo orden. Aun así funciona: los errores de pasos sucesivos se promedian.
-
-</div>
+con $\sigma^2 = \E\,\norm{\nabla\ell^{(i)} - \mathbf g}^2$ la varianza del gradiente de un solo ejemplo.
 
 </v-click>
+
 </div>
 <div>
 
@@ -153,14 +146,24 @@ Con un solo ejemplo, el ruido es **75 veces** la señal. Con $B = 128$, del mism
 
 <div class="pequeno tenue">
 
-200 minilotes de cada tamaño, después de una época de SGD. Sin reemplazo aparece el factor $\frac{N-B}{N-1}$ (línea punteada).
+200 minilotes por tamaño, tras una época de SGD. Sin reemplazo aparece el factor $\frac{M-|\mathcal B|}{M-1}$, con $M$ imágenes de entrenamiento (línea punteada).
 
 </div>
+
+<v-click>
+
+<div class="pequeno" style="margin-top: 12px">
+
+Con un solo ejemplo, el ruido es **75 veces** la señal. Con $|\mathcal B| = 128$, del mismo orden. Aun así funciona: los errores de pasos sucesivos se promedian.
+
+</div>
+
+</v-click>
 </div>
 </div>
 
 <!--
-B·E‖g_B − g‖² vale 171, 175, 179, 174, 170 y 155: constante salvo el factor de población finita en B = 1024. Ruido como regularizador implícito: impide asentarse en mínimos muy estrechos (Keskar et al., 2017).
+|B|·E‖g_B − g‖² vale 171, 175, 179, 174, 170 y 155: constante salvo el factor de población finita en |B| = 1024. Ruido como regularizador implícito: impide asentarse en mínimos muy estrechos (Keskar et al., 2017).
 -->
 
 ---
@@ -175,7 +178,7 @@ B·E‖g_B − g‖² vale 171, 175, 179, 174, 170 y 155: constante salvo el fac
 </div>
 <div>
 
-Misma red, misma inicialización, mismos minilotes; solo cambia $\eta$.
+Misma red, misma inicialización, mismos minilotes; solo cambia la tasa de aprendizaje $\eta$.
 
 <v-click>
 
@@ -187,7 +190,7 @@ $\eta = 0.001$: en 237 pasos la pérdida apenas baja de 2.28 a 2.10. Entre 0.1 y
 
 <div class="nota">
 
-Cerca del mínimo, el error en la dirección del valor propio $\lambda$ de la hessiana se multiplica por $1 - \eta\lambda$ en cada paso: **diverge si $\eta > 2/\lambda_{\max}$**. Regla práctica: la mayor tasa estable, un poco por debajo.
+Cerca del mínimo, el error en la dirección de un valor propio $\mu$ de la hessiana (la curvatura en esa dirección) se multiplica por $1 - \eta\mu$ en cada paso: **diverge si $\eta > 2/\mu_{\max}$**, con $\mu_{\max}$ la mayor curvatura. Regla práctica: la mayor tasa estable, un poco por debajo.
 
 </div>
 
@@ -206,14 +209,14 @@ Recordar los pasos anteriores, y darle a cada parámetro su escala.
 
 ---
 
-# El zigzag, otra vez
+# El zigzag en un valle angosto
 
 <ValleMomento :inicial="0" />
 
 <div class="cols" style="gap: 40px; margin-top: 10px">
 <div class="pequeno">
 
-**Bola pesada** (Polyak, 1964): $\vw_{t+1} = \vw_t - \eta\nabla E(\vw_t) + \beta(\vw_t - \vw_{t-1})$. Lo que zigzaguea se cancela; lo que apunta siempre al mismo lado se acumula.
+**Bola pesada** (Polyak, 1964): $\vth_{t+1} = \vth_t - \eta\nabla L(\vth_t) + \beta(\vth_t - \vth_{t-1})$, con $t$ el número de paso y $\beta \in [0, 1)$ el **momento**, la fracción del paso anterior que se conserva. Lo que zigzaguea se cancela; lo que apunta al mismo lado se acumula. Aquí la curvatura $\mu$ va de 1 a 50.
 
 </div>
 <div class="pequeno" v-click>
@@ -224,29 +227,31 @@ Con la **misma** $\eta$: 346 iteraciones sin momento, 79 con $\beta = 0.64$. Per
 </div>
 
 <!--
-Interactivo: empezar con β = 0, luego 0.5, 0.64 y 0.9. Es el valle de la Unidad 4 (temperatura sin estandarizar): κ = λmax/λmin grande obliga a una tasa chica.
+Interactivo: empezar con β = 0, luego 0.5, 0.64 y 0.9. Es el valle de una regresión lineal con un atributo sin estandarizar (la temperatura): κ = μmax/μmin grande obliga a una tasa chica.
 -->
 
 ---
 
 # Por qué funciona: una recurrencia de segundo orden
 
-<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 40px">
+<div class="cols" style="grid-template-columns: 6fr 5fr; gap: 40px">
 <div>
 
-En $E = \frac12\vw\T H\vw$, en la dirección de cada valor propio $\lambda$:
+En una cuadrática $L = \frac12\vth\T \mathbf H\vth$ (hessiana $\mathbf H$), el error $e_t$ en la dirección de un valor propio $\mu$ cumple
 
 $$
-e_{t+1} = (1 + \beta - \eta\lambda)\,e_t - \beta\, e_{t-1}
+e_{t+1} = (1 + \beta - \eta\mu)\,e_t - \beta\, e_{t-1} ,
 $$
 
+cuyas raíces características $r$ resuelven
+
 $$
-r^2 - (1+\beta-\eta\lambda)\,r + \beta = 0 .
+r^2 - (1+\beta-\eta\mu)\,r + \beta = 0 .
 $$
 
 <v-click>
 
-Si las raíces son complejas, $|r|^2 = \beta$: **la misma tasa $\sqrt\beta$ en todas las direcciones**. Eso pasa si $(1-\sqrt\beta)^2 \le \eta\lambda \le (1+\sqrt\beta)^2$; pidiendo que $[\lambda_{\min}, \lambda_{\max}]$ quepa:
+Si las raíces son complejas, $|r|^2 = \beta$: **la misma tasa $\sqrt\beta$ en todas las direcciones**. Eso pasa si $(1-\sqrt\beta)^2 \le \eta\mu \le (1+\sqrt\beta)^2$; pidiendo que $[\mu_{\min}, \mu_{\max}]$ quepa, con $\kappa = \mu_{\max}/\mu_{\min}$:
 
 $$
 \sqrt\beta = \frac{\sqrt\kappa - 1}{\sqrt\kappa + 1} \quad \text{contra} \quad \frac{\kappa - 1}{\kappa + 1} \text{ sin momento.}
@@ -260,13 +265,13 @@ $$
 
 <div class="pequeno tenue" style="margin-top: -6px">
 
-Punteada: $\eta$ y $\beta$ óptimos, 60 iteraciones.
+Punteada: $\eta$ y $\beta$ óptimos, 60 iteraciones. $\vth^*$ es el mínimo.
 
 </div>
 
 <div class="pequeno" v-click>
 
-**Estabilidad:** converge si $0 < \eta\lambda < 2(1+\beta)$. Con el mismo paso efectivo $\eta/(1-\beta)$, el momento tolera curvaturas **19 veces** mayores ($\beta = 0.9$).
+**Estabilidad:** converge si $0 < \eta\mu < 2(1+\beta)$. Con el mismo paso efectivo $\eta/(1-\beta)$, el momento tolera curvaturas **19 veces** mayores ($\beta = 0.9$).
 
 </div>
 </div>
@@ -288,12 +293,18 @@ $$
 $$
 
 $$
-\vw_t = \vw_{t-1} - \eta\,\frac{\hat{\mathbf{m}}_t}{\sqrt{\hat{\mathbf{v}}_t} + \varepsilon}, \quad \hat{\mathbf{m}}_t = \frac{\mathbf{m}_t}{1-\beta_1^t}, \ \hat{\mathbf{v}}_t = \frac{\mathbf{v}_t}{1-\beta_2^t}
+\vth_t = \vth_{t-1} - \eta\,\frac{\hat{\mathbf{m}}_t}{\sqrt{\hat{\mathbf{v}}_t} + \varepsilon}, \quad \hat{\mathbf{m}}_t = \frac{\mathbf{m}_t}{1-\beta_1^t}, \ \hat{\mathbf{v}}_t = \frac{\mathbf{v}_t}{1-\beta_2^t}
 $$
+
+<div class="pequeno">
+
+$\mathbf g_t$: gradiente del minilote en el paso $t$. $\mathbf m_t$ y $\mathbf v_t$: promedios móviles del gradiente y de su cuadrado, con factores de olvido $\beta_1, \beta_2$; $\varepsilon$ evita dividir entre cero. Cuadrado, raíz y división son entrada por entrada.
+
+</div>
 
 <v-click>
 
-**¿Por qué dividir?** Con $\mathbf{m}_0 = 0$, $\mathbf{m}_t = (1-\beta_1)\sum_{i\le t}\beta_1^{t-i}\mathbf{g}_i$, así que
+**¿Por qué dividir?** Con $\mathbf{m}_0 = 0$, $\mathbf{m}_t = (1-\beta_1)\sum_{s=1}^{t}\beta_1^{t-s}\mathbf{g}_s$, así que
 
 $$
 \E[\mathbf{m}_t] = (1 - \beta_1^t)\,\E[\mathbf{g}] .
@@ -332,18 +343,18 @@ Kingma y Ba, ICLR 2015. Valores usuales: β1 = 0.9, β2 = 0.999, ε = 1e-8, η =
 
 <div class="pequeno">
 
-Grande para avanzar, chica para asentarse. Coseno: $\eta_t = \frac{\eta_0}{2}\big(1 + \cos\frac{\pi t}{T}\big)$. El **calentamiento** protege a la inicialización (y a los *transformers*).
+Grande para avanzar, chica para asentarse. Coseno: $\eta_t = \frac{\eta_0}{2}\big(1 + \cos\frac{\pi t}{T}\big)$, con tasa inicial $\eta_0$, paso $t$ y $T$ pasos en total. El **calentamiento** protege a la inicialización (y a los *transformers*).
 
 </div>
 </div>
 <div v-click>
 
-Con SGD, la L2 $\frac\lambda2\norm{\vw}^2$ da $\vw \leftarrow (1 - \eta\lambda)\vw - \eta\mathbf{g}$: **decaimiento de pesos**.
+Con SGD, la regularización L2 $\frac\lambda2\norm{\vth}^2$, de fuerza $\lambda$, da $\vth \leftarrow (1 - \eta\lambda)\vth - \eta\mathbf{g}$: **decaimiento de pesos**.
 
-Con Adam, $\lambda\vw$ pasa por la división entre $\sqrt{\hat{\mathbf{v}}}$: los pesos con gradientes grandes casi no decaen. **AdamW** (Loshchilov y Hutter, 2019) lo desacopla:
+Con Adam, $\lambda\vth$ pasa por la división entre $\sqrt{\hat{\mathbf{v}}}$: los pesos con gradientes grandes casi no decaen. **AdamW** (Loshchilov y Hutter, 2019) lo desacopla:
 
 $$
-\vw_t = \vw_{t-1} - \eta\Big(\frac{\hat{\mathbf{m}}_t}{\sqrt{\hat{\mathbf{v}}_t}+\varepsilon} + \lambda\vw_{t-1}\Big) .
+\vth_t = \vth_{t-1} - \eta\Big(\frac{\hat{\mathbf{m}}_t}{\sqrt{\hat{\mathbf{v}}_t}+\varepsilon} + \lambda\vth_{t-1}\Big) .
 $$
 
 <div class="pequeno tenue">
@@ -363,7 +374,7 @@ En PyTorch: `Adam(weight_decay=λ)` es L2; `AdamW(weight_decay=λ)` es la desaco
 <div class="cols" style="gap: 40px; margin-top: 4px">
 <div class="pequeno" v-click>
 
-SGD ($\eta = 0.05$) avanza **a saltos**: su pérdida llega a subir 0.5 de una época a otra. El momento con el **mismo paso efectivo** ($\eta = 0.005$, $\beta = 0.9$) avanza igual en promedio y sin sobresaltos.
+SGD (tasa $\eta = 0.05$) avanza **a saltos**: su pérdida llega a subir 0.5 de una época a otra. El momento con el **mismo paso efectivo** ($\eta = 0.005$, momento $\beta = 0.9$) avanza igual en promedio y sin sobresaltos.
 
 </div>
 <div class="pequeno" v-click>
@@ -374,7 +385,7 @@ Adam ($\eta = 10^{-3}$) es el más rápido: 0.05 en entrenamiento a la época 30
 </div>
 
 <!--
-Los saltos de SGD son consistentes con el límite de estabilidad: con η = 0.05, SGD es inestable para λ > 40; con momento (η = 0.005, β = 0.9), solo para λ > 760.
+Los saltos de SGD son consistentes con el límite de estabilidad: con η = 0.05, SGD es inestable para curvaturas μ > 40; con momento (η = 0.005, β = 0.9), solo para μ > 760.
 -->
 
 ---
@@ -416,13 +427,13 @@ Para un modelo lineal, parar en el paso t equivale aproximadamente a L2 con λ �
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 44px">
 <div>
 
-En cada paso, cada neurona oculta se apaga con probabilidad $p$ (Srivastava et al., *JMLR* 2014):
+En cada paso, cada neurona oculta se apaga con probabilidad $p$ (Srivastava et al., *JMLR* 2014). Si $\va$ son las activaciones de una capa y $\mathbf r$ una máscara de ceros y unos:
 
 $$
-\tilde{\mathbf{a}} = \frac{\mathbf{r}\odot\mathbf{a}}{1-p}, \quad r_j \sim \text{Bernoulli}(1-p), \quad \E[\tilde{\mathbf{a}}] = \mathbf{a} .
+\tilde{\mathbf{a}} = \frac{\mathbf{r}\odot\va}{1-p}, \quad r_j \sim \text{Bernoulli}(1-p), \quad \E[\tilde{\mathbf{a}}] = \va ,
 $$
 
-Al evaluar se usa $\mathbf{a}$ tal cual: el escalamiento **invertido** ya igualó las escalas.
+con $\odot$ el producto entrada por entrada. Al evaluar se usa $\va$ tal cual: el escalamiento **invertido** ya igualó las escalas.
 
 </div>
 <div>
@@ -430,7 +441,7 @@ Al evaluar se usa $\mathbf{a}$ tal cual: el escalamiento **invertido** ya igual�
 <v-clicks>
 
 - **Coadaptación:** ninguna neurona puede contar con que otra esté presente; cada una tiene que servir por sí sola.
-- **Ensamble:** cada máscara es una de $2^n$ subredes que comparten pesos. Evaluar sin *dropout* aproxima su promedio.
+- **Ensamble:** con $H$ neuronas ocultas, cada máscara es una de $2^H$ subredes que comparten pesos. Evaluar sin *dropout* aproxima su promedio.
 - **Verificación:** promediar 100 subredes al azar da 0.865 de exactitud de validación; la red completa, 0.867. Coinciden en el 99 % de las predicciones.
 
 </v-clicks>
@@ -439,7 +450,7 @@ Al evaluar se usa $\mathbf{a}$ tal cual: el escalamiento **invertido** ya igual�
 </div>
 
 <!--
-El promedio es exacto para una capa lineal y aproximado después de no linealidades. Es la misma idea de los bosques aleatorios (Unidad 5): promediar modelos reduce varianza.
+El promedio es exacto para una capa lineal y aproximado después de no linealidades. Es la misma idea de los bosques aleatorios: promediar modelos reduce varianza.
 -->
 
 ---
@@ -461,7 +472,7 @@ Con Adam, la pérdida de validación termina en **0.42** en lugar de 0.70 y la p
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 44px">
 <div>
 
-**Normalización por lotes** (Ioffe y Szegedy, 2015): estandarizar cada neurona con el minilote y devolverle escala y desplazamiento aprendidos,
+**Normalización por lotes** (Ioffe y Szegedy, 2015): estandarizar cada neurona $z_j$ con la media $\mu_{\mathcal{B},j}$ y la varianza $\sigma^2_{\mathcal{B},j}$ del minilote, y devolverle una escala $\gamma_j$ y un desplazamiento $\beta_j$ aprendidos (este $\beta_j$ no es el momento),
 
 $$
 \hat z_j = \frac{z_j - \mu_{\mathcal{B},j}}{\sqrt{\sigma^2_{\mathcal{B},j} + \varepsilon}}, \qquad \gamma_j\hat z_j + \beta_j .
@@ -569,8 +580,8 @@ Las cifras de Strubell suponen GPUs P100 y la mezcla eléctrica promedio de EE. 
 <div class="cols cols-6-4" style="flex: 1">
 <div style="font-size: 24px; line-height: 1.4">
 
-1. El gradiente de un minilote es **insesgado** con varianza $\sigma^2/B$; la tasa debe quedar por debajo de $2/\lambda_{\max}$.
-2. El **momento** cambia $\kappa$ por $\sqrt\kappa$ y sube el límite de estabilidad; **Adam** da una escala por parámetro y necesita su corrección de sesgo.
+1. El gradiente de un minilote es **insesgado** con varianza $\sigma^2/|\mathcal B|$ ($|\mathcal B|$ ejemplos); la tasa $\eta$ debe quedar por debajo de $2/\mu_{\max}$, con $\mu_{\max}$ la mayor curvatura.
+2. El **momento** cambia el número de condición $\kappa = \mu_{\max}/\mu_{\min}$ por $\sqrt\kappa$ y sube el límite de estabilidad; **Adam** da una escala por parámetro y necesita su corrección de sesgo.
 3. Vigilar la **pérdida** de validación, no solo la exactitud: el sobreajuste se ve primero en las probabilidades.
 4. Parada temprana, *dropout*, decaimiento de pesos (AdamW), normalización y aumento de datos; pero **más datos** ganan.
 5. Cada entrenamiento cuesta energía: hay que contarlo.

@@ -31,7 +31,7 @@ const diagnostico = computed(() => grado.value <= 1 ? 'subajuste' : grado.value 
         <input v-model.number="grado" type="range" min="0" max="14" step="1">
         <output>{{ grado }}</output>
       </label>
-      <PanelPolinomio :grado="grado" :ancho="620" :alto="400" con-real />
+      <PanelPolinomio :grado="grado" :ancho="620" :alto="350" con-real />
       <div class="lectura">
         <span>E<sub>in</sub> = <b>{{ fmt(actual.ein) }}</b></span>
         <span>E<sub>out</sub> = <b>{{ fmt(actual.eout) }}</b></span>

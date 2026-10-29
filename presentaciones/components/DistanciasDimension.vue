@@ -8,7 +8,7 @@ const max = Math.max(...D.razon)
 <template>
   <div class="dd">
     <div v-for="(d, i) in D.d" :key="d" class="dd__fila">
-      <span class="dd__d">d = {{ d.toLocaleString('es-MX') }}</span>
+      <span class="dd__d">n = {{ d.toLocaleString('es-MX') }}</span>
       <div class="dd__barra"><div :style="{ width: `${Math.max(0.6, D.razon[i] / max * 100)}%` }" /></div>
       <b>{{ D.razon[i] >= 10 ? D.razon[i].toFixed(0) : D.razon[i].toFixed(2) }}</b>
     </div>

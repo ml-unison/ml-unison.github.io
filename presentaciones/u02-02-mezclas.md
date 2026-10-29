@@ -72,7 +72,7 @@ Dos jorobas: el histograma no parece **una** campana.
 </div>
 <div v-click class="pequeno">
 
-Pero sí la suma de **dos** campanas con pesos $\pi_1 + \pi_2 = 1$. (Las especies Adelie y Chinstrap tienen aletas parecidas y quedan juntas.)
+Pero sí la suma de **dos** campanas, cada una con su media $\mu_k$ y su desviación estándar $\sigma_k$, multiplicadas por pesos $\pi_1 + \pi_2 = 1$. (Las especies Adelie y Chinstrap tienen aletas parecidas y quedan juntas.)
 
 </div>
 </div>
@@ -88,17 +88,17 @@ Para generar un pingüino:
 
 <v-clicks>
 
-1. La naturaleza elige una componente oculta $z \in \{1, \dots, K\}$ con probabilidad $\pi_k$.
-2. Dada la componente, las medidas salen de una normal: $\;\vx \mid z = k \;\sim\; \mathcal{N}(\mu_k, \Sigma_k)$.
+1. La naturaleza elige una de las $K$ componentes, $z \in \{1, \dots, K\}$, que queda oculta: la $k$ con probabilidad $\pi_k$.
+2. Dada la componente, las medidas $\vx$ salen de una normal con media $\boldsymbol\mu_k$ y covarianza $\boldsymbol\Sigma_k$: $\;\vx \mid z = k \;\sim\; \mathcal{N}(\boldsymbol\mu_k, \boldsymbol\Sigma_k)$.
 
 </v-clicks>
 
 <div v-click>
 
-Al observar solo $\vx$, sumamos sobre lo que no vemos:
+Al observar solo $\vx$, sumamos sobre lo que no vemos. La densidad de $\vx$ es
 
 $$
-p(\vx) = \sum_{k=1}^{K} \pi_k \, \mathcal{N}(\vx \mid \mu_k, \Sigma_k) .
+p(\vx) = \sum_{k=1}^{K} \pi_k \, \mathcal{N}(\vx \mid \boldsymbol\mu_k, \boldsymbol\Sigma_k) .
 $$
 
 </div>
@@ -107,7 +107,7 @@ $$
 
 <Caja tipo="idea">
 
-Un **modelo generativo**: describe cómo podrían haberse producido los datos. Los parámetros son $\theta = \{\pi_k, \mu_k, \Sigma_k\}_{k=1}^K$.
+Un **modelo generativo**: describe cómo podrían haberse producido los datos. Los parámetros son $\theta = \{\pi_k, \boldsymbol\mu_k, \boldsymbol\Sigma_k\}_{k=1}^K$.
 
 Agrupar se vuelve un problema de **estimación**: encontrar el $\theta$ que hace más probables los datos observados.
 
@@ -128,11 +128,17 @@ Agrupar se vuelve un problema de **estimación**: encontrar el $\theta$ que hace
 </div>
 <div>
 
-La **responsabilidad** de la componente $k$ sobre el punto $i$ es la probabilidad de que lo haya generado ella, dado lo que medimos:
+La **responsabilidad** $\gamma^{(i)}_k$ de la componente $k$ sobre el punto $\vx^{(i)}$ es la probabilidad de que lo haya generado ella, dado lo que medimos:
 
 $$
-\gamma_{ik} = \frac{\pi_k \, \mathcal{N}(\vx_i \mid \mu_k, \Sigma_k)}{\sum_{j} \pi_j \, \mathcal{N}(\vx_i \mid \mu_j, \Sigma_j)}
+\gamma^{(i)}_k = \frac{\pi_k \, \mathcal{N}(\vx^{(i)} \mid \boldsymbol\mu_k, \boldsymbol\Sigma_k)}{\sum_{l=1}^{K} \pi_l \, \mathcal{N}(\vx^{(i)} \mid \boldsymbol\mu_l, \boldsymbol\Sigma_l)}
 $$
+
+<div class="pequeno">
+
+Con $\pi_k$, $\boldsymbol\mu_k$ y $\boldsymbol\Sigma_k$ el peso, la media y la covarianza de la componente $k$. Abajo, lo mismo sumado sobre las $K$ componentes.
+
+</div>
 
 <p class="pequeno tenue">Lejos de la frontera es casi 0 o 1, como en k-medias. Cerca, expresa la duda.</p>
 
@@ -157,50 +163,51 @@ numero: 2
 <div class="cols" style="gap: 48px">
 <div>
 
-### Si supiéramos las componentes $z_i$…
+### Si supiéramos las componentes $z^{(i)}$…
 
 …estimar sería fácil: para cada grupo, su proporción, su media y su covarianza.
 
 $$
-\hat\mu_k = \frac{1}{n_k} \sum_{z_i = k} \vx_i
+\hat{\boldsymbol\mu}_k = \frac{1}{M_k} \sum_{z^{(i)} = k} \vx^{(i)}
 $$
+
+con $M_k$ el número de datos de la componente $k$.
 
 </div>
 <div v-click>
 
 ### Si supiéramos los parámetros $\theta$…
 
-…las componentes también: las responsabilidades $\gamma_{ik}$ salen de la regla de Bayes.
+…las componentes también: las responsabilidades $\gamma^{(i)}_k$ salen de la regla de Bayes.
 
 </div>
 </div>
 
 <div v-click class="lema" style="margin-top: 40px; font-size: 28px">
-No sabemos ninguna de las dos. Hagamos lo mismo que en k-medias: <em>alternar</em>.
+No sabemos ninguna de las dos. Hagamos lo mismo que k-medias con centros y asignaciones: <em>alternar</em>.
 </div>
 
 ---
 
 # Esperanza y maximización
 
-<div class="cols" style="gap: 48px">
+<div class="cols" style="grid-template-columns: 3fr 2fr; gap: 44px">
 <div>
 
 <Caja tipo="algoritmo" nombre="EM para mezclas gaussianas">
 
-**Paso E.** Con $\theta$ fijo, calcular las responsabilidades $\gamma_{ik}$.
+**Paso E.** Con los parámetros $\theta$ fijos, calcular las responsabilidades $\gamma^{(i)}_k$.
 
-**Paso M.** Con las $\gamma_{ik}$ fijas, reestimar como promedios **ponderados**, con $N_k = \sum_i \gamma_{ik}$:
-
-$$
-\pi_k = \frac{N_k}{n}, \qquad \mu_k = \frac{1}{N_k} \sum_i \gamma_{ik} \vx_i
-$$
+**Paso M.** Con las $\gamma^{(i)}_k$ fijas, reestimar con promedios **ponderados** sobre los $M$ datos ($M_k = \sum_{i=1}^{M} \gamma^{(i)}_k$, $\pi_k = M_k / M$):
 
 $$
-\Sigma_k = \frac{1}{N_k} \sum_i \gamma_{ik} (\vx_i - \mu_k)(\vx_i - \mu_k)\T
+\begin{aligned}
+\boldsymbol\mu_k &= \frac{1}{M_k} \sum_{i=1}^{M} \gamma^{(i)}_k \vx^{(i)} \\
+\boldsymbol\Sigma_k &= \frac{1}{M_k} \sum_{i=1}^{M} \gamma^{(i)}_k (\vx^{(i)} - \boldsymbol\mu_k)(\vx^{(i)} - \boldsymbol\mu_k)\T
+\end{aligned}
 $$
 
-Repetir hasta que la log-verosimilitud deje de subir.
+Repetir mientras suba la log-verosimilitud $\log p(\Dat \mid \theta)$.
 
 </Caja>
 
@@ -211,9 +218,9 @@ Repetir hasta que la log-verosimilitud deje de subir.
 
 | | k-medias | EM |
 |---|---|---|
-| asignación | dura | suave, $\gamma_{ik}$ |
+| asignación | dura | suave, $\gamma^{(i)}_k$ |
 | centro | media | media ponderada |
-| forma | esfera | $\Sigma_k$ |
+| forma | esfera | $\boldsymbol\Sigma_k$ |
 | proporción | — | $\pi_k$ |
 
 <p class="pequeno tenue">A. Dempster, N. Laird y D. Rubin, <em>J. Royal Statistical Society B</em> 39 (1977).</p>
@@ -238,20 +245,20 @@ Recorrer las iteraciones con los botones. En la 0, tres círculos iguales. Notar
 <div class="cols" style="grid-template-columns: 11fr 9fr; gap: 44px">
 <div>
 
-Para cualquier distribución $q_i$ sobre las componentes, por la desigualdad de Jensen ($\log$ es cóncava):
+Para cualquier distribución $q^{(i)}_1, \dots, q^{(i)}_K$ sobre las componentes del dato $i$, por la desigualdad de Jensen ($\log$ es cóncava):
 
 $$
-\log p(\vx_i \mid \theta) \;\ge\; \sum_k q_{ik} \log \frac{p(\vx_i, z_i{=}k \mid \theta)}{q_{ik}} .
+\log p(\vx^{(i)} \mid \theta) \;\ge\; \sum_{k=1}^{K} q^{(i)}_k \log \frac{p(\vx^{(i)}, z^{(i)}{=}k \mid \theta)}{q^{(i)}_k} .
 $$
 
-Sumando sobre $i$, el lado derecho $\mathcal{L}(q, \theta)$ es una **cota inferior** de la log-verosimilitud $\ell(\theta)$.
+Sumando sobre $i$, el lado derecho $\mathcal{L}(q, \theta)$ es una **cota inferior** de la log-verosimilitud $\log p(\Dat \mid \theta) = \sum_{i=1}^{M} \log p(\vx^{(i)} \mid \theta)$. Llamamos $\theta_t$ a los parámetros en la iteración $t$.
 
 </div>
 <div>
 
 <v-clicks>
 
-- **E:** con $q_{ik} = \gamma_{ik}$ la cota es exacta, $\mathcal{L}(q, \theta^{t}) = \ell(\theta^{t})$.
+- **E:** con $q^{(i)}_k = \gamma^{(i)}_k$ (las responsabilidades) la cota es exacta, $\mathcal{L}(q, \theta_t) = \log p(\Dat \mid \theta_t)$.
 - **M:** maximizar $\mathcal{L}(q, \theta)$ en $\theta$ da las fórmulas ponderadas.
 - Entonces
 
@@ -260,7 +267,10 @@ Sumando sobre $i$, el lado derecho $\mathcal{L}(q, \theta)$ es una **cota inferi
 <div v-click="3">
 
 $$
-\ell(\theta^{t+1}) \ge \mathcal{L}(q, \theta^{t+1}) \ge \mathcal{L}(q, \theta^{t}) = \ell(\theta^{t}).
+\begin{aligned}
+\log p(\Dat \mid \theta_{t+1}) &\ge \mathcal{L}(q, \theta_{t+1}) \\
+&\ge \mathcal{L}(q, \theta_t) = \log p(\Dat \mid \theta_t).
+\end{aligned}
 $$
 
 </div>
@@ -269,7 +279,7 @@ $$
 
 <div v-click="4" class="nota">
 
-**Cuidado:** sube siempre, pero hacia un **máximo local**. Con otro inicio, los mismos pingüinos terminan en $\ell = -862$ (en vez de $-822$) y con ARI de 0.49. Por eso se corre varias veces (`n_init`) o se inicia con k-medias.
+**Cuidado:** sube siempre, pero hacia un **máximo local**. Con otro inicio, los mismos pingüinos terminan con log-verosimilitud de $-862$ (en vez de $-822$) y con ARI de 0.49 (el índice de Rand ajustado: 1 es coincidir con las especies y 0 lo que daría el azar). Por eso se corre varias veces (`n_init`) o se inicia con k-medias.
 
 </div>
 
@@ -280,18 +290,18 @@ $$
 <div class="cols cols-centro" style="flex: 1; gap: 56px">
 <div class="grande">
 
-Fijemos todas las covarianzas en $\Sigma_k = \sigma^2 I$ y los pesos iguales. Entonces
+Fijemos todas las covarianzas en $\boldsymbol\Sigma_k = \sigma^2 \mathbf{I}$ (la misma varianza $\sigma^2$ en todas direcciones; $\mathbf{I}$ es la identidad) y los pesos $\pi_k$ iguales. Entonces
 
 $$
-\gamma_{ik} = \frac{\exp\!\big(-\norm{\vx_i - \mu_k}^2 / 2\sigma^2\big)}{\sum_j \exp\!\big(-\norm{\vx_i - \mu_j}^2 / 2\sigma^2\big)} .
+\gamma^{(i)}_k = \frac{\exp\!\big(-\norm{\vx^{(i)} - \boldsymbol\mu_k}^2 / 2\sigma^2\big)}{\sum_{l=1}^{K} \exp\!\big(-\norm{\vx^{(i)} - \boldsymbol\mu_l}^2 / 2\sigma^2\big)} .
 $$
 
 </div>
 <div v-click class="grande">
 
-Si $\sigma \to 0$, el término del centro **más cercano** domina: $\gamma_{ik} \to 1$ para ese centro y $0$ para los demás.
+Si $\sigma \to 0$, el término del centro **más cercano** domina: la responsabilidad $\gamma^{(i)}_k \to 1$ para ese centro $\boldsymbol\mu_k$ y $0$ para los demás.
 
-El paso E se vuelve «asignar» y el paso M, «mover». **Es k-medias.**
+El paso E se vuelve «asignar cada punto a su centro más cercano» y el paso M, «mover cada centro a la media de sus puntos». **Es k-medias.**
 
 </div>
 </div>
@@ -304,7 +314,7 @@ El paso E se vuelve «asignar» y el paso M, «mover». **Es k-medias.**
 
 <div v-click class="nota">
 
-Más libertad ajusta mejor, pero cuesta parámetros: en $d$ dimensiones, cada covarianza completa tiene $d(d+1)/2$. Con $d = 100$ son 5,050 por componente.
+Más libertad ajusta mejor, pero cuesta parámetros: con $n$ atributos, cada covarianza completa tiene $n(n+1)/2$. Con $n = 100$ son 5,050 por componente.
 
 </div>
 
@@ -322,17 +332,17 @@ numero: 3
 <div class="cols" style="gap: 48px">
 <div>
 
-Agregar una componente nunca baja la verosimilitud máxima. En el extremo, una componente pegada a cada punto con $\Sigma_k \to 0$ da $\ell \to \infty$.
+Agregar una componente nunca baja la verosimilitud máxima. En el extremo, una componente pegada a cada punto con covarianza $\boldsymbol\Sigma_k \to 0$ da una log-verosimilitud $\log p(\Dat \mid \theta) \to \infty$.
 
 <v-click>
 
 El **criterio de información bayesiano** castiga la complejidad:
 
 $$
-\text{BIC} = -2\,\ell(\hat\theta) + p \log n ,
+\text{BIC} = -2 \log p(\Dat \mid \hat\theta) + |\theta| \log M ,
 $$
 
-con $p$ el número de parámetros libres y $n$ el de datos. Menor es mejor.
+con $\hat\theta$ los parámetros que da EM, $|\theta|$ el número de parámetros libres y $M$ el de datos. Menor es mejor.
 
 </v-click>
 </div>
@@ -340,7 +350,7 @@ con $p$ el número de parámetros libres y $n$ el de datos. Menor es mejor.
 
 <Caja tipo="cuidado" nombre="singularidades">
 
-Una componente puede encogerse sobre un solo punto: su densidad allí tiende a infinito y EM «mejora» sin límite con un modelo absurdo. La defensa práctica es sumar una constante pequeña a la diagonal de cada $\Sigma_k$ (en scikit-learn, `reg_covar`).
+Una componente puede encogerse sobre un solo punto: su densidad allí tiende a infinito y EM «mejora» sin límite con un modelo absurdo. La defensa práctica es sumar una constante pequeña a la diagonal de cada covarianza $\boldsymbol\Sigma_k$ (en scikit-learn, `reg_covar`).
 
 </Caja>
 
@@ -359,7 +369,7 @@ Una componente puede encogerse sobre un solo punto: su densidad allí tiende a i
 </div>
 <div>
 
-El mejor modelo es de covarianza **compartida** y $k = 4$, no 3.
+El mejor modelo es de covarianza **compartida** y $K = 4$ componentes, no 3.
 
 <v-click>
 
@@ -382,13 +392,13 @@ El mejor modelo es de covarianza **compartida** y $k = 4$, no 3.
 <div class="cols" style="gap: 48px">
 <div class="grande">
 
-La mezcla no solo agrupa: da $p(\vx)$ para **cualquier** punto.
+La mezcla no solo agrupa: da la densidad $p(\vx)$ para **cualquier** punto $\vx$.
 
 <v-clicks>
 
 - **Detectar atípicos:** los puntos con $p(\vx)$ muy baja. El pingüino más raro es una Chinstrap con pico de 58 mm y aleta de 181 mm.
-- **Generar** datos nuevos: muestrear $z$ y luego $\vx$.
-- **Clasificar** con una mezcla por clase (Unidad 4).
+- **Generar** datos nuevos: muestrear la componente $z$ y luego $\vx$.
+- **Clasificar** con una mezcla por clase.
 
 </v-clicks>
 </div>
@@ -413,8 +423,8 @@ EM sirve para cualquier modelo con **variables ocultas**: modelos ocultos de Mar
 1. Una mezcla gaussiana es un **modelo generativo**: una componente oculta y luego una normal.
 2. Las **responsabilidades** son asignaciones suaves.
 3. **EM** alterna completar lo oculto (E) y reestimar (M): la verosimilitud no baja, pero hay máximos locales.
-4. k-medias es el caso límite con $\Sigma_k = \sigma^2 I$, $\sigma \to 0$.
-5. Elegir $k$ y la covarianza con **BIC**; luego interpretar.
+4. k-medias es el caso límite con covarianzas $\boldsymbol\Sigma_k = \sigma^2 \mathbf{I}$ y $\sigma \to 0$.
+5. Elegir el número de componentes $K$ y la covarianza con **BIC**; luego interpretar.
 
 </div>
 <div>

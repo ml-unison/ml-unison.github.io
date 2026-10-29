@@ -74,7 +74,7 @@ Breiman, Friedman, Olshen y Stone abren su libro con este ejemplo (sección 1.1)
 <div class="cols" style="grid-template-columns: 5fr 6fr; gap: 40px">
 <div>
 
-Largo y profundidad del pico de 342 pingüinos de tres especies (Unidades 2 y 4).
+Largo y profundidad del pico de 342 pingüinos de tres especies.
 
 <v-clicks>
 
@@ -106,7 +106,7 @@ Cada pregunta corta con una recta **paralela a un eje**. Las hojas son rectángu
 
 <div v-click class="pequeno" style="margin-top: 10px">
 
-Sin límite, el árbol acierta en **todos** los de entrenamiento con 21 hojas, algunas para un solo pingüino. La validación cruzada se estanca desde la profundidad 4: es el sobreajuste de la Unidad 3, con forma geométrica.
+Sin límite, el árbol acierta en **todos** los de entrenamiento con 21 hojas, algunas para un solo pingüino. La validación cruzada se estanca desde la profundidad 4: es sobreajuste, con forma geométrica.
 
 </div>
 
@@ -132,7 +132,7 @@ Impureza, ganancia y el algoritmo voraz.
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 40px">
 <div>
 
-En un nodo, $p_k$ es la proporción de la clase $k$:
+En un nodo, $p_k$ es la proporción de la clase $k$ ($k = 1, \dots, K$):
 
 $$
 \begin{aligned}
@@ -144,10 +144,10 @@ $$
 
 <v-click>
 
-Una división manda $n_I$ datos a la izquierda y $n_D$ a la derecha. Su **ganancia**:
+Una división manda $M_I$ de los $M$ datos del nodo a la izquierda y $M_D$ a la derecha. Con $Q$ la impureza elegida ($G$, $H$ o $E$), su **ganancia** es
 
 $$
-\Delta = i(\text{padre}) - \tfrac{n_I}{n}\, i(\text{izq}) - \tfrac{n_D}{n}\, i(\text{der})
+\Delta = Q(\text{padre}) - \tfrac{M_I}{M}\, Q(\text{izq}) - \tfrac{M_D}{M}\, Q(\text{der})
 $$
 
 </v-click>
@@ -226,7 +226,7 @@ En las dos, las hijas siguen siendo de mayoría Adelie: el error no cambia. Pero
 
 <div class="pequeno">
 
-**Jensen:** las proporciones del padre son el promedio ponderado de las de las hijas. Si $i$ es **estrictamente cóncava**, el promedio de las impurezas de las hijas queda debajo: $\Delta > 0$ salvo que $p_I = p_D$. El error es lineal a trozos: $\Delta = 0$ si las hijas caen del mismo lado de $1/2$.
+**Jensen:** las proporciones del padre son el promedio ponderado de las de las hijas. Si la impureza $Q$ es **estrictamente cóncava**, el promedio de las impurezas de las hijas queda debajo: $\Delta > 0$ salvo que las dos hijas tengan las mismas proporciones. El error es lineal a trozos: $\Delta = 0$ si las hijas caen del mismo lado de $1/2$.
 
 </div>
 
@@ -252,7 +252,7 @@ Al hacer clic aparece la división A: círculo blanco = padre, puntos = hijas, r
 
 <div class="nota">
 
-Ordenando por $x_j$, los conteos de la izquierda son **sumas acumuladas**: todos los umbrales se evalúan en $O(n)$; con el orden, $O(n \log n)$ por atributo.
+Ordenando los $M$ datos del nodo por el atributo $x_j$, los conteos de la izquierda son **sumas acumuladas**: todos los umbrales se evalúan en $O(M)$; con el orden, $O(M \log M)$ por atributo.
 
 </div>
 
@@ -282,7 +282,7 @@ Mover el deslizador desde 38 mm hacia la derecha: los Adelie pasan a la izquierd
 
 <v-clicks>
 
-- **Costo:** $O(d\,N \log N)$ por nivel, porque los nodos de un mismo nivel se reparten los $N$ datos.
+- **Costo:** $O(n\,M \log M)$ por nivel, con $n$ atributos y $M$ datos, porque los nodos de un mismo nivel se reparten los $M$ datos.
 - **¿Por qué voraz?** Encontrar el árbol binario óptimo es **NP-completo** (Hyafil y Rivest, 1976). La regla voraz no ve el futuro: una división mediocre puede abrir paso a divisiones excelentes.
 - En la libreta, unas 30 líneas de NumPy reproducen a `DecisionTreeClassifier` en los pingüinos.
 
@@ -297,7 +297,7 @@ numero: 2
 
 # Árboles de regresión y poda
 
-Las bicicletas de la Unidad 4, sin construir nada a mano.
+Bicicletas rentadas por hora, sin construir atributos a mano.
 
 ---
 
@@ -309,8 +309,10 @@ Las bicicletas de la Unidad 4, sin construir nada a mano.
 Cada hoja predice el **promedio** de sus $y$ (la constante que minimiza los cuadrados). La impureza es la varianza; se busca
 
 $$
-\min_{j,\,t} \sum_{x_{nj} \le t} (y_n - \bar y_I)^2 + \sum_{x_{nj} > t} (y_n - \bar y_D)^2 .
+\min_{j,\,t} \sum_{i \,:\, x^{(i)}_j \le t} \big(y^{(i)} - \bar y_I\big)^2 + \sum_{i \,:\, x^{(i)}_j > t} \big(y^{(i)} - \bar y_D\big)^2 ,
 $$
+
+con $j$ el atributo, $t$ el umbral y $\bar y_I$, $\bar y_D$ los promedios de cada lado.
 
 <div v-click class="pequeno">
 
@@ -329,7 +331,7 @@ Profundidad 3, la rama de la madrugada:
 
 <div class="nota">
 
-**Una rama es una interacción.** En la U4 hubo que crear `hora × laboral` a mano; el árbol la encontró solo.
+**Una rama es una interacción.** Un modelo lineal necesita que le demos `hora × laboral` hecha a mano; el árbol la encontró solo.
 
 </div>
 </div>
@@ -374,7 +376,7 @@ Profundidad 3, la rama de la madrugada:
 <v-clicks>
 
 - Sin límite: profundidad 31, **10,403 hojas** para 10,886 horas. RECM de entrenamiento 6.0; de prueba, 80.5.
-- El mínimo de prueba, 69.5, en profundidad 10: ya mejor que Poisson.
+- El mínimo de prueba, 69.5, en profundidad 10: ya mejor que una regresión de Poisson.
 - Pero elegir la profundidad mirando la prueba es trampa, y detener el crecimiento tiene un defecto: una división que gana poco puede preparar otras muy buenas.
 
 </v-clicks>
@@ -388,7 +390,7 @@ Profundidad 3, la rama de la madrugada:
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-Crecer un árbol grande $T_0$ y **podarlo**. Para un subárbol $T$ con $|T|$ hojas:
+Crecer un árbol grande $T_0$ y **podarlo**. Para un subárbol $T$ con $|T|$ hojas y error de entrenamiento $R(T)$:
 
 $$
 R_\alpha(T) = R(T) + \alpha\, |T|
@@ -396,13 +398,13 @@ $$
 
 <div class="pequeno">
 
-Error de entrenamiento + precio por hoja: el esquema de regularización de la Unidad 3.
+Error de entrenamiento + un precio $\alpha$ por hoja: más hojas, más castigo, como en toda regularización (`ccp_alpha` en scikit-learn).
 
 </div>
 
 <v-click>
 
-Colapsar la rama $T_t$ de un nodo $t$ en una hoja conviene cuando
+Colapsar la rama $T_t$ de un nodo $t$ en una hoja, con error $R(t)$, conviene cuando
 
 $$
 \alpha \ge g(t) = \frac{R(t) - R(T_t)}{|T_t| - 1} .
@@ -449,7 +451,7 @@ RECM de prueba (bicicletas por hora):
 
 <div class="pequeno" style="margin-top: 10px">
 
-Con atributos crudos, el árbol podado le gana al mejor modelo lineal de la U4 y a Poisson.
+Con atributos crudos, el árbol podado le gana al mejor modelo lineal y a la regresión de Poisson.
 
 </div>
 </div>
@@ -469,7 +471,7 @@ En 200 remuestras, la primera pregunta cambia de atributo **35 veces**; en el 30
 
 <div v-click class="nota">
 
-Poco sesgo, mucha varianza: un cambio cerca de la raíz se propaga a todo el árbol. La Unidad 3 sugiere el remedio: **promediar**. Es la próxima clase.
+Poco sesgo, mucha varianza: un cambio cerca de la raíz se propaga a todo el árbol. El remedio natural para la varianza: **promediar** muchos árboles.
 
 </div>
 
@@ -483,7 +485,7 @@ Cada árbol se entrenó con una remuestra bootstrap de los 342 pingüinos (342 c
 
 # Árboles contra modelos lineales
 
-<div class="cols" style="grid-template-columns: 3fr 2fr; gap: 40px">
+<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 40px">
 <div>
 
 | | lineal | árbol |
@@ -499,7 +501,7 @@ Cada árbol se entrenó con una remuestra bootstrap de los 342 pingüinos (342 c
 
 <v-clicks>
 
-- **Transformaciones monótonas:** el árbol solo compara $x_j \le t$; cambiar $x_j$ por $\phi(x_j)$ creciente da las mismas particiones.
+- **Transformaciones monótonas:** el árbol solo compara $x_j \le t$ (atributo contra umbral); cambiar $x_j$ por $\phi(x_j)$ creciente da las mismas particiones.
 - **Categóricos:** con $q$ categorías hay $2^{q-1} - 1$ particiones; para dos clases o regresión basta ordenar por la media de $y$.
 - **Faltantes:** CART usaba divisiones sustitutas; scikit-learn aprende a qué lado mandarlos.
 - Una frontera **diagonal** necesita una escalera de muchos escalones.
@@ -515,10 +517,10 @@ Cada árbol se entrenó con una remuestra bootstrap de los 342 pingüinos (342 c
 <div class="cols cols-6-4" style="flex: 1">
 <div style="font-size: 25px; line-height: 1.4">
 
-1. Un árbol parte el espacio en **rectángulos** con preguntas $x_j \le t$; cada rama es una interacción.
+1. Un árbol parte el espacio en **rectángulos** con preguntas $x_j \le t$ (atributo $j$, umbral $t$); cada rama es una interacción.
 2. Se crece de forma **voraz** con la impureza: Gini o entropía, estrictamente cóncavas; el error no sirve.
 3. En regresión, hojas con promedios y reducción de la suma de cuadrados.
-4. Se controla con **poda por costo–complejidad** $R(T) + \alpha|T|$ y validación cruzada.
+4. Se controla con **poda por costo–complejidad** $R(T) + \alpha|T|$ (error más $\alpha$ por hoja) y validación cruzada.
 5. Poco sesgo, **mucha varianza**: la materia prima ideal para promediar.
 
 </div>

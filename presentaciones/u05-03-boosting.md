@@ -40,30 +40,26 @@ Kearns y Valiant (1988–89) lo plantearon como problema abierto de la teoría P
 </v-click>
 
 <!--
-Pedir ideas antes de mostrar la respuesta. Suelen proponer «promediar muchos», como el bagging de la clase pasada. Hacer notar la diferencia: si todos los clasificadores débiles se equivocan en los mismos casos, promediarlos no ayuda. Hay que obligar a cada uno a mirar donde los otros fallan.
+Pedir ideas antes de mostrar la respuesta. Suelen proponer «promediar muchos», como en el bagging. Hacer notar la diferencia: si todos los clasificadores débiles se equivocan en los mismos casos, promediarlos no ayuda. Hay que obligar a cada uno a mirar donde los otros fallan.
 -->
 
 ---
 
 # AdaBoost: concentrarse en los errores
 
-<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
+<div class="cols" style="grid-template-columns: 3fr 2fr; gap: 40px">
 <div>
 
 <Caja tipo="algoritmo" nombre="AdaBoost">
 
-Etiquetas $y_n \in \{-1, +1\}$, pesos $w_n = 1/N$. Para $t = 1, \dots, T$:
+Etiquetas $y^{(i)} \in \{-1, +1\}$; cada dato empieza con peso $w^{(i)} = 1/M$. Para cada ronda $t = 1, \dots, B$:
 
-1. ajustar $h_t$ a los datos con pesos $w$;
-2. $\varepsilon_t = \sum_n w_n\, \ind{h_t(\vx_n) \ne y_n}$;
-3. $\alpha_t = \frac12 \ln \frac{1 - \varepsilon_t}{\varepsilon_t}$;
-4. $w_n \leftarrow w_n\, e^{-\alpha_t y_n h_t(\vx_n)}$ y normalizar.
+1. ajustar el clasificador débil $h_t$ a los datos con pesos $w^{(i)}$;
+2. error ponderado $\varepsilon_t = \sum_i w^{(i)}\, \ind{h_t(\vx^{(i)}) \ne y^{(i)}}$;
+3. voto $\alpha_t = \frac12 \ln \frac{1 - \varepsilon_t}{\varepsilon_t}$;
+4. $w^{(i)} \leftarrow w^{(i)}\, e^{-\alpha_t y^{(i)} h_t(\vx^{(i)})}$ y normalizar.
 
-Clasificador final:
-
-$$
-g(\vx) = \operatorname{signo}\big(F_T(\vx)\big), \qquad F_T = \sum_t \alpha_t h_t .
-$$
+Clasificador final, tras $B$ rondas: $\hat y = \operatorname{signo}\big(F_B(\vx)\big)$, con $F_B = \sum_{t=1}^{B} \alpha_t h_t$.
 
 </Caja>
 
@@ -72,9 +68,9 @@ $$
 
 <v-clicks>
 
-- $y_n h_t(\vx_n) = +1$ si acertó: el peso se multiplica por $e^{-\alpha_t} < 1$. Si falló, por $e^{\alpha_t} > 1$.
+- $y^{(i)} h_t(\vx^{(i)}) = +1$ si acertó: el peso se multiplica por $e^{-\alpha_t} < 1$. Si falló, por $e^{\alpha_t} > 1$.
 - Un clasificador mejor que la moneda ($\varepsilon_t < \frac12$) recibe voto $\alpha_t > 0$; uno casi perfecto, un voto enorme.
-- **Aprendiz débil** típico: un **tocón**, un árbol de una sola pregunta $x_j > u$. Malo solo, con mucho sesgo y poca varianza.
+- **Aprendiz débil** típico: un **tocón**, un árbol de una sola pregunta $x_j > u$ (atributo $j$, umbral $u$). Malo solo, con mucho sesgo y poca varianza.
 
 </v-clicks>
 </div>
@@ -104,14 +100,14 @@ Recorrer las rondas: el tocón 1 dice «barbijo si longitud > 50.5»; se equivoc
 
 <Caja tipo="proposicion" nombre="Freund y Schapire, 1997">
 
-Con $\varepsilon_t = \frac12 - \gamma_t$, el error de entrenamiento cumple
+Con $\varepsilon_t = \frac12 - \gamma_t$ ($\gamma_t$: ventaja de $h_t$ sobre la moneda), el error de entrenamiento cumple
 
 $$
-\frac1N \sum_n \ind{g(\vx_n) \ne y_n} \le \frac1N\sum_n e^{-y_n F_T(\vx_n)}
+\frac1M \sum_{i=1}^{M} \ind{\hat y^{(i)} \ne y^{(i)}} \le \frac1M\sum_{i=1}^{M} e^{-y^{(i)} F_B(\vx^{(i)})}
 $$
 
 $$
-= \prod_{t} 2\sqrt{\varepsilon_t(1 - \varepsilon_t)} \le e^{-2\sum_t \gamma_t^2} .
+= \prod_{t=1}^{B} 2\sqrt{\varepsilon_t(1 - \varepsilon_t)} \le e^{-2\sum_t \gamma_t^2} .
 $$
 
 </Caja>
@@ -139,7 +135,7 @@ Pingüinos: con 200 tocones, cota 0.108 y error 0.029. No llega a 0: hay pingüi
 </div>
 
 <!--
-Si cada aprendiz débil tiene una ventaja γ fija sobre la moneda, el error de entrenamiento cae como exp(−2γ²T): ésa es la respuesta a Kearns y Valiant (para el error de entrenamiento; la generalización se controla aparte, como en la Unidad 3).
+Si cada aprendiz débil tiene una ventaja γ fija sobre la moneda, el error de entrenamiento cae como exp(−2γ²B) tras B rondas: ésa es la respuesta a Kearns y Valiant (para el error de entrenamiento; la generalización se controla aparte).
 En la gráfica, la igualdad entre la pérdida exponencial media y el producto se verifica en la libreta a 1e-16.
 -->
 
@@ -150,18 +146,18 @@ En la gráfica, la igualdad entre la pérdida exponencial media y el producto se
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-Friedman, Hastie y Tibshirani (2000): un **modelo aditivo por etapas**. En cada etapa, sin tocar lo anterior,
+Friedman, Hastie y Tibshirani (2000): un **modelo aditivo por etapas**. En cada etapa, sin tocar el modelo $F_{t-1}$ de las rondas anteriores,
 
 $$
-(\alpha_t, h_t) = \argmin_{\alpha, h} \sum_n e^{-y_n (F_{t-1}(\vx_n) + \alpha h(\vx_n))} .
+(\alpha_t, h_t) = \argmin_{\alpha, h} \sum_i e^{-y^{(i)} (F_{t-1}(\vx^{(i)}) + \alpha h(\vx^{(i)}))} .
 $$
 
 <v-click>
 
-Los factores $e^{-y_n F_{t-1}(\vx_n)}$ **son** los pesos $w_n$. Separando aciertos y errores:
+Los factores $e^{-y^{(i)} F_{t-1}(\vx^{(i)})}$ **son** los pesos $w^{(i)}$ (normalizados). Separando aciertos y errores, con $\varepsilon$ el error ponderado de $h$:
 
 $$
-\sum_n w_n e^{-\alpha y_n h(\vx_n)} = e^{-\alpha} + \big(e^{\alpha} - e^{-\alpha}\big)\,\varepsilon .
+\sum_i w^{(i)} e^{-\alpha y^{(i)} h(\vx^{(i)})} = e^{-\alpha} + \big(e^{\alpha} - e^{-\alpha}\big)\,\varepsilon .
 $$
 
 </v-click>
@@ -217,25 +213,25 @@ Descenso por gradiente donde los parámetros son funciones.
 <div class="cols" style="grid-template-columns: 5fr 6fr; gap: 40px">
 <div>
 
-Minimizar $\sum_n L\big(y_n, F(\vx_n)\big)$ tratando los valores $F(\vx_n)$ como parámetros:
+Minimizar $\sum_i \ell\big(y^{(i)}, F(\vx^{(i)})\big)$, con $\ell$ la pérdida de un dato, tratando los valores $F(\vx^{(i)})$ como parámetros. En la ronda $t$, con $F_{t-1}$ el modelo de las rondas anteriores:
 
 $$
-r_{nm} = -\frac{\partial L(y_n, F)}{\partial F}\Big|_{F = F_{m-1}(\vx_n)} .
+r^{(i)}_t = -\frac{\partial \ell(y^{(i)}, F)}{\partial F}\Big|_{F = F_{t-1}(\vx^{(i)})} .
 $$
 
 <v-click>
 
-Los **pseudo-residuos** solo dicen qué hacer en los datos. Friedman (2001): **ajustarles un árbol** $h_m$, que generaliza la dirección a todo $\vx$, y avanzar:
+Los **pseudo-residuos** solo dicen qué hacer en los datos. Friedman (2001): **ajustarles un árbol** $h_t$, que generaliza la dirección a todo $\vx$, y avanzar:
 
 $$
-F_m(\vx) = F_{m-1}(\vx) + \eta\, h_m(\vx) .
+F_t(\vx) = F_{t-1}(\vx) + \eta\, h_t(\vx) .
 $$
 
 </v-click>
 </div>
 <div v-click>
 
-| pérdida | $L(y, F)$ | pseudo-residuo |
+| pérdida | $\ell(y, F)$ | pseudo-residuo |
 |---|---|---|
 | cuadrática | $\frac12 (y - F)^2$ | $y - F$ |
 | absoluta | $\lvert y - F \rvert$ | $\operatorname{signo}(y - F)$ |
@@ -244,7 +240,7 @@ $$
 
 <div class="pequeno tenue">
 
-Logística con $y \in \{0, 1\}$, $F$ el log-momio y $p = \theta(F)$: «etiqueta menos probabilidad», el mismo residuo de los GLM de la Unidad 4. $\eta$ es la **tasa de aprendizaje**.
+Logística con $y \in \{0, 1\}$, $F$ el log-momio y $p = \sigma(F) = 1/(1 + e^{-F})$: «etiqueta menos probabilidad». $\eta$ es la **tasa de aprendizaje**.
 
 </div>
 </div>
@@ -261,8 +257,8 @@ Con la pérdida cuadrática, el algoritmo es: cada árbol se ajusta a lo que los
 <BoostingEtapas />
 
 <!--
-Bicicletas de Washington (Unidad 4), solo días laborales de entrenamiento, un solo atributo: la hora. Tocones y η = 0.5.
-Avanzar m: 0 (solo el promedio), 1, 2, 3... A la derecha, los residuos y el tocón rojo que se ajusta en la siguiente ronda: siempre corta donde los residuos cambian de signo en promedio. Con 300 tocones, la suma de escalones casi coincide con el promedio por hora (puntos dorados): es lo mejor que se puede con pérdida cuadrática y un atributo discreto.
+Bicicletas de Washington, solo días laborales de entrenamiento, un solo atributo: la hora. Tocones y η = 0.5.
+Avanzar t: 0 (solo el promedio), 1, 2, 3... A la derecha, los residuos y el tocón rojo que se ajusta en la siguiente ronda: siempre corta donde los residuos cambian de signo en promedio. Con 300 tocones, la suma de escalones casi coincide con el promedio por hora (puntos dorados): es lo mejor que se puede con pérdida cuadrática y un atributo discreto.
 -->
 
 ---
@@ -273,10 +269,10 @@ Avanzar m: 0 (solo el promedio), 1, 2, 3... A la derecha, los residuos y el toc�
 <div>
 
 ```python
-def gradient_boosting(X, y, M, eta, profundidad):
+def gradient_boosting(X, y, B, eta, profundidad):
     F = np.full(len(y), y.mean())
     arboles = []
-    for m in range(M):
+    for t in range(B):
         r = y - F                        # pseudo-residuos
         h = DecisionTreeRegressor(max_depth=profundidad).fit(X, r)
         F += eta * h.predict(X)
@@ -286,7 +282,7 @@ def gradient_boosting(X, y, M, eta, profundidad):
 
 <div class="pequeno tenue" style="margin-top: 14px">
 
-300 árboles de profundidad 4, $\eta = 0.1$. Contra `GradientBoostingRegressor`: diferencia máxima de $1.3 \times 10^{-12}$ bicicletas.
+$B = 300$ árboles de profundidad 4, tasa $\eta = 0.1$. Contra `GradientBoostingRegressor`: diferencia máxima de $1.3 \times 10^{-12}$ bicicletas.
 
 </div>
 </div>
@@ -296,8 +292,8 @@ Bicicletas de Washington, RECM de prueba con los atributos crudos (sin interacci
 
 | modelo | RECM |
 |---|---|
-| M4 lineal (Unidad 4) | 86.4 |
-| M4 Poisson (Unidad 4) | 72.2 |
+| regresión lineal | 86.4 |
+| regresión de Poisson | 72.2 |
 | *gradient boosting*, cuadrática | **59.9** |
 | `HistGradientBoosting`, Poisson | **56.5** |
 
@@ -305,7 +301,7 @@ Bicicletas de Washington, RECM de prueba con los atributos crudos (sin interacci
 </div>
 
 <!--
-Los árboles de profundidad 4 combinan hora, tipo de día y temperatura en una misma hoja: descubren solos la interacción que en la Unidad 4 hubo que construir a mano. Y la lección de la Unidad 4 sigue valiendo: con pérdida de Poisson baja un poco más.
+Los árboles de profundidad 4 combinan hora, tipo de día y temperatura en una misma hoja: descubren solos la interacción que el modelo lineal necesitó construida a mano. Y, como con los modelos lineales, para estos conteos la pérdida de Poisson baja un poco más el error.
 Para que coincidan también los desempates, en la libreta se le pasa a cada árbol el mismo generador aleatorio que usa scikit-learn.
 -->
 
@@ -362,7 +358,7 @@ Con todos los atributos, AUC de prueba:
 
 <div class="nota">
 
-¿Cuándo se conoce la duración de una llamada? **Al colgar**, cuando ya se sabe la respuesta. Es una **fuga de información** (Unidad 1); la documentación de UCI pide descartarla «si la intención es tener un modelo predictivo realista».
+¿Cuándo se conoce la duración de una llamada? **Al colgar**, cuando ya se sabe la respuesta. Es una **fuga de información**: un atributo que no se tendrá al momento de predecir. La documentación de UCI pide descartarla «si la intención es tener un modelo predictivo realista».
 
 </div>
 
@@ -407,7 +403,7 @@ Sin la duración. Captura: proporción de los que contratan que están en el 20 
 
 <div v-click class="nota">
 
-Lo más importante para el modelo es el **mes** y el tipo de **contacto**: identifican *qué campaña* era. Las filas están en orden temporal; una validación temporal (Unidad 7) sería más honesta.
+Lo más importante para el modelo es el **mes** y el tipo de **contacto**: identifican *qué campaña* era. Las filas están en orden temporal; una validación temporal (entrenar con campañas anteriores y probar con las siguientes) sería más honesta.
 
 </div>
 </div>
@@ -468,18 +464,20 @@ Segundo orden, regularización e histogramas.
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 44px">
 <div>
 
-XGBoost (Chen y Guestrin, 2016) agrega al árbol $h$, con hojas de valores $w_1, \dots, w_J$, una penalización
+XGBoost (Chen y Guestrin, 2016) agrega al árbol nuevo $f$, con $J$ hojas de valores $w_1, \dots, w_J$, una penalización
 
 $$
-\Omega(h) = \gamma J + \tfrac{\lambda}{2} \textstyle\sum_j w_j^2
+\Omega(f) = \gamma J + \tfrac{\lambda}{2} \textstyle\sum_{q=1}^{J} w_q^2
 $$
+
+($\gamma$: precio por hoja; $\lambda$: fuerza de la regularización)
 
 <v-click>
 
-y aproxima la pérdida a **segundo orden** alrededor de $F_{m-1}$, con $g_n = \partial_F L$ y $h_n = \partial^2_F L$:
+y aproxima la pérdida a **segundo orden** alrededor de $F_{t-1}$, con las derivadas de la pérdida $\ell$ de cada dato $g^{(i)} = \partial_F \ell$ y $h^{(i)} = \partial^2_F \ell$:
 
 $$
-\sum_n \Big[ g_n h(\vx_n) + \tfrac12 h_n h(\vx_n)^2 \Big] + \Omega(h) .
+\sum_i \Big[ g^{(i)} f(\vx^{(i)}) + \tfrac12 h^{(i)} f(\vx^{(i)})^2 \Big] + \Omega(f) .
 $$
 
 </v-click>
@@ -488,10 +486,10 @@ $$
 
 <v-click>
 
-Agrupando por hojas, con $G_j = \sum_{n \in j} g_n$ y $H_j = \sum_{n \in j} h_n$, cada hoja es una parábola independiente:
+Agrupando por hojas, con $G_q = \sum_{i \in q} g^{(i)}$ y $H_q = \sum_{i \in q} h^{(i)}$ (sumas sobre los datos de la hoja $q$), cada hoja es una parábola independiente:
 
 $$
-\sum_{j=1}^{J} \Big[ G_j w_j + \tfrac12 (H_j + \lambda)\, w_j^2 \Big] + \gamma J
+\sum_{q=1}^{J} \Big[ G_q w_q + \tfrac12 (H_q + \lambda)\, w_q^2 \Big] + \gamma J
 $$
 
 </v-click>
@@ -499,7 +497,7 @@ $$
 <v-click>
 
 $$
-w_j^* = -\frac{G_j}{H_j + \lambda}, \qquad \text{pérdida} = -\frac12 \sum_j \frac{G_j^2}{H_j + \lambda} + \gamma J .
+w_q^* = -\frac{G_q}{H_q + \lambda}, \qquad \text{pérdida} = -\frac12 \sum_q \frac{G_q^2}{H_q + \lambda} + \gamma J .
 $$
 
 </v-click>
@@ -508,7 +506,7 @@ $$
 
 <div class="pequeno">
 
-Logística: $g = p - y$, $h = p(1-p)$; con $\lambda = 0$ es un **paso de Newton** por hoja. Cuadrática: $h = 1$, el promedio de los residuos encogido por $\lambda$.
+Logística, con $p = \sigma(F)$: $g = p - y$, $h = p(1-p)$; con $\lambda = 0$ es un **paso de Newton** por hoja. Cuadrática: $h = 1$, el promedio de los residuos encogido por $\lambda$.
 
 </div>
 
@@ -523,7 +521,7 @@ Logística: $g = p - y$, $h = p(1-p)$; con $\lambda = 0$ es un **paso de Newton*
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 44px">
 <div>
 
-Si una hoja se divide en dos, con sumas $(G_I, H_I)$ a la izquierda y $(G_D, H_D)$ a la derecha, la pérdida baja en
+Si una hoja se divide en dos, con sumas de derivadas $(G_I, H_I)$ a la izquierda y $(G_D, H_D)$ a la derecha, la pérdida baja en
 
 $$
 \frac12 \left[ \frac{G_I^2}{H_I + \lambda} + \frac{G_D^2}{H_D + \lambda} - \frac{(G_I + G_D)^2}{H_I + H_D + \lambda} \right] - \gamma .
@@ -531,7 +529,7 @@ $$
 
 <v-click>
 
-Es el criterio para elegir divisiones (en vez de Gini o suma de cuadrados). Si ninguna gana más que $\gamma$, la hoja no se divide: **poda incorporada**, como el $\alpha$ del costo–complejidad.
+Es el criterio para elegir divisiones (en vez de Gini o suma de cuadrados). Si ninguna gana más que $\gamma$, la hoja no se divide: **poda incorporada**, porque cada hoja nueva cuesta $\gamma$.
 
 </v-click>
 </div>
@@ -539,7 +537,7 @@ Es el criterio para elegir divisiones (en vez de Gini o suma de cuadrados). Si n
 
 <Caja tipo="ejemplo" nombre="verificación con XGBoost">
 
-Un árbol de profundidad 1 sobre la edad, logística, $\lambda = 1$, desde $p = 0.5$:
+Un árbol de profundidad 1 sobre la edad, logística, $\lambda = 1$, desde $p = 0.5$; $G$ y $H$ suman las derivadas de cada hoja:
 
 | | $G$ | $H$ | $w^*$ |
 |---|---|---|---|
@@ -566,9 +564,9 @@ Las dos hojas son negativas porque partimos de p = 0.5 y solo el 11.7 % contrata
 
 <v-clicks>
 
-- **Histogramas.** Cada atributo se discretiza una vez en ≤ 255 intervalos. Buscar la división es recorrer 255 sumas de $g$ y $h$, no $N$ umbrales; el histograma de una hija es el del padre menos el de su hermana.
+- **Histogramas.** Cada atributo se discretiza una vez en ≤ 255 intervalos. Buscar la división es recorrer 255 sumas de las derivadas $g$ y $h$, no $M$ umbrales; el histograma de una hija es el del padre menos el de su hermana.
 - **Crecimiento por hojas** (LightGBM). Se divide siempre la hoja de mayor ganancia, hasta `num_leaves`. Baja más la pérdida con las mismas hojas; puede sobreajustar.
-- **GOSS** (LightGBM). Los datos con $\lvert g_n\rvert$ chico ya están bien ajustados: se usan todos los de gradiente grande y una muestra, reponderada, de los demás.
+- **GOSS** (LightGBM). Los datos con gradiente $\lvert g^{(i)}\rvert$ chico ya están bien ajustados: se usan todos los de gradiente grande y una muestra, reponderada, de los demás.
 
 </v-clicks>
 </div>
@@ -611,9 +609,9 @@ Las categóricas nativas parten las categorías en dos grupos ordenándolas por 
 <div style="font-size: 25px; line-height: 1.4">
 
 1. *Boosting*: un modelo aditivo **por etapas**; cada término corrige a los anteriores. Reduce sesgo, no varianza.
-2. AdaBoost = pérdida exponencial; su error de entrenamiento cae como $\prod_t 2\sqrt{\varepsilon_t(1 - \varepsilon_t)}$.
-3. *Gradient boosting*: árboles ajustados a los **pseudo-residuos**, $-\partial L/\partial F$.
-4. XGBoost: segundo orden, $w^* = -G/(H + \lambda)$; tasa chica y **parada temprana**.
+2. AdaBoost = pérdida exponencial; su error de entrenamiento cae como $\prod_t 2\sqrt{\varepsilon_t(1 - \varepsilon_t)}$, con $\varepsilon_t$ el error ponderado de la ronda $t$.
+3. *Gradient boosting*: árboles ajustados a los **pseudo-residuos**, $-\partial \ell/\partial F$, con $\ell$ la pérdida de cada dato.
+4. XGBoost: segundo orden, hojas $w^* = -G/(H + \lambda)$ con las sumas de derivadas $G$, $H$; tasa chica y **parada temprana**.
 5. Ningún algoritmo protege de una **fuga**: ¿tendré este dato al decidir?
 
 </div>

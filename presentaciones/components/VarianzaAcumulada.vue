@@ -13,7 +13,7 @@ const marcas = [[0.8, G.n80], [0.9, G.n90], [0.95, G.n95]]
 
 <template>
   <svg class="grafica" :viewBox="`0 0 ${W} ${H}`">
-    <Ejes :x="x" :y="y" :x-ticks="[0, 16, 32, 48, 64]" :y-ticks="[0, 0.25, 0.5, 0.75, 1]" :y-formato="(v: number) => `${Math.round(v * 100)} %`" x-titulo="número de componentes m" />
+    <Ejes :x="x" :y="y" :x-ticks="[0, 16, 32, 48, 64]" :y-ticks="[0, 0.25, 0.5, 0.75, 1]" :y-formato="(v: number) => `${Math.round(v * 100)} %`" x-titulo="número de componentes r" />
     <g v-for="[p, n] in marcas" :key="p">
       <line :x1="x(n)" :x2="x(n)" :y1="y(0)" :y2="y(p)" stroke="#C9971C" stroke-width="1.5" stroke-dasharray="5 4" />
       <line :x1="m.l" :x2="x(n)" :y1="y(p)" :y2="y(p)" stroke="#C9971C" stroke-width="1.5" stroke-dasharray="5 4" />

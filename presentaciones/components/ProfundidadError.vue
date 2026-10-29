@@ -20,7 +20,7 @@ const iMin = D.prueba.indexOf(Math.min(...D.prueba))
     <Ejes :x="x" :y="y" :x-ticks="ticks" :x-formato="fx" :y-ticks="[0, 25, 50, 75, 100, 125, 150]" x-titulo="profundidad máxima del árbol" y-titulo="RECM (bicicletas por hora)" />
     <line :x1="x(1)" :x2="x(24.5)" :y1="y(86.4)" :y2="y(86.4)" stroke="#8A91A0" stroke-dasharray="3 4" />
     <line :x1="x(1)" :x2="x(24.5)" :y1="y(72.2)" :y2="y(72.2)" stroke="#8A91A0" stroke-dasharray="3 4" />
-    <text :x="x(1.3)" :y="y(86.4) - 6" style="font-size: 15px">M4 lineal: 86.4</text>
+    <text :x="x(1.3)" :y="y(86.4) - 6" style="font-size: 15px">lineal: 86.4</text>
     <text :x="x(1.3)" :y="y(72.2) + 18" style="font-size: 15px">Poisson: 72.2</text>
     <path :d="camino(D.entrena)" fill="none" stroke="#6B7385" stroke-width="3" />
     <path :d="camino(D.prueba)" fill="none" stroke="#24398A" stroke-width="3.2" />

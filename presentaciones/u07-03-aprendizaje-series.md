@@ -142,8 +142,14 @@ Una hora sin rentas **no aparece** en la tabla: el faltante es un cero. Los día
 <PronVentana />
 
 $$
-\mathbf{x}_t^{(h)} = \big(y_t, \dots, y_{t-23},\ y_{t+h-24},\ y_{t+h-168},\ \bar y_{24},\ \bar y_{168},\ \text{calendario de } t+h\big) \ \longmapsto\ y_{t+h}
+\vx^{(i)} = \big(y_t, \dots, y_{t-23},\ y_{t+h-24},\ y_{t+h-168},\ \bar y_{24},\ \bar y_{168},\ \text{calendario de } t+h\big) \ \longmapsto\ y^{(i)} = y_{t+h}
 $$
+
+<div class="pequeno tenue">
+
+$y_t$: rentas en la hora $t$ (origen); $h$: horizonte; $\bar y_{24}$, $\bar y_{168}$: medias del último día y semana. Cada origen da un renglón $i$ de $n$ atributos (una tabla por $h$).
+
+</div>
 
 <!--
 Mover el deslizador: el objetivo (rojo) avanza; los dos dorados (misma hora ayer y hace una semana) lo acompañan.
@@ -160,7 +166,7 @@ Ojo: y(t+h-24) solo es legítimo si h <= 24.
 
 <v-clicks>
 
-- Cada atributo se calcula **solo con lo conocido en el origen** $t$. Rezagos como $y_{t+h-24}$ valen si $h \le 24$.
+- Cada atributo se calcula **solo con lo conocido en el origen** $t$. Rezagos como $y_{t+h-24}$ (ayer a la hora objetivo, con horizonte $h$) valen si $h \le 24$.
 - El **calendario** de $t+h$ sí se conoce: hora, día de la semana, feriado.
 - La partición es **por tiempo**, y ninguna **respuesta** de entrenamiento cae en la prueba.
 
@@ -230,7 +236,7 @@ La validación cruzada aleatoria mezclaría horas vecinas, casi idénticas, entr
 </div>
 <div>
 
-**Estrategia directa:** 24 modelos, $\hat y_{t+h} = g_h(\mathbf{x}_t^{(h)})$.
+**Estrategia directa:** 24 modelos, $\hat y_{t+h \mid t} = g_h(\vx^{(i)})$: el modelo $g_h$ del horizonte $h$ recibe el renglón $\vx^{(i)}$ del origen $t$.
 
 <v-click>
 
@@ -242,7 +248,7 @@ En prueba se rentan **215** bicicletas por hora en promedio. A una hora, el erro
 
 <div class="pequeno tenue">
 
-La lineal recibe la hora × tipo de día en *one-hot* (como el M4 de la Unidad 4). Pronósticos recortados en 0.
+La lineal recibe la hora × tipo de día en *one-hot* (un indicador por combinación). Pronósticos recortados en 0.
 
 </div>
 
@@ -259,7 +265,7 @@ La lineal recibe la hora × tipo de día en *one-hot* (como el M4 de la Unidad 4
 <div class="cols" style="gap: 40px; margin-top: 10px">
 <div class="pequeno">
 
-A una hora, **el presente** $y_t$ y la misma hora de la semana pasada.
+A una hora ($h = 1$), **el presente** $y_t$ (las rentas en el origen) y la misma hora de la semana pasada.
 
 </div>
 <div v-click class="pequeno">
@@ -270,7 +276,7 @@ A un día, dos terceras partes vienen de **la misma hora hace una semana**: un e
 </div>
 
 <!--
-Fracción de la ganancia total de las divisiones (Unidad 5). Azul: rezagos; dorado: calendario.
+Fracción de la ganancia total de las divisiones de los árboles. Azul: rezagos; dorado: calendario.
 La hora aporta poco sola porque el rezago semanal ya la lleva implícita: el lunes pasado a las 8 ya "sabe" que es lunes a las 8.
 -->
 
@@ -281,7 +287,7 @@ La hora aporta poco sola porque el rezago semanal ya la lleva implícita: el lun
 <div class="cols" style="gap: 48px">
 <div>
 
-La lluvia reduce las rentas un 39 % (Unidad 4). Agreguemos la temperatura y el clima **observados** en la hora objetivo $t+h$:
+La lluvia reduce las rentas un 39 %. Agreguemos la temperatura y el clima **observados** en la hora objetivo $t+h$ (origen $t$, horizonte $h$ en horas):
 
 | h | sin clima | con clima | mejora |
 |---|---|---|---|
@@ -311,7 +317,7 @@ Formas honestas: solo **rezagos** del clima; el **pronóstico meteorológico** d
 </div>
 
 <!--
-Mismo tipo de error que la duración de la llamada en el ejemplo del banco (libreta de boosting, Unidad 5). En validación brilla; en producción, el atributo no está.
+Es el error clásico de usar un atributo que solo se conoce después, como la duración de una llamada para predecir si un cliente contratará. En validación brilla; en producción, el atributo no está.
 -->
 
 ---
@@ -335,7 +341,7 @@ Recursiva, directa o multisalida.
 Un modelo a un paso, aplicado 24 veces, con cada pronóstico **metido en la ventana** como si fuera dato:
 
 $$
-\hat y_{t+2} = g(\hat y_{t+1}, y_t, \dots)
+\hat y_{t+2 \mid t} = g(\hat y_{t+1 \mid t}, y_t, \dots)
 $$
 
 <div class="pequeno tenue">
@@ -351,7 +357,7 @@ Es lo que hace ARIMA. Los errores **se acumulan**.
 Un modelo por horizonte:
 
 $$
-\hat y_{t+h} = g_h\big(\mathbf{x}_t^{(h)}\big)
+\hat y_{t+h \mid t} = g_h\big(\vx^{(i)}\big)
 $$
 
 <div class="pequeno tenue">
@@ -367,7 +373,7 @@ No acumula errores, pero son 24 modelos que no comparten nada.
 Un modelo, 24 salidas:
 
 $$
-(\hat y_{t+1}, \dots, \hat y_{t+24}) = g(\mathbf{x}_t)
+(\hat y_{t+1 \mid t}, \dots, \hat y_{t+24 \mid t}) = g(\vx^{(i)})
 $$
 
 <div class="pequeno tenue">
@@ -376,6 +382,12 @@ Natural en una red: la última capa tiene 24 neuronas.
 
 </div>
 </div>
+</div>
+
+<div class="pequeno tenue" style="margin-top: 8px">
+
+$g$, $g_h$: modelos aprendidos; $\vx^{(i)}$: atributos del origen $t$; $\hat y_{t+h \mid t}$: pronóstico de la hora $t+h$ hecho en $t$.
+
 </div>
 
 <div v-click class="nota">
@@ -440,7 +452,7 @@ Directa 42.9, recursiva 60.0, red 30.6. En otros orígenes el orden cambia; por 
 <v-clicks>
 
 - Todos empeoran en las primeras 6 horas y luego se estabilizan.
-- La **recursiva** coincide con la directa en $h = 1$ y se separa: a 24 h tiene MAE 58.6 contra 54.4.
+- La **recursiva** coincide con la directa en el horizonte $h = 1$ hora y se separa: a 24 h tiene MAE 58.6 contra 54.4.
 - La **red multisalida**, sin atributos diseñados, queda cerca (52.4 contra 50.3 de 1 a 24 h) y su RECM es la menor (82.9).
 
 </v-clicks>
@@ -475,10 +487,10 @@ Para decidir cuántas bicicletas llevar a una estación no basta $\hat y$: hace 
 <Caja tipo="definicion" nombre="pérdida cuantil (pinball)">
 
 $$
-\rho_\tau(u) = u\,\big(\tau - \ind{u < 0}\big), \qquad u = y - q .
+\ell_\tau(u) = u\,\big(\tau - \ind{u < 0}\big), \qquad u = y - q .
 $$
 
-Quedarse corto cuesta $\tau$ por unidad; pasarse, $1 - \tau$.
+$q$ es el pronóstico, $\tau \in (0, 1)$ el cuantil buscado e $\ind{\cdot}$ vale 1 si se cumple la condición y 0 si no. Quedarse corto cuesta $\tau$ por unidad; pasarse, $1 - \tau$.
 
 </Caja>
 
@@ -489,7 +501,7 @@ Quedarse corto cuesta $\tau$ por unidad; pasarse, $1 - \tau$.
 
 <Caja tipo="proposicion">
 
-Si $Y$ tiene distribución continua $F$, el minimizador $q^*$ de $L(q) = \E[\rho_\tau(Y - q)]$ cumple $F(q^*) = \tau$: es el **cuantil** $\tau$ de $Y$.
+Si $Y$ tiene distribución continua $F$, el minimizador $q^*$ de la pérdida esperada $L(q) = \E[\ell_\tau(Y - q)]$ cumple $F(q^*) = \tau$: es el **cuantil** $\tau$ de $Y$.
 
 </Caja>
 
@@ -512,7 +524,7 @@ $L'$ es creciente: $L$ es convexa y su mínimo está donde $F(q) = \tau$.
 </div>
 
 <!--
-Con τ = 0.5, ρ es la mitad del error absoluto: la mediana minimiza el MAE.
+Con τ = 0.5, ℓ es la mitad del error absoluto: la mediana minimiza el MAE.
 Con datos: la pendiente de la pérdida empírica es (fracción de datos debajo de q) − τ.
 -->
 

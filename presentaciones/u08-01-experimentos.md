@@ -43,7 +43,7 @@ Abrir la unidad con esta idea: hasta ahora todo el curso ha sido ese cuadrito ne
 layout: pregunta
 ---
 
-# ¿Podrías reproducir el mejor modelo que entrenaste en el laboratorio 3 dentro de seis meses?
+# ¿Podrías reproducir dentro de seis meses el mejor modelo que has entrenado?
 
 <v-click>
 
@@ -64,7 +64,7 @@ Dejar que respondan. Casi todos dirán que sí al principio; las preguntas del c
 <div class="cols" style="gap: 40px; margin-top: 8px">
 <div class="pequeno">
 
-Riesgo de crédito de la Unidad 3 (Taiwán, 22,500 clientes). Bosque: 200 árboles, diez semillas, la misma partición de validación.
+Riesgo de incumplimiento de tarjetas de crédito (Taiwán, 22,500 clientes). Bosque: 200 árboles, diez semillas, la misma partición de validación.
 
 </div>
 <div class="pequeno" v-click>
@@ -76,7 +76,7 @@ Logística: nada aleatorio en el modelo, pero cambia cómo se reparten los clien
 
 <div v-click class="nota">
 
-La franja dorada: lo que separa al primer y al segundo lugar de la búsqueda que haremos hoy. **El ruido de la semilla es del mismo tamaño que la diferencia que usamos para elegir.**
+La franja dorada separa al primer y al segundo lugar de la búsqueda de hoy. **El ruido de la semilla es del mismo tamaño que la diferencia que usamos para elegir.**
 
 </div>
 
@@ -246,7 +246,7 @@ def correr(config):
 </div>
 <div class="pequeno" v-click>
 
-La ***log-loss*** delata al *boosting* agresivo (η = 0.3, 63 hojas): sobreajustado, con probabilidades demasiado extremas.
+La ***log-loss*** delata al *boosting* agresivo (tasa de aprendizaje η = 0.3, 63 hojas): sobreajusta y da probabilidades extremas.
 
 </div>
 <div class="pequeno" v-click>
@@ -583,7 +583,7 @@ M. Mitchell et al., «Model Cards for Model Reporting», FAT\* 2019: cada modelo
 
 <Caja tipo="idea">
 
-La ficha la lee **quien decide**, no quien entrena. Su aporte central es la sección 7: el promedio puede esconder que el modelo trata distinto a distintos grupos, como vimos en la Unidad 3.
+La ficha la lee **quien decide**, no quien entrena. Su aporte central es la sección 7: el promedio puede esconder que el modelo trata distinto a distintos grupos.
 
 </Caja>
 
@@ -606,9 +606,9 @@ En la libreta la ficha se **genera desde el código**, para que sus cifras siemp
 # La ficha de `riesgo-credito`, versión 2
 
 <div class="cols cols-6-4" style="gap: 40px">
-<div>
+<div class="tabla-ficha">
 
-Prueba, umbral $t^\ast = 1/6$ (un incumplido no detectado cuesta 5 veces una alerta innecesaria):
+Prueba, umbral $t^\ast = 1/6$ sobre la probabilidad de incumplir (un incumplido no detectado cuesta 5 veces una alerta innecesaria). TVP y TFP: tasas de verdaderos y de falsos positivos.
 
 | grupo | clientes | prevalencia | AUC | TVP | TFP |
 |---|---|---|---|---|---|
@@ -633,6 +633,10 @@ Prueba, umbral $t^\ast = 1/6$ (un incumplido no detectado cuesta 5 veces una ale
 
 </div>
 </div>
+
+<style>
+.tabla-ficha td, .tabla-ficha th { padding-top: 6px; padding-bottom: 6px; }
+</style>
 
 ---
 

@@ -90,12 +90,12 @@ Problema: dada la imagen, decir el tipo de prenda. Preguntar cuáles creen que s
 <div>
 
 $$
-Y[i, j] = \sum_{u=0}^{k-1}\sum_{v=0}^{k-1} K[u, v]\; X[i + u,\, j + v]
+\mathbf Z[r, c] = \sum_{u=0}^{k-1}\sum_{v=0}^{k-1} \vW[u, v]\; \mathbf A[r + u,\, c + v]
 $$
 
 <div class="pequeno">
 
-Cada salida es el producto punto del filtro con una ventana de $k \times k$. **Los mismos $k^2$ pesos** en todas las posiciones.
+$\mathbf A$: la imagen; $\vW$: el filtro de $k \times k$ pesos; $\mathbf Z$: el mapa de salida en el renglón $r$ y la columna $c$. Cada salida es el producto punto del filtro con una ventana de $k \times k$. **Los mismos $k^2$ pesos** en todas las posiciones.
 
 </div>
 
@@ -118,7 +118,7 @@ En rigor es correlación cruzada; la convolución voltea el filtro. Como el filt
 </div>
 
 <!--
-Usar los botones para recorrer las 9 posiciones; un clic en una celda de la salida salta a esa posición. Sin relleno, 5×5 con 3×3 da 3×3: n − k + 1.
+Usar los botones para recorrer las 9 posiciones; un clic en una celda de la salida salta a esa posición. Sin relleno, 5×5 con 3×3 da 3×3: d − k + 1.
 -->
 
 ---
@@ -151,18 +151,19 @@ El vertical marca los contornos laterales; el horizontal, la suela y el borde su
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-Sea $(T X)[i, j] = X[i - a,\, j - b]$. Entonces
+Sea $T$ la traslación de la imagen $\mathbf A$ por $\Delta_r$ renglones y $\Delta_c$ columnas, $(T \mathbf A)[r, c] = \mathbf A[r - \Delta_r,\, c - \Delta_c]$, y $\vW \star \mathbf A$ filtrar $\mathbf A$ con $\vW$. Entonces
 
 $$
 \begin{aligned}
-(K \star TX)[i, j] &= \sum_{u,v} K[u, v]\, X[i + u - a,\, j + v - b] \\
-&= (K \star X)[i - a,\, j - b] = \big(T(K \star X)\big)[i, j] .
+(\vW \star T\mathbf A)[r, c] &= \sum_{u,v} \vW[u, v]\, \mathbf A[r + u - \Delta_r,\, c + v - \Delta_c] \\
+&= (\vW \star \mathbf A)[r - \Delta_r,\, c - \Delta_c] \\
+&= \big(T(\vW \star \mathbf A)\big)[r, c] .
 \end{aligned}
 $$
 
 <v-click>
 
-La convolución es **equivariante** a traslaciones: si la prenda se mueve, el mapa se mueve igual. En el botín con margen de ceros, la diferencia máxima entre los dos lados es **exactamente 0**.
+La convolución es **equivariante** a traslaciones: si la prenda se mueve, el mapa también. En el botín con margen de ceros, la diferencia máxima entre los dos lados es **exactamente 0**.
 
 </v-click>
 
@@ -190,18 +191,19 @@ Una capa densa no tiene esta propiedad: lo que aprende sobre un objeto en una po
 <div class="cols" style="grid-template-columns: 5fr 4fr; gap: 40px">
 <div>
 
+- **Ventana** $k$: el filtro es de $k \times k$; la entrada mide $d \times d$.
 - **Relleno** $p$: ceros alrededor; con $k = 3$, $p = 1$ conserva el tamaño.
 - **Paso** $s$: la ventana avanza de $s$ en $s$.
 - **Canales**: cada filtro abarca los $C_{\text{ent}}$ canales de entrada y produce uno de salida.
 
 $$
-n_{\text{sal}} = \left\lfloor \frac{n + 2p - k}{s} \right\rfloor + 1 ,\qquad
+d_{\text{sal}} = \left\lfloor \frac{d + 2p - k}{s} \right\rfloor + 1 ,\qquad
 \#\text{parám.} = (C_{\text{ent}}\,k^2 + 1)\,C_{\text{sal}}
 $$
 
 <div class="pequeno">
 
-El número de parámetros **no depende del tamaño de la imagen**. El *max-pooling* de 2 × 2 se queda con el máximo de cada bloque y no tiene parámetros.
+$d_{\text{sal}}$: lado de la salida; $C_{\text{sal}}$: número de filtros (canales de salida); el $+1$ es el sesgo de cada filtro. El número de parámetros **no depende del tamaño de la imagen**. El *max-pooling* de 2 × 2 se queda con el máximo de cada bloque y no tiene parámetros.
 
 </div>
 </div>
@@ -250,14 +252,14 @@ Una capa con ventana $k$ y paso $s$:
 
 $$
 \begin{aligned}
-r_\ell &= r_{\ell-1} + (k - 1)\, j_{\ell-1} \\
-j_\ell &= j_{\ell-1}\, s
+r^{[\ell]} &= r^{[\ell-1]} + (k - 1)\, \Delta^{[\ell-1]} \\
+\Delta^{[\ell]} &= \Delta^{[\ell-1]}\, s
 \end{aligned}
 $$
 
 <div class="pequeno">
 
-$r$: lado del cuadro de la imagen que ve una neurona; $j$: distancia en pixeles entre posiciones vecinas del mapa. Empieza con $r_0 = j_0 = 1$.
+$r^{[\ell]}$: lado del cuadro de la imagen que ve una neurona de la capa $\ell$; $\Delta^{[\ell]}$: distancia en pixeles entre posiciones vecinas de su mapa. Empieza con $r^{[0]} = \Delta^{[0]} = 1$.
 
 </div>
 
@@ -298,7 +300,7 @@ Los botones muestran el campo después de cada etapa. Los cuadros corresponden a
 
 <div class="pequeno tenue">
 
-Cambio relativo de la representación al mover un pixel a la derecha 1,000 imágenes de prueba (red con pesos al azar).
+Cambio relativo de la representación $f(\mathbf A)$ de una imagen $\mathbf A$ al moverla un pixel a la derecha ($T\mathbf A$), en 1,000 imágenes de prueba (red con pesos al azar).
 
 </div>
 </div>
@@ -337,7 +339,7 @@ Menos parámetros, mejor sesgo inductivo.
 
 # Más exactitud con 11 veces menos parámetros
 
-<div class="cols" style="grid-template-columns: 3fr 2fr; gap: 40px">
+<div class="cols" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px">
 <div>
 
 <CurvasCNNMLP />
@@ -345,7 +347,7 @@ Menos parámetros, mejor sesgo inductivo.
 </div>
 <div>
 
-Mismo entrenamiento para las dos: Adam con tasa 0.001, minilotes de 64 en el mismo orden, 3 épocas.
+Mismo entrenamiento para las dos: Adam (tasa 0.001), minilotes de 64 en el mismo orden, 3 épocas.
 
 <v-click>
 
@@ -357,7 +359,7 @@ La red convolucional: **89.4 %** contra 86.7 %, una cuarta parte menos de errore
 
 <Caja tipo="idea">
 
-No es más capacidad, es **la capacidad correcta**: restringir las hipótesis de una forma que coincide con el problema baja la varianza sin pagar en sesgo (Unidad 3).
+No es más capacidad, es **la capacidad correcta**: restringir las hipótesis de una forma que coincide con el problema baja la varianza sin pagar en sesgo.
 
 </Caja>
 
@@ -447,7 +449,7 @@ A 28 × 28 en grises, una camisa de manga corta sin botones visibles **es** una 
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-**LeNet-5** (LeCun, Bottou, Bengio y Haffner, 1998): dos capas convolucionales y unos 60,000 parámetros; leía dígitos de cheques. Es la red que acabamos de entrenar.
+**LeNet-5** (LeCun, Bottou, Bengio y Haffner, 1998): dos capas convolucionales y unos 60,000 parámetros; leía dígitos de cheques. La red que acabamos de entrenar es una versión reducida de la misma idea.
 
 <v-click>
 
@@ -488,21 +490,21 @@ El segundo lugar de 2012 usaba atributos diseñados a mano (SIFT, vectores de Fi
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 40px">
 <div>
 
-He, Zhang, Ren y Sun (2016): una red simple de 56 capas se ajustaba **peor** que una de 20 en sus propios datos de entrenamiento. En lugar de aprender $H(\vx)$, cada bloque aprende la corrección:
+He, Zhang, Ren y Sun (2016): una red simple de 56 capas se ajustaba **peor** que una de 20 en sus propios datos de entrenamiento. En vez de su salida, cada bloque $\ell$ aprende una corrección $F^{[\ell]}$ que se suma a su entrada $\va^{[\ell]}$:
 
 $$
-\vx_{\ell+1} = \vx_\ell + F_\ell(\vx_\ell)
+\va^{[\ell+1]} = \va^{[\ell]} + F^{[\ell]}\big(\va^{[\ell]}\big)
 $$
 
 <v-click>
 
 $$
-\frac{\partial E}{\partial \vx_\ell} = \frac{\partial E}{\partial \vx_L}\prod_{m=\ell}^{L-1}\Big(I + \frac{\partial F_m}{\partial \vx_m}\Big)
+\frac{\partial \ell}{\partial \va^{[\ell]}} = \frac{\partial \ell}{\partial \va^{[D]}}\prod_{m=\ell}^{D-1}\Big(\mathbf I + \frac{\partial F^{[m]}}{\partial \va^{[m]}}\Big)
 $$
 
 <div class="pequeno">
 
-Al desarrollar el producto aparece $\partial E/\partial \vx_L$ **tal cual**: el gradiente llega a cualquier capa sin pasar por ninguna matriz de pesos. Y si lo mejor es no hacer nada, basta $F = 0$.
+$\ell$: la pérdida; $D$: el número de bloques; $\mathbf I$: la identidad. Al desarrollar el producto aparece $\partial \ell/\partial \va^{[D]}$ **tal cual**: el gradiente llega a cualquier capa sin pasar por ninguna matriz de pesos. Y si lo mejor es no hacer nada, basta $F^{[\ell]} = 0$.
 
 </div>
 
@@ -629,7 +631,7 @@ Dos conjuntos de rostros muy usados (IJB-A y Adience) tenían entre **79.6 % y 8
 
 <v-click>
 
-La transferencia hereda lo que el modelo aprendió… **y lo que no**. Antes de usar una red preentrenada: ¿con qué datos se entrenó, a quién representan? Y evaluar por grupo, como en la Unidad 3.
+La transferencia hereda lo que el modelo aprendió… **y lo que no**. Antes de usar una red preentrenada: ¿con qué datos se entrenó, a quién representan? Y medir el error por separado en cada grupo.
 
 </v-click>
 
@@ -641,9 +643,9 @@ La transferencia hereda lo que el modelo aprendió… **y lo que no**. Antes de 
 <div style="font-size: 25px; line-height: 1.4">
 
 1. Convolución = capa lineal con **conexiones locales** y **pesos compartidos**: equivariante a traslaciones y con pocos parámetros.
-2. $n_{\text{sal}} = \lfloor (n + 2p - k)/s \rfloor + 1$; parámetros $(C_{\text{ent}}k^2 + 1)C_{\text{sal}}$; el campo receptivo crece con la profundidad.
+2. Con lado $d$, ventana $k$, relleno $p$ y paso $s$: $d_{\text{sal}} = \lfloor (d + 2p - k)/s \rfloor + 1$; parámetros $(C_{\text{ent}}k^2 + 1)C_{\text{sal}}$ con $C$ canales; el campo receptivo crece con la profundidad.
 3. En Fashion-MNIST, 11 veces menos parámetros y más exactitud: el sesgo inductivo correcto.
-4. $\vx + F(\vx)$: el gradiente tiene un camino directo; así se entrenan cientos de capas.
+4. Conexión residual $\va + F(\va)$: el gradiente tiene un camino directo; así se entrenan cientos de capas.
 5. Con pocas etiquetas, transferir le gana a entrenar desde cero; pero se heredan los sesgos.
 
 </div>

@@ -82,22 +82,22 @@ Al hacer clic: el año 2023 con la climatología encima. Se ven el ciclo anual, 
 </div>
 <div>
 
-Promediar cada día del año da una curva ruidosa (29 años). Mejor, una **regresión lineal sobre armónicos**, con $\omega = 2\pi/365.25$:
+Promediar cada día del año da una curva ruidosa (29 años). Mejor, una **regresión lineal sobre armónicos** del día del año $d$, con $\omega = 2\pi/365.25$, sesgo $b$ y pesos $\alpha_j, \beta_j$:
 
 $$
-c(d) = \beta_0 + \sum_{k=1}^{3}\big[a_k \cos k\omega d + b_k \sin k\omega d\big]
+c(d) = b + \sum_{j=1}^{3}\big[\alpha_j \cos j\omega d + \beta_j \sin j\omega d\big]
 $$
 
 <v-click>
 
-La **anomalía** es $a_t = y_t - c(d_t)$. La climatología explica el **82 %** de la varianza diaria; las anomalías tienen desviación estándar de **2.85 °C**.
+La **anomalía** es $a_t = y_t - c(d_t)$: la temperatura $y_t$ menos la climatología de su día del año $d_t$. La climatología explica el **82 %** de la varianza diaria; las anomalías tienen desviación estándar de **2.85 °C**.
 
 </v-click>
 </div>
 </div>
 
 <!--
-La climatología se ajusta solo con 1992–2020 para poder usarla como pronóstico de 2021–2024 sin trampa. Mínimo de 16.4 °C a principios de enero, máximo de 34.0 °C a principios de julio. No es una senoide: sube rápido en primavera y se aplana en el verano; eso lo dan los armónicos 2 y 3. Es la Unidad 4: mínimos cuadrados con atributos no lineales en d.
+La climatología se ajusta solo con 1992–2020 para poder usarla como pronóstico de 2021–2024 sin trampa. Mínimo de 16.4 °C a principios de enero, máximo de 34.0 °C a principios de julio. No es una senoide: sube rápido en primavera y se aplana en el verano; eso lo dan los armónicos 2 y 3. Son mínimos cuadrados con atributos no lineales en d.
 -->
 
 ---
@@ -108,7 +108,7 @@ La climatología se ajusta solo con 1992–2020 para poder usarla como pronósti
 
 <div class="pequeno tenue" style="margin-top: 6px">
 
-STL (Cleveland et al., 1990) alterna suavizamientos locales: $y_t = T_t + S_t + R_t$, y deja que el ciclo anual cambie poco a poco. La tendencia va de 24.3 a 28.0 °C: ¿calentamiento? Antes necesitamos medir la memoria de la serie.
+STL (Cleveland et al., 1990) alterna suavizamientos locales: $y_t = \tau_t + s_t + r_t$ (tendencia, estacionalidad y residuo), y deja que el ciclo anual cambie poco a poco. La tendencia va de 24.3 a 28.0 °C: ¿calentamiento? Antes necesitamos medir la memoria de la serie.
 
 </div>
 
@@ -141,7 +141,7 @@ $$
 
 <div class="pequeno tenue">
 
-Se divide entre $T$, no entre $T-k$: la matriz de autocovarianzas queda semidefinida positiva y los rezagos con pocos pares se encogen hacia cero.
+$T$ es el número de días y $\bar y$ la media de la serie; $\hat\gamma$ es la autocovarianza y $\hat\rho$ la autocorrelación. Se divide entre $T$, no entre $T-k$: la matriz de autocovarianzas queda semidefinida positiva y los rezagos con pocos pares se encogen hacia cero.
 
 </div>
 </div>
@@ -151,7 +151,7 @@ Se divide entre $T$, no entre $T-k$: la matriz de autocovarianzas queda semidefi
 
 <Caja tipo="definicion" nombre="ruido blanco">
 
-$\E[\varepsilon_t] = 0$, $\Var(\varepsilon_t) = \sigma^2$ y $\operatorname{Cov}(\varepsilon_t, \varepsilon_s) = 0$ si $t \neq s$. Sin memoria: nada mejor que su media para pronosticarlo.
+$\E[\varepsilon_t] = 0$, varianza $\Var(\varepsilon_t) = \sigma^2$ y $\operatorname{Cov}(\varepsilon_t, \varepsilon_s) = 0$ si $t \neq s$. Sin memoria: nada mejor que su media para pronosticarlo.
 
 </Caja>
 
@@ -172,7 +172,7 @@ Es una banda **rezago por rezago**: con 40 rezagos, que se salgan uno o dos es n
 </div>
 
 <!--
-Es la correlación de la serie con ella misma recorrida k pasos, usando la media global. En la libreta se programa en tres líneas y coincide con statsmodels. Con un ruido blanco simulado de la misma longitud, 1 de 40 rezagos queda fuera de la banda. Para probar muchos rezagos a la vez está Ljung–Box, en la siguiente presentación.
+Es la correlación de la serie con ella misma recorrida k pasos, usando la media global. En la libreta se programa en tres líneas y coincide con statsmodels. Con un ruido blanco simulado de la misma longitud, 1 de 40 rezagos queda fuera de la banda. Para probar muchos rezagos a la vez existe la prueba de Ljung–Box.
 -->
 
 ---
@@ -207,7 +207,7 @@ La estacionalidad aparece en la ACF como una oscilación con el periodo m, y tap
 
 <Caja tipo="definicion" nombre="estacionariedad débil">
 
-$\E[y_t] = \mu$ y $\operatorname{Cov}(y_t, y_{t-k}) = \gamma(k)$ no dependen de $t$, con varianza finita.
+La media $\E[y_t] = \mu$ y la autocovarianza $\operatorname{Cov}(y_t, y_{t-k}) = \gamma(k)$ no dependen de $t$, con varianza finita.
 
 </Caja>
 
@@ -243,14 +243,14 @@ No es estacionaria; su **diferencia** $y_t - y_{t-1} = \varepsilon_t$ sí.
 
 <div class="pequeno tenue">
 
-Con 2,000 caminatas: varianza empírica de 96.2, 253.7 y 528.3 en $t = 100, 250, 500$.
+Con choques $\varepsilon_t$ de ruido blanco con varianza $\sigma^2 = 1$ y 2,000 caminatas: varianza empírica de 96.2, 253.7 y 528.3 en $t = 100, 250, 500$.
 
 </div>
 </div>
 </div>
 
 <!--
-Toda la teoría de la ACF supone que la correlación entre y_t y y_{t-k} depende solo de k. La caminata aleatoria es el ejemplo clásico de lo contrario: la media es constante pero la varianza crece con t, y la covarianza (t-k)σ² depende de t. Su ACF muestral decae casi en línea recta, señal típica de no estacionariedad. Diferenciar es la otra forma clásica de quitar tendencias; la usaremos en ARIMA.
+Toda la teoría de la ACF supone que la correlación entre y_t y y_{t-k} depende solo de k. La caminata aleatoria es el ejemplo clásico de lo contrario: la media es constante pero la varianza crece con t, y la covarianza (t-k)σ² depende de t. Su ACF muestral decae casi en línea recta, señal típica de no estacionariedad. Diferenciar es la otra forma clásica de quitar tendencias; es la base de los modelos ARIMA.
 -->
 
 ---
@@ -273,8 +273,8 @@ Con las 12,054 anomalías diarias y mínimos cuadrados ordinarios:
 
 | error estándar | pendiente / e.e. |
 |---|---|
-| OLS ingenuo: 0.027 | $t = -1.91$ |
-| HAC (Newey–West): 0.149 | $t = -0.35$ |
+| OLS ingenuo: 0.027 | −1.91 |
+| HAC (Newey–West): 0.149 | −0.35 |
 
 </v-click>
 
@@ -318,6 +318,12 @@ Lo más simple que se puede hacer, y cómo medir cuánto se equivoca.
 | climatología | $c(d_{T+h})$ |
 | deriva | $y_T + h\,\dfrac{y_T - y_1}{T-1}$ |
 
+<div class="pequeno tenue">
+
+Con datos $y_1, \dots, y_T$ se pronostica $h$ días adelante; $m$ es el periodo estacional y $c(d)$ la climatología del día del año $d$.
+
+</div>
+
 </div>
 <div>
 
@@ -335,7 +341,7 @@ $$
 \hat y_{T+h\mid T} = c(d_{T+h}) + \hat\phi^{\,h} a_T ,
 $$
 
-con $\hat\phi = \hat\rho_a(1) = 0.794$. Es un **AR(1)** de las anomalías (siguiente presentación).
+con $a_T$ la anomalía de hoy y $\hat\phi = \hat\rho_a(1) = 0.794$, la autocorrelación de las anomalías a un día. Es un **AR(1)** de las anomalías: la de mañana es $\phi$ veces la de hoy, más ruido.
 
 </v-click>
 </div>
@@ -378,11 +384,11 @@ Ir mostrando una referencia por clic: ingenuo (se queda en el valor del origen),
 </div>
 <div>
 
-**Origen móvil:** cada día de 2021–2024 es un origen; la climatología y $\hat\phi$ se re-ajustan cada 1 de enero con todo el pasado.
+**Origen móvil:** cada día de 2021–2024 es un origen; la climatología y el coeficiente $\hat\phi$ del AR(1) se re-ajustan cada 1 de enero con todo el pasado.
 
 <v-clicks>
 
-- El ingenuo gana a un día (1.28 °C) y empata con la climatología en $h = 3$.
+- El ingenuo gana a un día (1.28 °C) y empata con la climatología a $h = 3$ días.
 - El AR(1) es el mejor en todos los horizontes; a dos semanas ya es la climatología.
 - Más allá, **la mejor información sobre un día es su fecha**.
 
@@ -403,16 +409,16 @@ Mover el deslizador: h = 1, 3, 7, 14, 30. El estacional ingenuo es el peor en to
 <div>
 
 $$
-\text{MAE} = \tfrac1n \textstyle\sum |e_t|, \qquad \text{RECM} = \sqrt{\tfrac1n \textstyle\sum e_t^2}
+\text{MAE} = \tfrac1M \textstyle\sum |e_t|, \qquad \text{RECM} = \sqrt{\tfrac1M \textstyle\sum e_t^2}
 $$
 
 $$
-\text{MAPE} = \tfrac{100}{n}\textstyle\sum \left|\dfrac{e_t}{y_t}\right|, \qquad \text{MASE} = \dfrac{\text{MAE}}{q}
+\text{MAPE} = \tfrac{100}{M}\textstyle\sum \left|\dfrac{e_t}{y_t}\right|, \qquad \text{MASE} = \dfrac{\text{MAE}}{q}
 $$
 
 <div class="pequeno">
 
-$q = \frac{1}{T-m}\sum_{t>m} |y_t - y_{t-m}|$: el MAE del estacional ingenuo **dentro del entrenamiento** (Hyndman y Koehler, 2006); aquí $q = 3.11$ °C.
+$e_t = y_t - \hat y_{t \mid t-h}$ es el error de cada uno de los $M$ pronósticos evaluados. $q = \frac{1}{T-m}\sum_{t>m} |y_t - y_{t-m}|$: el MAE del estacional ingenuo **dentro del entrenamiento**, con periodo $m = 365$ (Hyndman y Koehler, 2006); aquí $q = 3.11$ °C.
 
 </div>
 </div>
@@ -466,13 +472,13 @@ En *K-fold* aleatorio, el día $t$ queda en prueba y $t - 1$, $t + 1$ en entrena
 </div>
 <div v-click>
 
-Sus anomalías tienen correlación **0.79** con la de $t$: el modelo puede ver la respuesta de prueba **a través de sus vecinos**. Es una fuga del futuro (Unidad 1).
+Sus anomalías tienen correlación **0.79** con la de $t$: el modelo puede ver la respuesta de prueba **a través de sus vecinos**. Es una fuga del futuro: información que no se tendría al pronosticar.
 
 </div>
 </div>
 
 <!--
-La validación cruzada de la Unidad 3 supone renglones independientes. Con una serie no lo son. Cuánto se nota depende del modelo: uno que pueda «ubicar» un día en el tiempo y promediar a sus vecinos aprovecha la fuga; una regresión lineal casi no puede.
+La validación cruzada usual supone renglones independientes. Con una serie no lo son. Cuánto se nota depende del modelo: uno que pueda «ubicar» un día en el tiempo y promediar a sus vecinos aprovecha la fuga; una regresión lineal casi no puede.
 -->
 
 ---
@@ -526,7 +532,7 @@ Con el día del año y el año, el bosque puede ubicar cada día casi exactament
 <div class="cols pequeno" style="grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 8px">
 <div>
 
-**Ventana creciente:** entrena con todo el pasado. **Deslizante:** solo con los últimos $w$ días, para olvidar un pasado que ya no se parece al presente.
+**Ventana creciente:** entrena con todo el pasado. **Deslizante:** solo con una ventana fija de días recientes, para olvidar un pasado que ya no se parece al presente.
 
 </div>
 <div>

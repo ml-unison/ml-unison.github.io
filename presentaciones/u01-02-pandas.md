@@ -432,7 +432,7 @@ df.groupby(df["fecha"].dt.month)["llenado"].mean()
 
 <div class="pequeno">
 
-Baja de enero a julio (riego y evaporación) y sube en agosto y septiembre, con el monzón. Esta **estacionalidad** será clave en la Unidad 7.
+Baja de enero a julio (riego y evaporación) y sube en agosto y septiembre, con el monzón. Esta **estacionalidad** será clave para pronosticar.
 
 </div>
 </div>
@@ -457,7 +457,7 @@ Baja de enero a julio (riego y evaporación) y sube en agosto y septiembre, con 
 
 <div class="pequeno">
 
-**Libreta:** *Explorar datos con pandas: las presas de Sonora* (Unidad 1, ejemplo 1).
+**Libreta:** *Explorar datos con pandas: las presas de Sonora* (ejemplo 1).
 
 **Referencia:** la [guía de usuario de pandas](https://pandas.pydata.org/docs/user_guide/index.html), en especial «10 minutes to pandas» y «Group by».
 

@@ -34,7 +34,7 @@ layout: pregunta
 # Si nadie nos dice las respuestas, ¿qué podemos aprender de los datos?
 
 <!--
-Recordar la Unidad 1: en supervisado cada ejemplo trae su etiqueta. Aquí solo tenemos las x. Dejar que propongan: grupos, cosas raras, resúmenes, dimensiones importantes.
+Recordar el aprendizaje supervisado: cada ejemplo trae su etiqueta y. Aquí solo tenemos los atributos x. Dejar que propongan: grupos, cosas raras, resúmenes, dimensiones importantes.
 -->
 
 ---
@@ -110,25 +110,27 @@ Representar cada grupo por un solo punto.
 <div class="cols cols-centro" style="flex: 1; gap: 56px">
 <div class="grande">
 
-Imaginen que solo pueden guardar **$k$ puntos** y que cada dato se sustituye por el más cercano de ellos.
+Imaginen que solo pueden guardar **$K$ puntos** y que cada dato se sustituye por el más cercano de ellos.
 
 <v-click>
 
-¿Qué $k$ puntos elegirían para **perder lo menos posible**?
+¿Qué $K$ puntos elegirían para **perder lo menos posible**?
 
 </v-click>
 </div>
 <div v-click>
 
-Si medimos la pérdida con la distancia al cuadrado, buscamos centros $\mu_1, \dots, \mu_k$ y una asignación $c(i)$ que minimicen
+Si medimos la pérdida con la distancia al cuadrado, buscamos centros $\boldsymbol\mu_1, \dots, \boldsymbol\mu_K$ y una asignación $c(i)$ que minimicen
 
 $$
-J = \sum_{i=1}^{n} \norm{\vx_i - \mu_{c(i)}}^2 .
+J = \sum_{i=1}^{M} \norm{\vx^{(i)} - \boldsymbol\mu_{c(i)}}^2 ,
 $$
+
+donde $\vx^{(i)}$ es el dato $i$, $M$ el número de datos y $c(i) \in \{1, \dots, K\}$ el grupo al que se asigna.
 
 <div class="pequeno" style="margin-top: 16px">
 
-Es la misma idea que en la Unidad 1: definir qué es «hacerlo bien» con una función que se pueda minimizar.
+Es la idea de siempre en aprendizaje: definir qué es «hacerlo bien» con una función que se pueda minimizar.
 
 </div>
 </div>
@@ -141,31 +143,35 @@ Es la misma idea que en la Unidad 1: definir qué es «hacerlo bien» con una fu
 <div class="cols" style="gap: 56px">
 <div>
 
-Minimizar $J$ sobre centros **y** asignaciones a la vez es NP-difícil.<sup>1</sup> Pero cada mitad por separado es fácil:
+Minimizar $J$ (la suma de distancias al cuadrado de cada punto a su centro) sobre centros **y** asignaciones a la vez es NP-difícil.<sup>1</sup> Pero cada mitad por separado es fácil:
 
 <v-clicks>
 
 - **Centros fijos.** La mejor asignación es mandar cada punto a su centro más cercano.
 - **Asignación fija.** El mejor centro de cada grupo es su **media**:
 $$
-\nabla_{\mu_j} \sum_{c(i)=j} \norm{\vx_i - \mu_j}^2 = 0 \;\Rightarrow\; \mu_j = \bar\vx_j .
+\nabla_{\boldsymbol\mu_k} \sum_{c(i)=k} \norm{\vx^{(i)} - \boldsymbol\mu_k}^2 = 0 \;\Rightarrow\; \boldsymbol\mu_k = \bar\vx_k ,
 $$
+con $\bar\vx_k$ el promedio de los puntos del grupo $k$.
 
 </v-clicks>
 
-<p class="pequeno tenue" style="margin-top: 30px"><sup>1</sup> D. Aloise et al., «NP-hardness of Euclidean sum-of-squares clustering», <em>Machine Learning</em> 75 (2009).</p>
-
 </div>
+<div>
 <div v-click>
 
 <Caja tipo="algoritmo" nombre="Lloyd, 1957">
 
-1. Elegir $k$ centros iniciales.
+1. Elegir $K$ centros iniciales.
 2. **Asignar:** cada punto al centro más cercano.
 3. **Mover:** cada centro a la media de sus puntos.
 4. Repetir 2–3 hasta que nada cambie.
 
 </Caja>
+
+</div>
+
+<p class="pequeno tenue" style="margin-top: 30px"><sup>1</sup> D. Aloise et al., «NP-hardness of Euclidean sum-of-squares clustering», <em>Machine Learning</em> 75 (2009).</p>
 
 </div>
 </div>
@@ -189,13 +195,13 @@ Mover el deslizador despacio. Preguntar en la iteración 1: ¿por qué el grupo 
 
 <Caja tipo="proposicion">
 
-$J$ nunca aumenta de una iteración a la siguiente, y el algoritmo termina en un número finito de pasos.
+$J$, la suma de distancias al cuadrado de cada punto a su centro, nunca aumenta de una iteración a la siguiente, y el algoritmo termina en un número finito de pasos.
 
 </Caja>
 
 <v-click>
 
-**Idea.** Cada paso minimiza $J$ respecto a una parte de las variables, con la otra fija: no puede subir. Hay un número finito de particiones de $n$ puntos en $k$ grupos, y no se repite ninguna (salvo empates), así que se acaba.
+**Idea.** Cada paso minimiza $J$ respecto a una parte de las variables, con la otra fija: no puede subir. Hay un número finito de particiones de $M$ puntos en $K$ grupos, y no se repite ninguna (salvo empates), así que se acaba.
 
 </v-click>
 </div>
@@ -218,7 +224,7 @@ El resultado depende del **inicio**.
 
 <div v-click class="nota">
 
-**k-medias++** elige el primer centro al azar y cada uno de los siguientes con probabilidad proporcional a $D(\vx)^2$, la distancia al cuadrado al centro más cercano ya elegido: tiende a repartirlos. En la práctica, además, se corre varias veces (`n_init`) y se queda el menor $J$. D. Arthur y S. Vassilvitskii, *SODA* (2007).
+**k-medias++** elige el primer centro al azar y cada uno de los siguientes con probabilidad proporcional a $D(\vx)^2$, la distancia al cuadrado al centro más cercano ya elegido: tiende a repartirlos. En la práctica, además, se corre varias veces (`n_init`) y se queda el de menor $J$ (suma de distancias al cuadrado a los centros). D. Arthur y S. Vassilvitskii, *SODA* (2007).
 
 </div>
 
@@ -226,11 +232,11 @@ El resultado depende del **inicio**.
 layout: pregunta
 ---
 
-# ¿Y cuántos grupos pedimos? ¿Cómo elegimos $k$?
+# ¿Y cuántos grupos pedimos? ¿Cómo elegimos $K$?
 
 <v-click>
 
-$J$ no sirve para eso: siempre baja al aumentar $k$. Con $k = n$, $J = 0$.
+$J$, la suma de distancias al cuadrado a los centros, no sirve para eso: siempre baja al aumentar el número de grupos $K$. Con $K = M$, un grupo por dato, $J = 0$.
 
 </v-click>
 
@@ -250,7 +256,7 @@ $J$ no sirve para eso: siempre baja al aumentar $k$. Con $k = n$, $J = 0$.
 </div>
 <div>
 
-<div class="lema" style="font-size: 25px">Las tres son muy sesgadas: logaritmo y estandarizar, como en la Unidad 1.</div>
+<div class="lema" style="font-size: 25px">Las tres son muy sesgadas: logaritmo y estandarizar (media 0 y desviación 1).</div>
 
 <p class="pequeno tenue" style="margin-top: 30px">D. Chen, <em>Online Retail</em>, UCI Machine Learning Repository (2015). CC BY 4.0.</p>
 
@@ -259,14 +265,14 @@ $J$ no sirve para eso: siempre baja al aumentar $k$. Con $k = n$, $J = 0$.
 
 ---
 
-# Dos criterios para elegir $k$
+# Dos criterios para elegir $K$
 
 <CurvasK />
 
 <div class="cols" style="gap: 40px; margin-top: 8px">
 <div class="pequeno">
 
-**Codo:** buscar dónde $J$ deja de bajar mucho. Aquí no hay un codo claro, lo que pasa casi siempre con datos reales.
+**Codo:** buscar dónde $J$ (la suma de distancias al cuadrado a los centros) deja de bajar mucho al aumentar el número de grupos $K$. Aquí no hay un codo claro, lo que pasa casi siempre con datos reales.
 
 </div>
 <div class="pequeno" v-click>
@@ -278,24 +284,24 @@ $J$ no sirve para eso: siempre baja al aumentar $k$. Con $k = n$, $J = 0$.
 
 ---
 
-# La silueta prefiere $k = 2$. ¿Nos sirve?
+# La silueta prefiere $K = 2$. ¿Nos sirve?
 
 <div class="cols" style="grid-template-columns: 5fr 6fr; gap: 48px">
 <div>
 
-Con $k = 2$ el corte separa casi exactamente a quienes compraron **una sola vez**. En logaritmo, entre 1 y 2 compras hay un hueco: esa estructura la pusimos nosotros al representar los datos.
+Con $K = 2$ grupos el corte separa casi exactamente a quienes compraron **una sola vez**. En logaritmo, entre 1 y 2 compras hay un hueco: esa estructura la pusimos nosotros al representar los datos.
 
 <div v-click="2" style="margin-top: 22px">
 <Caja tipo="idea">
 
-No hay un $k$ «verdadero». Los criterios internos descartan valores malos; la decisión depende de **para qué** se quieren los grupos.
+No hay un número de grupos $K$ «verdadero». Los criterios internos descartan valores malos; la decisión depende de **para qué** se quieren los grupos.
 
 </Caja>
 </div>
 </div>
 <div v-click="1">
 
-Con $k = 4$ salen grupos que mercadotecnia puede **usar**:
+Con $K = 4$ salen grupos que mercadotecnia puede **usar**:
 
 <TablaMini :columnas="['segmento', 'clientes', 'días sin comprar', 'compras', '% ventas']" :filas="[['leales de alto valor', 763, 7, 9, '66 %'], ['regulares', '1,214', 53, 4, '23 %'], ['nuevos u ocasionales', 777, 16, 2, '5 %'], ['dormidos', '1,563', 173, 1, '6 %']]" :tam="19" />
 
@@ -346,7 +352,7 @@ No uno, sino todos los agrupamientos a la vez.
 
 <v-click>
 
-El resultado es un **dendrograma**: un árbol que registra a qué distancia se unió cada par de grupos. Cortarlo a una altura da un agrupamiento; no hay que fijar $k$ antes.
+El resultado es un **dendrograma**: un árbol que registra a qué distancia se unió cada par de grupos. Cortarlo a una altura da un agrupamiento; no hay que fijar el número de grupos $K$ antes.
 
 </v-click>
 </div>
@@ -367,7 +373,7 @@ Entre dos puntos la sabemos medir. Entre dos **grupos** hay que decidirlo, y la 
 
 <div v-click class="nota">
 
-El **simple** encadena: dos grupos lejanos se unen si hay una fila de puntos entre ellos. El **completo** prefiere grupos compactos. **Ward** minimiza lo mismo que k-medias, $J$, un paso a la vez.
+El **simple** encadena: dos grupos lejanos se unen si hay una fila de puntos entre ellos. El **completo** prefiere grupos compactos. **Ward** minimiza lo mismo que k-medias, la suma $J$ de distancias al cuadrado a los centros, un paso a la vez.
 
 </div>
 
@@ -480,8 +486,8 @@ Conectar con la cita de Estivill-Castro que viene más adelante: los grupos los 
 <div class="cols" style="gap: 56px">
 <div class="grande">
 
-- Guardar todas las distancias entre pares: memoria $O(n^2)$.
-- Tiempo entre $O(n^2)$ y $O(n^3)$, según el enlace.
+- Guardar todas las distancias entre pares de los $M$ puntos: memoria $O(M^2)$.
+- Tiempo entre $O(M^2)$ y $O(M^3)$, según el enlace.
 - Con 100 mil puntos, 5 mil millones de distancias.
 
 </div>
@@ -489,7 +495,7 @@ Conectar con la cita de Estivill-Castro que viene más adelante: los grupos los 
 
 <Caja tipo="idea">
 
-Jerárquico para **cientos o pocos miles** de puntos, cuando el árbol mismo es informativo (especies, documentos, presas). k-medias cuando $n$ es grande: cada iteración cuesta $O(nkd)$.
+Jerárquico para **cientos o pocos miles** de puntos, cuando el árbol mismo es informativo (especies, documentos, presas). k-medias cuando $M$ es grande: cada iteración cuesta $O(MKn)$, con $K$ grupos y $n$ atributos.
 
 </Caja>
 
@@ -530,7 +536,7 @@ Dos parámetros: un radio $\varepsilon$ y un mínimo de puntos $m$.
 
 ### Lo que gana
 
-- No hay que fijar $k$.
+- No hay que fijar el número de grupos $K$.
 - Grupos de **cualquier forma**.
 - Separa el **ruido** en lugar de forzarlo a un grupo.
 
@@ -569,7 +575,7 @@ numero: 4
 
 ### Internos
 
-Solo usan los datos: silueta, $J$, índices de Davies–Bouldin o Calinski–Harabasz.
+Solo usan los datos: silueta, $J$ (suma de distancias al cuadrado a los centros), índices de Davies–Bouldin o Calinski–Harabasz.
 
 <span class="tenue pequeno">Cada uno premia su propia idea de grupo (casi siempre compacto y redondo).</span>
 
@@ -624,14 +630,14 @@ Nadie programó «cobrar más a los pobres». Bastó con segmentar por una varia
 
 # Para llevarse
 
-<div class="cols cols-6-4" style="flex: 1">
+<div class="cols" style="flex: 1; grid-template-columns: 2fr 1fr">
 <div class="grande">
 
 1. Agrupar exige decidir qué es **parecido**: variables, escala y distancia.
-2. **k-medias** minimiza $J$ alternando asignar y mover; mínimos locales, k-medias++ y varios inicios.
+2. **k-medias** minimiza $J$, la suma de distancias al cuadrado a los centros, alternando asignar y mover; mínimos locales, k-medias++ y varios inicios.
 3. **Jerárquico** da el árbol completo; el enlace cambia el resultado.
 4. **DBSCAN** encuentra regiones densas de cualquier forma y separa el ruido.
-5. No hay $k$ verdadero: el criterio final es la utilidad.
+5. No hay un número de grupos $K$ verdadero: el criterio final es la utilidad.
 
 </div>
 <div>

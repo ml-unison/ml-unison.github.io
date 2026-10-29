@@ -305,7 +305,7 @@ El de grado 12 pasa por casi todos los puntos. ¿Es el mejor?
 
 # Para comparar, necesitamos medir el error
 
-<div class="cols cols-6-4 cols-centro">
+<div class="cols cols-centro" style="grid-template-columns: 11fr 9fr">
 <div><EscenaPolinomio :grado="4" residuos="tr" :ancho="700" :alto="420" /></div>
 <div>
 
@@ -313,16 +313,18 @@ En cada punto, la curva se equivoca por la distancia vertical <span style="color
 
 <v-click>
 
-Elevamos al cuadrado (para que no importe el signo y pesen más los errores grandes) y promediamos:
+Elevamos al cuadrado (así no importa el signo y pesan más los errores grandes) y promediamos:
 
 $$
-\frac{1}{n}\sum_{i=1}^{n}\big(\,\text{predicción}_i - y_i\,\big)^2
+\frac{1}{M}\sum_{i=1}^{M}\big(\,\hat y^{(i)} - y^{(i)}\,\big)^2
 $$
+
+<span class="pequeno tenue">$M$: número de puntos; $y^{(i)}$: valor observado del punto $i$; $\hat y^{(i)}$: lo que predice la curva.</span>
 
 </v-click>
 <v-click>
 
-Esa forma de medir qué tan mal lo hace un modelo en un ejemplo es una **función de pérdida**.
+Medir qué tan mal lo hace un modelo en un ejemplo es una **función de pérdida**.
 
 </v-click>
 </div>
@@ -342,7 +344,7 @@ Aquí aparece por primera vez la función de pérdida, como respuesta a una nece
 El promedio de la pérdida en los datos que **vio** el modelo:
 
 $$
-\Ein(h) = \frac{1}{n}\sum_{i=1}^{n} \ell\big(h(\vx_i),\, y_i\big)
+\Ein(h) = \frac{1}{M}\sum_{i=1}^{M} \ell\big(y^{(i)},\, h(\vx^{(i)})\big)
 $$
 
 <span class="tenue">Lo podemos calcular.</span>
@@ -353,13 +355,15 @@ $$
 La pérdida esperada en datos **nuevos** del mismo fenómeno:
 
 $$
-\Eout(h) = \E\big[\, \ell\big(h(\vx),\, y\big) \,\big]
+\Eout(h) = \E\big[\, \ell\big(y,\, h(\vx)\big) \,\big]
 $$
 
 <span class="tenue">Es lo que nos importa, y no lo conocemos.</span>
 
 </Caja>
 </div>
+
+<p class="pequeno tenue" style="margin-top: 12px">$h$: el modelo; $\ell$: la pérdida en un dato; $\vx^{(i)}$, $y^{(i)}$: entrada y salida del dato $i$, de los $M$ que vio el modelo; $\E$: promedio sobre todos los datos $(\vx, y)$ posibles del fenómeno.</p>
 
 <div v-click class="lema" style="margin-top: 20px">
 
@@ -375,7 +379,7 @@ Aprender bien es lograr un $\Ein$ pequeño <em>y</em> que $\Eout$ se parezca a $
 
 <div class="nota">
 
-Punteada: la regla verdadera, que en la práctica nunca conocemos. $\Ein$ siempre baja; $\Eout$ baja y luego se dispara.
+Punteada: la regla verdadera, que en la práctica nunca conocemos. $\Ein$ (error en los datos que vio) siempre baja; $\Eout$ (error en datos nuevos) baja y luego se dispara.
 
 </div>
 
@@ -417,7 +421,7 @@ nota: «No hay que multiplicar las entidades sin necesidad.» Entre explicacione
 </div>
 <div class="pequeno">
 
-**Su límite.** «Simple» no es «simplista»: el grado 1 tampoco sirve. En la Unidad 3 convertiremos esta idea en herramientas: regularización y validación.
+**Su límite.** «Simple» no es «simplista»: el grado 1 tampoco sirve. Más adelante convertiremos esta idea en herramientas: regularización y validación.
 
 </div>
 </div>
@@ -625,7 +629,7 @@ etiqueta: Antes de entrenar cualquier modelo
 
 <div class="pequeno">
 
-**Libretas:** *Explorar datos con pandas* y *Un primer pipeline sin trampas* (Unidad 1, ejemplos 1 y 3).
+**Libretas:** *Explorar datos con pandas* y *Un primer pipeline sin trampas* (ejemplos 1 y 3).
 
 **Lectura:** Abu-Mostafa, Magdon-Ismail y Lin (2012), *Learning From Data*, cap. 1.
 

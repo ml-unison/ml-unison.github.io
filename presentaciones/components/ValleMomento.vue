@@ -6,7 +6,7 @@ import { line } from 'd3-shape'
 import datos from '../datos/u06-02.json'
 const V = (datos as any).valle
 const props = withDefaults(defineProps<{ inicial?: number, pasos?: number }>(), { inicial: 0, pasos: 40 })
-const W = 1120, H = 330, m = { l: 20, r: 20, t: 14, b: 14 }
+const W = 1120, H = 300, m = { l: 20, r: 20, t: 14, b: 14 }
 const x = scaleLinear().domain([-4.35, 1.05]).range([m.l, W - m.r])
 const esc = (x(1) - x(0))
 const y = (v: number) => H / 2 - v * esc
@@ -37,7 +37,7 @@ const fmt = (v: number) => String(v).replace('.', '.')
         <circle v-for="(p, i) in sel.camino.slice(0, pasos + 1)" :key="i" :cx="x(p[0])" :cy="y(p[1])" r="4.5" :fill="colores[String(beta)]" />
       </g>
       <path :d="`M ${x(0)} ${y(0) - 15} l 4.4 9.5 10.3 1.2 -7.6 7 2.1 10.2 -9.2 -5.2 -9.2 5.2 2.1 -10.2 -7.6 -7 10.3 -1.2 z`" fill="#C9971C" stroke="#fff" stroke-width="1.5" />
-      <text :x="x(-4.3)" :y="H - 24" style="fill: #5E6678; font-size: 17px">primeros {{ pasos }} pasos · λ = 1 a lo largo del valle, λ = 50 a lo ancho</text>
+      <text :x="x(-4.3)" :y="H - 24" style="fill: #5E6678; font-size: 17px">primeros {{ pasos }} pasos · μ = 1 a lo largo del valle, μ = 50 a lo ancho</text>
     </svg>
   </div>
 </template>

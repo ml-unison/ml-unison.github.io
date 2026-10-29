@@ -35,7 +35,7 @@ const camino = computed(() => line<number>().x((_, i) => xl(i)).y(v => yl(Math.m
         <path :d="camino" fill="none" :stroke="SERIE[0]" stroke-width="3" />
         <text :x="m.l - 58" :y="18" class="titulo-eje" style="font-size: 17px">log-verosimilitud por iteración</text>
       </svg>
-      <div class="em__ll">iteración {{ P.it }} · ℓ = <b>{{ E.ll[P.it].toFixed(1).replace('-', '−') }}</b></div>
+      <div class="em__ll">iteración {{ P.it }} · log-verosimilitud = <b>{{ E.ll[P.it].toFixed(1).replace('-', '−') }}</b></div>
       <p class="em__nota">Pico de 342 pingüinos, largo (horizontal) y profundidad (vertical), estandarizados. Inicio: tres pingüinos al azar con covarianza identidad.</p>
     </div>
   </div>

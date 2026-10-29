@@ -80,10 +80,10 @@ layout: pregunta
 </div>
 <div>
 
-Capital Bikeshare, Washington, D. C. Rentas por hora con calendario y clima (Unidad 4).
+Capital Bikeshare, Washington, D. C. Rentas por hora con calendario y clima.
 
 - *Boosting* con pérdida de Poisson, entrenado con 2011: hora, día laboral, día de la semana, clima, temperatura, humedad, viento.
-- Validación en 2011: RECM **47.4**, sesgo +0.8 %.
+- Validación en 2011: RECM (raíz del error cuadrático medio) **47.4**, sesgo +0.8 %.
 
 <v-click>
 
@@ -270,7 +270,7 @@ El monitoreo, antes de que lleguen las etiquetas.
 
 # Tres maneras de que el mundo cambie
 
-$P(\vx, y) = P(\vx)\,P(y \mid \vx) = P(y)\,P(\vx \mid y)$, y cada factor puede moverse solo. Azul: 2011; rojo: 2012.
+$\Prob(\vx, y) = \Prob(\vx)\,\Prob(y \mid \vx) = \Prob(y)\,\Prob(\vx \mid y)$, con $\vx$ los atributos de una hora y $y$ sus rentas; cada factor puede moverse solo. Azul: 2011; rojo: 2012.
 
 <TresCambios :mostrar="$clicks + 1" />
 
@@ -287,13 +287,13 @@ $P(\vx, y) = P(\vx)\,P(y \mid \vx) = P(y)\,P(\vx \mid y)$, y cada factor puede m
 </div>
 <div v-click>
 
-**Cambio en $P(y)$.** Solo se ve con las etiquetas.
+**Cambio en $\Prob(y)$.** Solo se ve con las etiquetas.
 
 </div>
 </div>
 
 <!--
-El cambio de prevalencia propiamente dicho es P(y) cambiando con P(x|y) fijo (una epidemia que aumenta la proporción de enfermos). Recordar la Unidad 3: la precisión depende de la prevalencia aunque TVP y TFP no cambien. Aquí P(y) cambia como consecuencia del cambio de concepto.
+El cambio de prevalencia propiamente dicho es P(y) cambiando con P(x|y) fijo (una epidemia que aumenta la proporción de enfermos). Recordar que la precisión depende de la prevalencia aunque las tasas de verdaderos y falsos positivos no cambien. Aquí P(y) cambia como consecuencia del cambio de concepto.
 -->
 
 ---
@@ -303,7 +303,7 @@ El cambio de prevalencia propiamente dicho es P(y) cambiando con P(x|y) fijo (un
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-Error esperado en $\vx$, con $f(\vx) = \E[y \mid \vx]$:
+Error esperado del modelo $h$ en $\vx$, con $f(\vx) = \E[y \mid \vx]$ la respuesta promedio y $\sigma^2(\vx)$ la varianza del ruido:
 
 $$
 e(\vx) = \big(f(\vx) - h(\vx)\big)^2 + \sigma^2(\vx) .
@@ -311,10 +311,10 @@ $$
 
 <v-click>
 
-Si las entradas pasan a seguir $Q$ en lugar de $P$:
+Si la densidad de las entradas pasa de $p(\vx)$ (entrenamiento) a $q(\vx)$ (producción), el error esperado en producción es
 
 $$
-E_{\text{out}}(Q) = \E_{\vx \sim Q}\big[e(\vx)\big] = \E_{\vx \sim P}\Big[\tfrac{q(\vx)}{p(\vx)}\, e(\vx)\Big] .
+E_{\text{out}} = \E_{\vx \sim q}\big[e(\vx)\big] = \E_{\vx \sim p}\Big[\tfrac{q(\vx)}{p(\vx)}\, e(\vx)\Big] .
 $$
 
 </v-click>
@@ -329,7 +329,7 @@ $$
 
 <v-click>
 
-**Concepto:** $f$ se mueve y aparece $(f_{\text{nueva}} - h)^2$, incluso donde había muchos datos. Ningún reponderado lo arregla.
+**Concepto:** $f$ se mueve y aparece $(f_{\text{nueva}} - h)^2$, con $f_{\text{nueva}}$ la nueva respuesta promedio, incluso donde había muchos datos. Ningún reponderado lo arregla.
 
 </v-click>
 
@@ -352,7 +352,7 @@ Bicicletas: la respuesta llega en una hora. Crédito: meses. Una casa de Zillow:
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-Cubetas en los deciles de la **referencia**; $p_k$ y $q_k$, proporciones de referencia y actuales:
+$K$ cubetas en los deciles de la **referencia** ($K = 10$); $p_k$ y $q_k$, proporciones de referencia y actuales en la cubeta $k$:
 
 $$
 \text{PSI} = \sum_{k=1}^{K} (q_k - p_k)\ln\frac{q_k}{p_k} .
@@ -366,7 +366,11 @@ $$
 \text{PSI} = \underbrace{\sum_k q_k \ln\tfrac{q_k}{p_k}}_{D(q\|p)} + \underbrace{\sum_k p_k \ln\tfrac{p_k}{q_k}}_{D(p\|q)} ,
 $$
 
-la divergencia de **Kullback–Leibler simetrizada**: $\ge 0$, cero solo si $q = p$.
+<div class="pequeno">
+
+con $D(q\|p)$ la divergencia de Kullback–Leibler de $q$ respecto a $p$. El PSI es la **divergencia simetrizada**: $\ge 0$, cero solo si $q = p$.
+
+</div>
 
 </v-click>
 </div>
@@ -415,10 +419,10 @@ $$
 
 <v-click>
 
-Sin **ningún** cambio, con $N$ datos de referencia y $M$ actuales, $\Var(\hat q_k - \hat p_k) = p_k(1 - p_k)\big(\tfrac1N + \tfrac1M\big)$, así que
+Sin **ningún** cambio, con $M_{\text{ref}}$ datos de referencia y $M_{\text{act}}$ actuales, las proporciones observadas $\hat p_k$ y $\hat q_k$ cumplen $\Var(\hat q_k - \hat p_k) = p_k(1 - p_k)\big(\tfrac{1}{M_{\text{ref}}} + \tfrac{1}{M_{\text{act}}}\big)$, así que
 
 $$
-\E[\text{PSI}] \approx (K - 1)\Big(\frac1N + \frac1M\Big) .
+\E[\text{PSI}] \approx (K - 1)\Big(\frac{1}{M_{\text{ref}}} + \frac{1}{M_{\text{act}}}\Big) .
 $$
 
 </v-click>
@@ -488,7 +492,7 @@ Cada mes de 2012 contra el mismo mes de 2011. Hay alarmas de temperatura, humeda
 <div class="cols" style="grid-template-columns: 2fr 3fr; gap: 40px">
 <div>
 
-Compara las **distribuciones empíricas**:
+Compara las **distribuciones empíricas** $F_1$ y $F_2$ de las dos muestras ($F(x)$: fracción de datos $\le x$):
 
 $$
 D = \sup_x \big|F_1(x) - F_2(x)\big| .
@@ -502,10 +506,10 @@ El supremo se alcanza en un dato: basta evaluar en la muestra combinada.
 
 <v-click>
 
-Sin cambio, la distribución de $D$ **no depende** de la de los datos; se rechaza la igualdad al 5 % si
+Sin cambio, la distribución de $D$ **no depende** de la de los datos; con $M_1$ y $M_2$ datos en cada muestra, se rechaza la igualdad al 5 % si
 
 $$
-D > 1.358\sqrt{\frac{n + m}{nm}} .
+D > 1.358\sqrt{\frac{M_1 + M_2}{M_1 M_2}} .
 $$
 
 </v-click>
@@ -516,7 +520,7 @@ $$
 
 <div class="pequeno tenue">
 
-Marzo: 730 horas de 2011, 743 de 2012. $D = 0.457$, umbral 0.071, $p \approx 5 \times 10^{-70}$.
+Marzo: 730 horas de 2011, 743 de 2012. $D = 0.457$, umbral 0.071, valor $p \approx 5 \times 10^{-70}$.
 
 </div>
 </div>
@@ -531,7 +535,7 @@ Marzo: 730 horas de 2011, 743 de 2012. $D = 0.457$, umbral 0.071, $p \approx 5 \
 <div class="cols" style="gap: 40px; margin-top: 8px">
 <div class="pequeno">
 
-Temperaturas de 2011 contra las mismas más **0.5 °C**, un cambio que el modelo ni nota. $D$ se estabiliza en 0.04; el umbral baja como $1/\sqrt{n}$.
+Temperaturas de 2011 contra las mismas más **0.5 °C**, un cambio que el modelo ni nota. $D$ se estabiliza en 0.04; el umbral baja como $1/\sqrt{M}$, con $M$ datos en cada muestra.
 
 </div>
 <div class="pequeno" v-click>
@@ -563,7 +567,7 @@ El error real y qué hacer con él.
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 40px; margin-top: 10px">
 <div class="pequeno" v-click>
 
-Rentas observadas **encendidas**, predicciones tranquilas: es la firma del cambio de concepto. RECM de 2012: **124.7** (validación: 47.4); el modelo subestimó todos los meses, **35.6 %** en el año.
+Rentas observadas **encendidas**, predicciones tranquilas: es la firma del cambio de concepto. RECM (raíz del error cuadrático medio) de 2012: **124.7** (validación: 47.4); el modelo subestimó todos los meses, **35.6 %** en el año.
 
 </div>
 <div class="pequeno" v-click>
@@ -582,7 +586,7 @@ Multiplicar todas las predicciones por **1.55** baja la RECM a 64.5: casi todo e
 <div class="cols" style="grid-template-columns: repeat(3, 1fr); gap: 28px; font-size: 19px; line-height: 1.35; margin-top: -6px">
 <div v-click>
 
-**Ventana de 12 meses** (promedio 89 contra 122): ayuda, pero mezcla el nivel de 2011.
+**Ventana de 12 meses** (RECM mensual promedio: 89 contra 122): ayuda, pero mezcla el nivel de 2011.
 
 </div>
 <div v-click>
@@ -609,7 +613,7 @@ Las cifras entre paréntesis son el promedio de las RECM mensuales de 2012. La m
 <div style="font-size: 24px; line-height: 1.4">
 
 1. Un servicio valida sus entradas, devuelve la **versión** del modelo y guarda una **bitácora**; el contenedor congela el entorno.
-2. Puede cambiar $P(\vx)$, $P(y \mid \vx)$ o $P(y)$. Solo el cambio de concepto obliga a reaprender.
+2. Puede cambiar $\Prob(\vx)$, $\Prob(y \mid \vx)$ o $\Prob(y)$. Solo el cambio de concepto obliga a reaprender.
 3. PSI = KL simetrizada; KS = máxima diferencia de distribuciones. Umbrales sobre el **tamaño del efecto**, con referencias que respeten las **estaciones** y conscientes del tamaño de muestra.
 4. Las entradas no delatan el cambio de concepto: hay que medir el **error real** en cuanto lleguen las etiquetas.
 5. Reentrenar es una política que se prueba contra el pasado, con el **retraso** de las etiquetas incluido.

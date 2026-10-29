@@ -46,14 +46,14 @@ Que en promedio le atine a $f$ (**poco sesgo**) y que no cambie mucho de un conj
 <div class="cols" style="gap: 48px">
 <div>
 
-- Regresión con error cuadrático; $y = f(\vx) + \epsilon$, con $\E[\epsilon] = 0$ y $\Var[\epsilon] = \sigma^2$.
+- Regresión con error cuadrático; $y = f(\vx) + \epsilon$, donde $f$ es la función verdadera y $\epsilon$ un ruido con $\E[\epsilon] = 0$ y $\Var[\epsilon] = \sigma^2$.
 - El conjunto de entrenamiento $\Dat$ es **aleatorio**, así que la hipótesis aprendida $g^{(\Dat)}$ también lo es.
 - La **hipótesis promedio**: $\;\bar g(\vx) = \E_{\Dat}\big[g^{(\Dat)}(\vx)\big]$.
 
 </div>
 <div v-click>
 
-Queremos el error esperado fuera de la muestra, promediado sobre los conjuntos de entrenamiento:
+Queremos el error esperado fuera de la muestra, $\Eout$, promediado sobre los conjuntos de entrenamiento:
 
 $$
 \E_{\Dat}\big[\Eout(g^{(\Dat)})\big] = \E_{\vx}\Big[\, \E_{\Dat, \epsilon}\big[(g^{(\Dat)}(\vx) - y)^2\big] \Big] .
@@ -127,7 +127,7 @@ El grado 3 se mueve poco y su promedio casi coincide con $f$.
 
 <div class="tenue" style="font-size: 16px; margin-top: 10px">
 
-$f(x) = \sin 2\pi x$, $N = 15$, ruido $\sigma = 0.25$, como en la Unidad 1. En gris, cada ajuste; en azul, $\bar g$; punteada, $f$.
+$f(x) = \sin 2\pi x$, $M = 15$ datos, ruido $\sigma = 0.25$. En gris, cada ajuste; en azul, $\bar g$; punteada, $f$.
 
 </div>
 
@@ -140,32 +140,28 @@ $f(x) = \sin 2\pi x$, $N = 15$, ruido $\sigma = 0.25$, como en la Unidad 1. En g
 
 <DescomposicionU />
 
-</div>
-<div>
-
-Promediando 2,000 conjuntos de entrenamiento por grado (cada uno con un $x$ en cada quinceavo de $[0, 1]$).
-
-<v-click>
-
-El mejor es el **grado 3**: sesgo² ≈ 0.005, varianza ≈ 0.019 y, con el ruido, $\Eout \approx 0.086$.
-
-</v-click>
-
-<v-click>
-
-El sesgo ya casi es cero desde el grado 5; lo que sigue solo agrega varianza, que con 15 puntos crece muy rápido a partir del grado 8.
-
-</v-click>
-
-<v-click>
-
-<div class="pequeno tenue">
+<div v-click="3" class="pequeno tenue" style="margin-top: 16px">
 
 En la práctica no podemos calcular $\bar g$: tenemos un solo $\Dat$. La descomposición es para **pensar**; para **medir** usaremos validación.
 
 </div>
 
-</v-click>
+</div>
+<div>
+
+Promediando 2,000 conjuntos de entrenamiento por grado (cada uno con un $x$ en cada quinceavo de $[0, 1]$).
+
+<div v-click="1">
+
+El mejor es el **grado 3**: sesgo² ≈ 0.005, varianza ≈ 0.019 y, con el ruido, $\Eout \approx 0.086$.
+
+</div>
+
+<div v-click="2">
+
+El sesgo ya casi es cero desde el grado 5; lo que sigue solo agrega varianza, que con 15 puntos crece muy rápido a partir del grado 8.
+
+</div>
 </div>
 </div>
 
@@ -178,7 +174,7 @@ En la práctica no podemos calcular $\bar g$: tenemos un solo $\Dat$. La descomp
 <div class="cols" style="gap: 40px; margin-top: 4px">
 <div class="pequeno">
 
-$\Ein$ sube y $\Eout$ baja con $N$; las dos convergen a **sesgo² + $\sigma^2$** (la línea punteada es $\sigma^2 = 0.0625$). La recta se estanca pronto, lejos del ruido.
+$\Ein$ (error de entrenamiento) sube y $\Eout$ (error fuera de la muestra) baja con el número de datos $M$; las dos convergen a **sesgo² + $\sigma^2$** (la línea punteada es $\sigma^2 = 0.0625$). La recta se estanca pronto, lejos del ruido.
 
 </div>
 <div class="pequeno" v-click>
@@ -229,19 +225,21 @@ Conservar la flexibilidad, pero cobrar por usarla.
 <div class="cols" style="gap: 48px">
 <div>
 
-Bajar del grado 12 al 3 es una restricción **dura**: $w_4 = \dots = w_{12} = 0$. Una restricción **suave**:
+Bajar del grado 12 al 3 es una restricción **dura**: $w_4 = \dots = w_{12} = 0$, donde $w_j$ es el coeficiente de $x^j$. Una restricción **suave**, con un presupuesto $C$:
 
 $$
-\min_{\vw} \; \Ein(\vw) \quad \text{sujeto a} \quad \vw\T\vw \le C .
+\min_{\vw} \; \Ein(\vw) \quad \text{sujeto a} \quad \vw\T\vw \le C ,
 $$
+
+donde $\Ein(\vw)$ es el error de entrenamiento con pesos $\vw$.
 
 </div>
 <div v-click>
 
-Si la restricción está activa, en la solución el gradiente de $\Ein$ es opuesto a la normal de la esfera: $\nabla \Ein(\vw^*) = -2\frac{\lambda}{N}\vw^*$ para algún $\lambda \ge 0$. Es la condición de óptimo de
+Si la restricción está activa, en la solución el gradiente de $\Ein$ es opuesto a la normal de la esfera: $\nabla \Ein(\vw^*) = -2\frac{\lambda}{M}\vw^*$ para algún $\lambda \ge 0$, con $M$ el número de datos. Es la condición de óptimo de
 
 $$
-\min_{\vw} \; \Ein(\vw) + \frac{\lambda}{N}\, \vw\T\vw .
+\min_{\vw} \; \Ein(\vw) + \frac{\lambda}{M}\, \vw\T\vw .
 $$
 
 <div class="pequeno tenue">
@@ -259,28 +257,28 @@ Cada $C$ corresponde a un $\lambda$: $C$ más chico, $\lambda$ más grande.
 <div class="cols" style="gap: 48px">
 <div>
 
-Con $\Ein(\vw) = \frac{1}{N}\norm{X\vw - \mathbf y}^2$, el gradiente del objetivo es
+Con $\Ein(\vw) = \frac{1}{M}\norm{\vX\vw - \vy}^2$ ($\vX$, la matriz de datos de $M \times n$; $\vy$, las salidas; atributos y salida centrados, así que $b = 0$), el gradiente del objetivo es
 
 $$
-\tfrac{2}{N}\big(X\T X\vw - X\T\mathbf y\big) + \tfrac{2\lambda}{N}\vw = 0
+\tfrac{2}{M}\big(\vX\T \vX\vw - \vX\T\vy\big) + \tfrac{2\lambda}{M}\vw = 0
 $$
 
 $$
-\Longrightarrow\quad \vw_{\text{ridge}} = \big(X\T X + \lambda I\big)^{-1} X\T \mathbf y .
+\Longrightarrow\quad \vw_{\text{ridge}} = \big(\vX\T \vX + \lambda \mathbf{I}\big)^{-1} \vX\T \vy .
 $$
 
 <div v-click class="pequeno">
 
-$X\T X + \lambda I$ es invertible para todo $\lambda > 0$, aunque haya columnas colineales o más columnas que filas.
+$\vX\T \vX + \lambda \mathbf{I}$ es invertible para todo $\lambda > 0$, aunque haya columnas colineales o más columnas que filas.
 
 </div>
 </div>
 <div v-click>
 
-Con la SVD $X = U D V\T$ las predicciones quedan
+Con la SVD $\vX = \mathbf{U} \mathbf{D} \mathbf{V}\T$ (columnas $\mathbf u_j$ de $\mathbf U$, valores singulares $d_j$) las predicciones quedan
 
 $$
-\hat{\mathbf y} = \sum_{j} \mathbf u_j \, \frac{d_j^2}{d_j^2 + \lambda} \, \mathbf u_j\T \mathbf y .
+\hat{\vy} = \sum_{j} \mathbf u_j \, \frac{d_j^2}{d_j^2 + \lambda} \, \mathbf u_j\T \vy .
 $$
 
 Ridge **encoge** cada dirección según su valor singular: las de poca varianza ($d_j$ chico) casi desaparecen. Los **grados de libertad efectivos** son $\;\mathrm{df}(\lambda) = \sum_j \frac{d_j^2}{d_j^2 + \lambda}$.
@@ -309,26 +307,26 @@ Con $\lambda = 0$, interpola. Con $\lambda = 10^{-2}$ se parece a $f$ con los mi
 
 <RegularizacionLam />
 
-</div>
-<div>
-
-Polinomio de grado 12, $N = 15$, promediando 800 conjuntos de entrenamiento.
-
-<v-click>
-
-Al subir $\lambda$, la **varianza baja** varios órdenes de magnitud y el **sesgo sube** poco. El mejor $\lambda$ está entre $0.01$ y $0.03$: el grado 12 regularizado se acerca al grado 3.
-
-</v-click>
-
-<v-click>
+<div v-click="2" style="margin-top: 16px">
 
 <Caja tipo="cuidado">
 
-La penalización $\vw\T\vw$ trata igual a todos los coeficientes: hay que **estandarizar** los atributos antes, como vimos en la Unidad 1.
+La penalización $\vw\T\vw$ trata igual a todos los coeficientes: hay que **estandarizar** los atributos antes (restar su media y dividir entre su desviación estándar).
 
 </Caja>
 
-</v-click>
+</div>
+
+</div>
+<div>
+
+Polinomio de grado 12, $M = 15$ datos, promediando 800 conjuntos de entrenamiento.
+
+<div v-click="1">
+
+Al subir $\lambda$, la **varianza baja** varios órdenes de magnitud y el **sesgo sube** poco. El mejor $\lambda$ está entre $0.01$ y $0.03$: el grado 12 regularizado se acerca al grado 3.
+
+</div>
 </div>
 </div>
 
@@ -345,7 +343,7 @@ La penalización $\vw\T\vw$ trata igual a todos los coeficientes: hay que **esta
 <div>
 
 $$
-\min_{\vw} \; \Ein(\vw) + \frac{\lambda}{N} \sum_j |w_j|
+\min_{\vw} \; \Ein(\vw) + \frac{\lambda}{M} \sum_j |w_j|
 $$
 
 <v-click>
@@ -398,7 +396,7 @@ Ridge acerca todos los coeficientes a cero a la vez. Lasso los **apaga uno por u
 Con ruido gaussiano, maximizar la verosimilitud es minimizar el error cuadrático. Si además ponemos una **distribución previa** sobre $\vw$ y buscamos el máximo *a posteriori*:
 
 $$
-\max_{\vw}\; \log p(\mathbf y \mid X, \vw) + \log p(\vw) .
+\max_{\vw}\; \log p(\vy \mid \vX, \vw) + \log p(\vw) .
 $$
 
 </div>
@@ -406,8 +404,8 @@ $$
 
 <v-clicks>
 
-- Previa **gaussiana** $w_j \sim \mathcal N(0, \tau^2)$: $\;\log p(\vw) = -\frac{1}{2\tau^2}\norm{\vw}_2^2 + c$. Es **ridge**, con $\lambda \propto \sigma^2/\tau^2$.
-- Previa de **Laplace** $p(w_j) \propto e^{-|w_j|/b}$: es **lasso**.
+- Previa **gaussiana** $w_j \sim \mathcal N(0, \tau^2)$: $\;\log p(\vw) = -\frac{1}{2\tau^2}\norm{\vw}_2^2 + c$. Es **ridge**, con $\lambda \propto \sigma^2/\tau^2$ ($\sigma^2$, la varianza del ruido).
+- Previa de **Laplace** $p(w_j) \propto e^{-|w_j|/\beta}$, con escala $\beta$: es **lasso**.
 - Regularizar es decir, antes de ver los datos, que **preferimos pesos pequeños**: la navaja de Occam en forma de ecuación.
 
 </v-clicks>
@@ -424,7 +422,7 @@ $$
 
 1. Error esperado = **sesgo² + varianza + ruido**.
 2. Más complejidad: menos sesgo, más varianza. Las **curvas de aprendizaje** dicen cuál domina.
-3. **Ridge**: $\big(X\T X + \lambda I\big)^{-1} X\T\mathbf y$, encoge las direcciones débiles.
+3. **Ridge**: $\big(\vX\T \vX + \lambda \mathbf{I}\big)^{-1} \vX\T\vy$, encoge las direcciones débiles.
 4. **Lasso**: pone coeficientes en cero, selecciona variables.
 5. Estandarizar antes de regularizar; $\lambda$ se elige con **validación**.
 

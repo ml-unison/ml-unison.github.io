@@ -71,7 +71,7 @@ Tendencia que **se acelera** (0.86 ppm por año en los sesenta, 2.62 en esta dé
 
 <!--
 El ciclo anual: la vegetación del hemisferio norte absorbe CO₂ en primavera y verano y lo libera en otoño e invierno. El máximo es en mayo, el mínimo en septiembre u octubre.
-Preguntar: ¿qué modelo de la Unidad 4 usarían? (regresión sobre tendencia + mes: la veremos al final).
+Preguntar: ¿qué modelo de regresión usarían? (regresión sobre tendencia + mes: la veremos al final).
 -->
 
 ---
@@ -82,7 +82,7 @@ layout: pregunta
 
 <v-click>
 
-Probablemente siga arriba, pero un poco menos: la sorpresa de hoy **se arrastra** y se va desvaneciendo. Esa memoria es lo que vamos a modelar: $y_t = \phi\, y_{t-1} + \varepsilon_t$.
+Probablemente siga arriba, pero un poco menos: la sorpresa de hoy **se arrastra** y se va desvaneciendo. Esa memoria es lo que vamos a modelar: $y_t = \phi\, y_{t-1} + \varepsilon_t$, donde $y_t$ es la desviación del mes $t$, $\phi$ cuánto se arrastra y $\varepsilon_t$ la sorpresa nueva.
 
 </v-click>
 
@@ -106,6 +106,12 @@ $$
 y_t = c + \phi\, y_{t-1} + \varepsilon_t, \qquad \varepsilon_t \sim \text{ruido blanco}(0, \sigma^2)
 $$
 
+<div class="pequeno tenue">
+
+$c$ es una constante, $\phi$ el coeficiente y $\varepsilon_t$ el choque del tiempo $t$, con varianza $\sigma^2$.
+
+</div>
+
 Sustituyendo hacia atrás $k$ veces:
 
 $$
@@ -122,9 +128,9 @@ Si $|\phi| < 1$, el pasado lejano se olvida ($\phi^k \to 0$): $y_t$ es una suma 
 
 <v-click>
 
-**Media:** $\mu = c + \phi\mu \;\Rightarrow\; \mu = \dfrac{c}{1-\phi}$.
+**Media** $\mu$: $\mu = c + \phi\mu \;\Rightarrow\; \mu = \dfrac{c}{1-\phi}$.
 
-**Varianza:** $\varepsilon_t$ no se correlaciona con $y_{t-1}$, así que
+**Varianza** $\gamma_0$, con $\gamma_k = \operatorname{Cov}(y_t, y_{t-k})$: $\varepsilon_t$ no se correlaciona con $y_{t-1}$, así que
 
 $$
 \gamma_0 = \phi^2 \gamma_0 + \sigma^2 \;\Rightarrow\; \gamma_0 = \frac{\sigma^2}{1-\phi^2} .
@@ -134,7 +140,7 @@ $$
 
 <v-click>
 
-**ACF:** multiplicando por $y_{t-k} - \mu$, $\gamma_k = \phi\,\gamma_{k-1}$, así que
+**ACF** $\rho_k = \gamma_k/\gamma_0$: multiplicando por $y_{t-k} - \mu$, $\gamma_k = \phi\,\gamma_{k-1}$, así que
 
 $$
 \rho_k = \phi^k .
@@ -160,6 +166,12 @@ $$
 
 <ProcesosMemoria />
 
+<div class="pequeno tenue">
+
+AR(1): $y_t = \phi\,y_{t-1} + \varepsilon_t$; MA(1): $y_t = \varepsilon_t + \theta\,\varepsilon_{t-1}$, con $\varepsilon_t$ ruido blanco y $\rho_1$ la autocorrelación a un paso.
+
+</div>
+
 <!--
 Recorrer los botones. Pedir al grupo que adivine la ACF antes de mostrarla.
 Ruido blanco: con 20 rezagos, esperamos ~1 barra fuera de la banda por azar.
@@ -182,11 +194,17 @@ $$
 y_t = \mu + \varepsilon_t + \theta_1\varepsilon_{t-1} + \dots + \theta_q\varepsilon_{t-q} .
 $$
 
+<div class="pequeno tenue">
+
+$\mu$: media; $\varepsilon_t$: ruido blanco; $\theta_j$: peso del choque de hace $j$ pasos ($\theta$ solo para medias móviles).
+
+</div>
+
 $y_t$ y $y_{t-k}$ no comparten choques si $k > q$: **la ACF se corta en $q$**.
 
 <v-click>
 
-**PACF:** $\alpha_k$ es el último coeficiente de la mejor regresión de $y_t$ sobre $y_{t-1}, \dots, y_{t-k}$: la correlación con $y_{t-k}$ **descontando** los rezagos intermedios. En un AR($p$), **se corta en $p$**.
+**PACF:** $\alpha_k$ es el último coeficiente de la mejor regresión de $y_t$ sobre $y_{t-1}, \dots, y_{t-k}$: la correlación con $y_{t-k}$ **descontando** los rezagos intermedios. En un AR($p$), con $p$ rezagos, **se corta en $p$**.
 
 </v-click>
 </div>
@@ -198,7 +216,7 @@ Identificación de Box y Jenkins (1970):
 |---|---|---|
 | AR($p$) | decae | se corta en $p$ |
 | MA($q$) | se corta en $q$ | decae |
-| ARMA($p$, $q$) | decae | decae |
+| ARMA($p$, $q$): ambos | decae | decae |
 | no estacionario | casi no baja | $\alpha_1 \approx 1$ |
 
 <div class="pequeno tenue">
@@ -220,11 +238,11 @@ $$
 y_t = c + \phi_1 y_{t-1} + \dots + \phi_p y_{t-p} + \varepsilon_t
 $$
 
-Los atributos son **la propia serie, desplazada**: una fila de $X$ por cada $t$, y mínimos cuadrados como en la Unidad 4, $\hat{\mathbf{w}} = (X\T X)^{-1} X\T \mathbf{y}$.
+Los atributos son **la propia serie, desplazada**: el renglón $i$ (uno por cada $t$) es $\vx^{(i)} = (y_{t-1}, \dots, y_{t-p})$ con salida $y^{(i)} = y_t$; los $\phi_j$ son los pesos $w_j$ y $c$ el sesgo $b$, por mínimos cuadrados.
 
 <div v-click class="tabla-chica">
 
-AR(2) simulado, $T = 1{,}000$:
+AR(2) simulado, con $T = 1{,}000$ observaciones:
 
 | | $c$ | $\phi_1$ | $\phi_2$ |
 |---|---|---|---|
@@ -256,7 +274,7 @@ Azul: atributos; rojo: respuesta; dorado: la predicción $\hat y_t$ del modelo a
 <!--
 Mover el deslizador: cada posición de la ventana es una fila de la matriz de diseño.
 Con errores gaussianos, mínimos cuadrados es la máxima verosimilitud condicional en las primeras p observaciones; ARIMA usa la verosimilitud exacta y da 0.730 y −0.507: casi igual.
-Advertencia que conecta con la presentación anterior: no se valida con KFold aleatorio, porque las filas comparten valores.
+Advertencia: no se valida con KFold aleatorio, porque las filas vecinas comparten valores.
 -->
 
 ---
@@ -292,6 +310,12 @@ Diferenciar, y luego modelar lo que queda: ARIMA y SARIMA.
 
 <DiferenciasCO2 />
 
+<div class="pequeno tenue">
+
+$\nabla y_t = y_t - y_{t-1}$ es la diferencia con el mes anterior y $\nabla_{12}\, y_t = y_t - y_{t-12}$ con el mismo mes del año anterior.
+
+</div>
+
 <!--
 ∇ = 1 − B quita una tendencia lineal; ∇₁₂ = 1 − B¹² quita un ciclo anual fijo y es el crecimiento anual (el pico de 1998 es el gran El Niño de 1997–98).
 En ∇∇₁₂y quedan dos barras: −0.29 en el rezago 1 y −0.46 en el 12. Con la tabla de Box–Jenkins: un MA(1) y un MA(1) estacional.
@@ -310,9 +334,15 @@ $$
 \phi(B)\,(1-B)^d\, y_t = \theta(B)\,\varepsilon_t .
 $$
 
+<div class="pequeno tenue">
+
+$B$ es el operador de rezago ($B y_t = y_{t-1}$), $\phi(B)$ el polinomio autorregresivo de grado $p$ y $\theta(B) = 1 + \theta_1 B + \dots + \theta_q B^q$ el de medias móviles.
+
+</div>
+
 <v-click>
 
-**SARIMA$(p,d,q)(P,D,Q)_m$:** polinomios en $B^m$ para la parte estacional, multiplicados con los de corto plazo:
+**SARIMA$(p,d,q)(P,D,Q)_m$:** con periodo $m$ (12 meses), polinomios $\Phi$ y $\Theta$ en $B^m$ de órdenes $P$ y $Q$, y $D$ diferencias estacionales, multiplicados con los de corto plazo:
 
 $$
 \phi(B)\Phi(B^m)(1-B)^d(1-B^m)^D y_t = \theta(B)\Theta(B^m)\varepsilon_t
@@ -322,7 +352,7 @@ $$
 </div>
 <div v-click>
 
-La ACF de $\nabla\nabla_{12}\, y$ sugiere el $(0,1,1)(0,1,1)_{12}$:
+La ACF de $\nabla\nabla_{12}\, y$ (diferencia mensual y anual) sugiere el $(0,1,1)(0,1,1)_{12}$, con un solo coeficiente $\theta$ y uno estacional $\Theta$:
 
 $$
 (1-B)(1-B^{12})\,y_t = (1+\theta B)(1+\Theta B^{12})\,\varepsilon_t
@@ -362,7 +392,7 @@ $$
 \mathrm{AIC} = -2 \ln \hat L + 2k
 $$
 
-Penaliza los parámetros, como $\Eout \approx \Ein + \text{complejidad}$ en la Unidad 3. Solo compara modelos con la **misma** diferenciación.
+$\hat L$: verosimilitud máxima; $k$: número de parámetros. Penaliza la complejidad, como $\Eout \approx \Ein + \text{complejidad}$ (error fuera de la muestra y de entrenamiento). Solo compara modelos con la **misma** diferenciación.
 
 </v-click>
 </div>
@@ -380,7 +410,7 @@ Penaliza los parámetros, como $\Eout \approx \Ein + \text{complejidad}$ en la U
 
 <div class="pequeno">
 
-Elegido: $\hat\phi = 0.19$, $\hat\theta = -0.54$, $\hat\Theta = -0.87$, $\hat\sigma = 0.30$ ppm.
+Elegido: $\hat\phi = 0.19$, $\hat\theta = -0.54$, $\hat\Theta = -0.87$ y desviación estándar del ruido $\hat\sigma = 0.30$ ppm.
 
 </div>
 </div>
@@ -413,6 +443,12 @@ $$
 Q = T(T+2)\sum_{k=1}^{K}\frac{\hat\rho_k^2}{T-k} \;\approx\; \chi^2_{K - 3} .
 $$
 
+<div class="pequeno tenue">
+
+$\hat\rho_k$ es la autocorrelación de los residuos en el rezago $k$ y $T$ su número; se restan los 3 coeficientes estimados.
+
+</div>
+
 </v-click>
 
 <div v-click class="tabla-chica">
@@ -420,9 +456,9 @@ $$
 | $K$ | 12 | 24 | 36 |
 |---|---|---|---|
 | $Q$ | 6.2 | 15.7 | 30.0 |
-| valor $p$ | 0.72 | 0.79 | 0.62 |
+| valor p | 0.72 | 0.79 | 0.62 |
 
-Las barras en 1 y en 12 desaparecieron: **pasa el diagnóstico**.
+Ya no hay barras en 1 ni en 12: **pasa el diagnóstico**.
 
 </div>
 </div>
@@ -430,8 +466,8 @@ Las barras en 1 y en 12 desaparecieron: **pasa el diagnóstico**.
 
 <style>
 .tabla-chica { font-size: 22px; }
-.tabla-chica table { font-size: 20px; margin-bottom: 14px; }
-.tabla-chica td { padding: 7px 14px 7px 0; }
+.tabla-chica table { font-size: 20px; margin-bottom: 8px; }
+.tabla-chica td, .tabla-chica th { padding: 4px 14px 4px 0; }
 </style>
 
 ---
@@ -450,7 +486,7 @@ Cuánto sabemos del futuro, y cuánto creemos saber.
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 40px">
 <div>
 
-AR(1) con media 0, iterando $h$ pasos:
+AR(1) con media 0 y datos hasta $T$, iterando $h$ pasos:
 
 $$
 y_{T+h} = \phi^h y_T + \sum_{j=0}^{h-1}\phi^j \varepsilon_{T+h-j}
@@ -458,7 +494,7 @@ $$
 
 <v-click>
 
-El pronóstico es $\hat y_{T+h\mid T} = \phi^h y_T$; el error, los choques que aún no ocurren:
+El pronóstico es $\hat y_{T+h\mid T} = \phi^h y_T$; el error, los choques que aún no ocurren, cada uno con varianza $\sigma^2$:
 
 $$
 \Var(\text{error}) = \sigma^2 \sum_{j=0}^{h-1}\phi^{2j} \xrightarrow[h\to\infty]{} \frac{\sigma^2}{1-\phi^2} .
@@ -538,9 +574,9 @@ De los 141 meses, el 94 % cae dentro del intervalo del 95 %, pero solo el 21 % d
 # ¿Quién gana? Depende del horizonte
 
 <div class="cols" style="grid-template-columns: 1fr 640px; gap: 36px">
-<div>
+<div class="tabla-mase">
 
-**Un origen**, 141 meses (2015–2026):
+**Un origen**, 141 meses (2015–2026). MASE: el MAE entre el del estacional ingenuo en entrenamiento.
 
 | modelo | MAE | MASE |
 |---|---|---|
@@ -553,7 +589,7 @@ De los 141 meses, el 94 % cae dentro del intervalo del 95 %, pero solo el 21 % d
 
 <div class="pequeno">
 
-**Origen móvil**, 130 orígenes, $h = 1, \dots, 12$: el SARIMA gana en todos los horizontes, con MAE de 0.28 ppm a un mes y 0.64 a un año (MASE 0.30 en promedio).
+**Origen móvil**, 130 orígenes, horizontes $h = 1, \dots, 12$ meses: el SARIMA gana en todos los horizontes, con MAE de 0.28 ppm a un mes y 0.64 a un año (MASE 0.30 en promedio).
 
 </div>
 
@@ -565,6 +601,10 @@ De los 141 meses, el 94 % cae dentro del intervalo del 95 %, pero solo el 21 % d
 
 </div>
 </div>
+
+<style>
+.tabla-mase td, .tabla-mase th { padding-top: 7px; padding-bottom: 7px; }
+</style>
 
 <!--
 MASE: MAE dividido entre el del estacional ingenuo a un paso en entrenamiento (1.50 ppm, el crecimiento anual típico).
@@ -588,7 +628,7 @@ En los 130 orígenes, el intervalo del 80 % contuvo el **75 %** de los valores y
 <v-click>
 
 - Los parámetros son los de 2014 y su propia incertidumbre no se incluye.
-- La serie se aceleró: el error medio es positivo y crece con $h$.
+- La serie se aceleró: el error medio es positivo y crece con el horizonte $h$.
 
 </v-click>
 
@@ -611,7 +651,7 @@ Un intervalo de predicción vale lo que vale el supuesto de que el futuro se com
 <div class="cols cols-6-4" style="flex: 1">
 <div style="font-size: 25px; line-height: 1.4">
 
-1. AR(1): estacionario si $|\phi| < 1$, varianza $\sigma^2/(1-\phi^2)$, ACF $\phi^k$.
+1. AR(1) $y_t = \phi\,y_{t-1} + \varepsilon_t$, choques de varianza $\sigma^2$: estacionario si $|\phi| < 1$, varianza $\sigma^2/(1-\phi^2)$, ACF $\phi^k$.
 2. Un AR($p$) es una **regresión lineal sobre los rezagos**; ACF y PACF distinguen AR de MA.
 3. **Diferenciar** quita tendencia y ciclo: ARIMA y SARIMA.
 4. Máxima verosimilitud, AIC y residuos de ruido blanco (Ljung–Box).

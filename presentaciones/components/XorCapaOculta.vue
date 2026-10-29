@@ -1,6 +1,6 @@
 <script setup lang="ts">
-// XOR con una red 2-2-2 (tanh): el espacio original con las rectas z₁ = 0 y z₂ = 0 de las neuronas ocultas,
-// y el espacio oculto (a₁, a₂), donde una recta separa las clases. Datos: herramientas/laminas/u06_01.py.
+// XOR con una red 2-2-2 (tanh): el espacio original con las rectas z[1]₁ = 0 y z[1]₂ = 0 de las neuronas ocultas,
+// y el espacio oculto (a<sup>[1]</sup><sub>1</sub>, a<sup>[1]</sup><sub>2</sub>), donde una recta separa las clases. Datos: herramientas/laminas/u06_01.py.
 import { scaleLinear } from 'd3-scale'
 import datos from '../datos/u06-01.json'
 withDefaults(defineProps<{ oculto?: boolean }>(), { oculto: true })
@@ -28,8 +28,8 @@ const sep = recta(wd, bd, -1.15, 1.15)
         <Regiones :datos="D.regiones" :x="x" :y="y" :colores="['#C0CEE3', '#F3C7C4']" :opacidad="0.7" />
         <line v-for="(s, j) in ocultas" :key="j" :x1="x(s[0][0])" :y1="y(s[0][1])" :x2="x(s[1][0])" :y2="y(s[1][1])" stroke="#1A2133" stroke-width="2" stroke-dasharray="7 6" />
         <circle v-for="(v, i) in D.x" :key="i" :cx="x(v)" :cy="y(D.y[i])" r="4" :fill="col(D.g[i])" stroke="#fff" stroke-width="0.8" />
-        <text :x="x(-0.55)" :y="y(-2.0)" style="fill: #1A2133; font-weight: 600">z₁ = 0</text>
-        <text :x="x(1.05)" :y="y(1.92)" style="fill: #1A2133; font-weight: 600">z₂ = 0</text>
+        <text :x="x(-0.55)" :y="y(-2.0)" style="fill: #1A2133; font-weight: 600">z<tspan baseline-shift="super" font-size="68%">[1]</tspan><tspan baseline-shift="sub" font-size="68%">1</tspan> = 0</text>
+        <text :x="x(1.05)" :y="y(1.92)" style="fill: #1A2133; font-weight: 600">z<tspan baseline-shift="super" font-size="68%">[1]</tspan><tspan baseline-shift="sub" font-size="68%">2</tspan> = 0</text>
         <text :x="T / 2" :y="T - 6" text-anchor="middle" class="titulo-eje">x₁</text>
         <text :x="12" :y="T / 2" text-anchor="middle" class="titulo-eje">x₂</text>
       </svg>
@@ -45,10 +45,10 @@ const sep = recta(wd, bd, -1.15, 1.15)
         <text :x="xa(1)" :y="ya(-1) + 24" text-anchor="middle">1</text>
         <text :x="xa(-1) - 10" :y="ya(1) + 6" text-anchor="end">1</text>
         <text :x="xa(-1) - 10" :y="ya(-1) + 6" text-anchor="end">−1</text>
-        <text :x="T / 2" :y="T - 6" text-anchor="middle" class="titulo-eje">a₁ = tanh(z₁)</text>
-        <text :x="12" :y="T / 2" text-anchor="middle" class="titulo-eje">a₂</text>
+        <text :x="T / 2" :y="T - 6" text-anchor="middle" class="titulo-eje">a<tspan baseline-shift="super" font-size="68%">[1]</tspan><tspan baseline-shift="sub" font-size="68%">1</tspan> = tanh(z<tspan baseline-shift="super" font-size="68%">[1]</tspan><tspan baseline-shift="sub" font-size="68%">1</tspan>)</text>
+        <text :x="12" :y="T / 2" text-anchor="middle" class="titulo-eje">a<tspan baseline-shift="super" font-size="68%">[1]</tspan><tspan baseline-shift="sub" font-size="68%">2</tspan></text>
       </svg>
-      <div class="xco__t">espacio oculto (a₁, a₂)</div>
+      <div class="xco__t">espacio oculto (a<sup>[1]</sup><sub>1</sub>, a<sup>[1]</sup><sub>2</sub>)</div>
     </div>
   </div>
 </template>

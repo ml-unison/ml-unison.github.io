@@ -10,7 +10,7 @@ const D = (datos as any).hermosillo
 const Hs = Object.keys(D.redes).map(Number).sort((a, b) => a - b)
 const k = ref(props.inicial)
 const R = computed(() => D.redes[String(Hs[k.value])])
-const W = 1040, H = 380, m = { l: 56, r: 20, t: 34, b: 44 }
+const W = 1040, H = 350, m = { l: 56, r: 20, t: 34, b: 44 }
 const x = scaleLinear().domain([1, 365]).range([m.l, W - m.r]), y = scaleLinear().domain([14, 36]).range([H - m.b, m.t])
 const camino = computed(() => line<number>().x(v => x(v)).y((_, i) => y(R.value.v[i]))(R.value.t)!)
 const meses = [[1, '1 ene'], [91, '1 abr'], [182, '1 jul'], [274, '1 oct'], [365, '31 dic']] as const

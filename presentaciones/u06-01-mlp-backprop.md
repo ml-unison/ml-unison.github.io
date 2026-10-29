@@ -40,7 +40,7 @@ Con ninguna: en el XOR, cualquier recta deja de cada lado la mitad de cada clase
 </v-click>
 
 <!--
-Dibujar en el pizarrón los cuatro puntos (0,0), (1,1) azules y (0,1), (1,0) rojos. Dejar que propongan rectas. La logística de la Unidad 4 acierta 49.5 % en las nubes del XOR de la libreta: lo mismo que una moneda.
+Dibujar en el pizarrón los cuatro puntos (0,0), (1,1) azules y (0,1), (1,0) rojos. Dejar que propongan rectas. La regresión logística acierta 49.5 % en las nubes del XOR de la libreta: lo mismo que una moneda.
 -->
 
 ---
@@ -52,7 +52,7 @@ nota: "Sobre la demostración del perceptrón de Frank Rosenblatt, financiado po
 La Marina reveló hoy el embrión de una computadora electrónica que, espera, podrá caminar, hablar, ver, escribir, reproducirse y ser consciente de su existencia.
 
 <!--
-El perceptrón de Rosenblatt era una sola capa de pesos ajustables: el mismo algoritmo del perceptrón que vimos en la Unidad 3. La expectativa pública iba muy por delante de lo que el modelo podía hacer. Es una buena ocasión para comentar con el grupo cómo se cubren hoy los anuncios de IA.
+El perceptrón de Rosenblatt era una sola capa de pesos ajustables, que se corregían cada vez que el modelo se equivocaba en un ejemplo. La expectativa pública iba muy por delante de lo que el modelo podía hacer. Es una buena ocasión para comentar con el grupo cómo se cubren hoy los anuncios de IA.
 -->
 
 ---
@@ -75,7 +75,7 @@ El perceptrón de Rosenblatt era una sola capa de pesos ajustables: el mismo alg
 </div>
 
 <!--
-La idea del modo inverso de la diferenciación ya estaba en la tesis de maestría de S. Linnainmaa (1970), y P. Werbos la propuso para redes en su tesis doctoral (1974). El artículo de 1986 la popularizó. Cybenko (1989) y Glorot y Bengio (2010) aparecen más adelante en esta clase; AlexNet, en el tema 3.
+La idea del modo inverso de la diferenciación ya estaba en la tesis de maestría de S. Linnainmaa (1970), y P. Werbos la propuso para redes en su tesis doctoral (1974). El artículo de 1986 la popularizó. Cybenko (1989) y Glorot y Bengio (2010) aparecen más adelante en esta clase.
 -->
 
 ---
@@ -91,18 +91,18 @@ La idea del modo inverso de la diferenciación ya estaba en la tesis de maestrí
 </div>
 <div>
 
-Red 2-2-2 con $\tanh$, entrenada en 200 puntos del XOR. Aprende dos **franjas** paralelas a la diagonal:
+Red 2-2-2 con $\tanh$ en 200 puntos del XOR. Las neuronas ocultas $a^{[1]}_1, a^{[1]}_2$ aprenden dos **franjas** paralelas a la diagonal de los atributos $x_1, x_2$:
 
 $$
 \begin{aligned}
-a_1 &\approx \tanh\big(2(x_2 - x_1 + 1)\big)\\
-a_2 &\approx \tanh\big(2(x_1 - x_2 + 1)\big)
+a^{[1]}_1 &\approx \tanh\big(2(x_2 - x_1 + 1)\big)\\
+a^{[1]}_2 &\approx \tanh\big(2(x_1 - x_2 + 1)\big)
 \end{aligned}
 $$
 
 <v-click>
 
-Las dos nubes azules van a la **misma esquina** $(1, 1)$ del espacio oculto. Ahí una recta, la logística de salida, separa las clases. Exactitud: 0.975.
+Las nubes azules van a la **misma esquina** $(1, 1)$ del espacio oculto; ahí una recta, la logística de salida, separa las clases. Exactitud: 0.975.
 
 </v-click>
 </div>
@@ -119,11 +119,13 @@ Primero solo el espacio original: la frontera de la red ya no es una recta. Con 
 <div class="cols" style="grid-template-columns: 2fr 3fr; gap: 40px">
 <div>
 
-Si $\sigma(z) = z$, la composición de capas es **afín**:
+Si la activación es la identidad, $g(z) = z$, la composición de capas es **afín**:
 
 $$
-W^{(2)}\big(W^{(1)}\vx + \mathbf b^{(1)}\big) + \mathbf b^{(2)} = W\vx + \mathbf b .
+\vW^{[2]}\big(\vW^{[1]}\vx + \mathbf b^{[1]}\big) + \mathbf b^{[2]} = \vW\vx + \mathbf b ,
 $$
+
+con $\vW^{[\ell]}$ y $\mathbf b^{[\ell]}$ los pesos y sesgos de la capa $\ell$.
 
 <v-click>
 
@@ -135,7 +137,7 @@ Con cualquier número de capas, el resultado es una regresión *softmax* con una
 
 <div class="pequeno">
 
-**Activaciones:** sigmoide $\frac{1}{1 + e^{-z}}$, $\tanh z$ y la más usada hoy, $\operatorname{ReLU}(z) = \max(0, z)$.
+**Activaciones** $g$: sigmoide $\sigma(z) = \frac{1}{1 + e^{-z}}$, $\tanh z$ y la más usada hoy, $\operatorname{ReLU}(z) = \max(0, z)$.
 
 </div>
 
@@ -161,12 +163,12 @@ Con cualquier número de capas, el resultado es una regresión *softmax* con una
 
 <div class="pequeno" style="margin-top: 4px">
 
-$g(x) = c_0 + \sum_i s_i \operatorname{ReLU}(x - t_i)$ es lineal por pedazos: con una neurona por nodo **interpolamos** cualquier curva. Temperatura media diaria en el aeropuerto de Hermosillo (GHCN-Daily, NOAA).
+$\hat f(x) = c_0 + \sum_{r=1}^{H} s_r \operatorname{ReLU}(x - \tau_r)$, con $x$ el día del año y $H$ neuronas ocultas, es lineal por pedazos: parte de la altura $c_0$ y cambia de pendiente en $s_r$ en cada nodo $\tau_r$. Con una neurona por nodo **interpolamos** cualquier curva. Temperatura media diaria, aeropuerto de Hermosillo (GHCN-Daily, NOAA).
 
 </div>
 
 <!--
-Mover el deslizador: 1, 2, 3, 6, 12, 24. Los pesos no se entrenan: se construyen. Neurona i: peso 1, sesgo −t_i; salida: s_i = cambio de pendiente en t_i. Con 3 neuronas, RECM 1.87 °C; con 12, 0.59 °C; con 24, 0.48 °C, y ya solo persigue el ruido del promedio. Error de la interpolación lineal ≤ Δ² max|f''| / 8: baja como 1/H².
+Mover el deslizador: 1, 2, 3, 6, 12, 24. Los pesos no se entrenan: se construyen. Neurona r: peso 1, sesgo −τ_r; salida: s_r = cambio de pendiente en τ_r. Con 3 neuronas, RECM 1.87 °C; con 12, 0.59 °C; con 24, 0.48 °C, y ya solo persigue el ruido del promedio. Error de la interpolación lineal ≤ Δ² max|f''| / 8: baja como 1/H².
 -->
 
 ---
@@ -178,17 +180,17 @@ Mover el deslizador: 1, 2, 3, 6, 12, 24. Los pesos no se entrenan: se construyen
 
 <Caja tipo="teorema" nombre="Cybenko, 1989; Hornik, 1991">
 
-Sea $\sigma$ continua, acotada y no constante. Para toda $f$ continua en un compacto $K \subset \R^d$ y todo $\varepsilon > 0$ existen $H$ y pesos tales que
+Sea la activación $g$ continua, acotada y no constante. Para toda $f$ continua en un compacto $\Omega \subset \R^n$ y todo $\varepsilon > 0$ existen $H$ neuronas ocultas, con pesos $\vw_r$, sesgos $b_r$ y pesos de salida $c_r$, tales que
 
 $$
-\Big| f(\vx) - \sum_{j=1}^{H} c_j\, \sigma(\vw_j\T\vx + b_j) \Big| < \varepsilon \quad \text{en } K .
+\Big| f(\vx) - \sum_{r=1}^{H} c_r\, g(\vw_r\T\vx + b_r) \Big| < \varepsilon \quad \text{en } \Omega .
 $$
 
 </Caja>
 
 <div class="pequeno tenue">
 
-Leshno et al. (1993): basta con que $\sigma$ no sea un polinomio; incluye ReLU.
+Leshno et al. (1993): basta con que $g$ no sea un polinomio; incluye ReLU.
 
 </div>
 </div>
@@ -198,9 +200,9 @@ Leshno et al. (1993): basta con que $\sigma$ no sea un polinomio; incluye ReLU.
 
 <v-clicks>
 
-- **Cuántas** neuronas: la construcción con una malla de nodos necesita del orden de $(1/\varepsilon)^{d/2}$; con $d = 64$ es absurdo.
-- **Cómo encontrarlas**: existen, pero nada garantiza que el descenso por gradiente llegue a ellas.
-- Nada de **generalización**: lo que puede aproximar cualquier función también puede memorizar el ruido (Unidad 3).
+- **Cuántas** neuronas: con una malla de nodos se necesitan del orden de $(1/\varepsilon)^{n/2}$, con $n$ atributos; con $n = 64$ es absurdo.
+- **Cómo encontrarlas**: nada garantiza que el descenso por gradiente llegue a ellas.
+- Nada de **generalización**: lo que puede aproximar cualquier función también puede memorizar el ruido.
 
 </v-clicks>
 
@@ -228,22 +230,22 @@ La regla de la cadena, organizada para no repetir cuentas.
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-Dos capas, $K$ clases:
+Dos capas, $K$ clases, un ejemplo $\vx^{(i)}$:
 
 $$
 \begin{aligned}
-\mathbf z^{(1)} &= W^{(1)}\vx + \mathbf b^{(1)}, & \mathbf a^{(1)} &= \sigma\big(\mathbf z^{(1)}\big),\\
-\mathbf z^{(2)} &= W^{(2)}\mathbf a^{(1)} + \mathbf b^{(2)}, & \hat{\mathbf y} &= \operatorname{softmax}\big(\mathbf z^{(2)}\big),
+\vz^{[1]} &= \vW^{[1]}\vx^{(i)} + \mathbf b^{[1]}, & \va^{[1]} &= g\big(\vz^{[1]}\big),\\
+\vz^{[2]} &= \vW^{[2]}\va^{[1]} + \mathbf b^{[2]}, & \hat{\mathbf y} &= \operatorname{softmax}\big(\vz^{[2]}\big),
 \end{aligned}
 $$
 
 $$
-E = -\textstyle\sum_k y_k \ln \hat y_k \qquad (\mathbf y \text{ en one-hot}).
+\ell = -\textstyle\sum_{k=1}^{K} y_k \ln \hat y_k \qquad (\mathbf y \text{: la clase en one-hot}).
 $$
 
 <div class="pequeno tenue">
 
-La última capa es la regresión *softmax* de la Unidad 4, sobre atributos $\mathbf a^{(1)}$ **aprendidos**.
+$g$ es la activación oculta y $\ell$ la pérdida del ejemplo. La última capa es una regresión *softmax* (logística de $K$ clases) sobre atributos $\va^{[1]}$ **aprendidos**.
 
 </div>
 </div>
@@ -251,16 +253,16 @@ La última capa es la regresión *softmax* de la Unidad 4, sobre atributos $\mat
 
 <v-click>
 
-Definimos el **error** de cada capa: $\boldsymbol\delta^{(\ell)} = \partial E / \partial \mathbf z^{(\ell)}$.
+Definimos el **error** de cada capa $\ell$: $\boldsymbol\delta^{[\ell]} = \partial \ell / \partial \vz^{[\ell]}$.
 
 </v-click>
 
 <v-click>
 
-Como $\ln \hat y_k = z_k - \ln\sum_j e^{z_j}$,
+Con $z_k$ la componente $k$ de $\vz^{[2]}$, $\ln \hat y_k = z_k - \ln\sum_{k'} e^{z_{k'}}$, así que
 
 $$
-\frac{\partial E}{\partial z_i} = -\sum_k y_k\big(\ind{k = i} - \hat y_i\big) = \hat y_i - y_i ,
+\frac{\partial \ell}{\partial z_c} = -\sum_k y_k\big(\ind{k = c} - \hat y_c\big) = \hat y_c - y_c ,
 $$
 
 </v-click>
@@ -268,7 +270,7 @@ $$
 <v-click>
 
 $$
-\boldsymbol\delta^{(2)} = \hat{\mathbf y} - \mathbf y .
+\boldsymbol\delta^{[2]} = \hat{\mathbf y} - \mathbf y .
 $$
 
 «Predicción menos dato», como en la logística y en todo GLM con liga canónica.
@@ -284,10 +286,10 @@ $$
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-**Pesos.** $W^{(\ell)}_{ij}$ solo afecta a $z^{(\ell)}_i$, con $\partial z^{(\ell)}_i / \partial W^{(\ell)}_{ij} = a^{(\ell-1)}_j$:
+**Pesos.** $W^{[\ell]}_{pq}$, de la neurona $q$ de la capa $\ell-1$ a la $p$ de la capa $\ell$, solo afecta a $z^{[\ell]}_p$, con $\partial z^{[\ell]}_p / \partial W^{[\ell]}_{pq} = a^{[\ell-1]}_q$:
 
 $$
-\frac{\partial E}{\partial W^{(\ell)}} = \boldsymbol\delta^{(\ell)}\, \mathbf a^{(\ell-1)\top}, \qquad \frac{\partial E}{\partial \mathbf b^{(\ell)}} = \boldsymbol\delta^{(\ell)} .
+\frac{\partial \ell}{\partial \vW^{[\ell]}} = \boldsymbol\delta^{[\ell]}\, \va^{[\ell-1]\top}, \qquad \frac{\partial \ell}{\partial \mathbf b^{[\ell]}} = \boldsymbol\delta^{[\ell]} .
 $$
 
 <div class="pequeno tenue">
@@ -298,10 +300,10 @@ Error que llega por activación que entra: un producto exterior.
 
 <v-click>
 
-**Errores.** $a^{(\ell)}_j$ afecta a **todas** las $z^{(\ell+1)}_i$; se suman y se pasa por $\sigma$:
+**Errores.** $a^{[\ell]}_q$ afecta a **todas** las $z^{[\ell+1]}_p$: se suman y se multiplica ($\odot$, entrada por entrada) por la derivada $g'$ de la activación:
 
 $$
-\boldsymbol\delta^{(\ell)} = \Big(W^{(\ell+1)\top}\boldsymbol\delta^{(\ell+1)}\Big) \odot \sigma'\big(\mathbf z^{(\ell)}\big) .
+\boldsymbol\delta^{[\ell]} = \Big(\vW^{[\ell+1]\top}\boldsymbol\delta^{[\ell+1]}\Big) \odot g'\big(\vz^{[\ell]}\big) .
 $$
 
 </v-click>
@@ -310,14 +312,14 @@ $$
 
 <v-click>
 
-**Con un lote de $N$ ejemplos** (renglones), los productos exteriores sumados son productos de matrices:
+**Con un minilote $\mathcal B$ de $|\mathcal B|$ ejemplos** (renglones), los productos exteriores sumados son productos de matrices; la pérdida $L$ es el promedio de las $\ell$:
 
 ```python
-D2 = P.copy()
-D2[np.arange(N), y] -= 1          # Δ(2) = Ŷ − Y
-D2 /= N                           # E es un promedio
+D2 = P.copy()                     # P: probabilidades Ŷ
+D2[np.arange(nB), y] -= 1         # Δ[2] = Ŷ − Y, nB = |B|
+D2 /= nB                          # L es un promedio
 gW2, gb2 = D2.T @ A1, D2.sum(0)
-D1 = (D2 @ W2) * dsigma(Z1)       # Δ(1)
+D1 = (D2 @ W2) * dg(Z1)           # Δ[1]; dg = g'
 gW1, gb1 = D1.T @ X, D1.sum(0)
 ```
 
@@ -349,10 +351,10 @@ Hacer en el pizarrón el caso de un solo peso de la primera capa con la regla de
 Sin saber nada de la red:
 
 $$
-\frac{\partial E}{\partial \theta} \approx \frac{E(\theta + h) - E(\theta - h)}{2h}
+\frac{\partial L}{\partial \theta} \approx \frac{L(\theta + h) - L(\theta - h)}{2h}
 $$
 
-con error de truncamiento $O(h^2)$; la diferencia hacia adelante tiene $O(h)$.
+para un parámetro $\theta$ de la pérdida $L$ y un paso pequeño $h$, con error de truncamiento $O(h^2)$; la diferencia hacia adelante tiene $O(h)$.
 
 <v-click>
 
@@ -376,7 +378,7 @@ Regla práctica: $\lesssim 10^{-7}$ está bien; $\gtrsim 10^{-2}$ es un error en
 
 <div class="pequeno tenue">
 
-Derivada respecto de un solo peso. Mejor error: $5 \times 10^{-8}$ hacia adelante; $6 \times 10^{-11}$ centrada.
+Derivada respecto de un solo peso; $\varepsilon \approx 10^{-16}$ es la precisión de la máquina. Mejor error: $5 \times 10^{-8}$ hacia adelante; $6 \times 10^{-11}$ centrada.
 
 </div>
 </div>
@@ -413,7 +415,7 @@ Red 64-64-10 para los dígitos: **4,810** parámetros.
 
 <v-click>
 
-**Modo inverso.** Para $E: \R^P \to \R$ (muchos parámetros, una pérdida), el gradiente completo cuesta un múltiplo pequeño y **constante** de evaluar $E$, sin importar $P$.
+**Modo inverso.** Para la pérdida $L: \R^P \to \R$ ($P$ parámetros, una sola salida), el gradiente completo cuesta un múltiplo pequeño y **constante** de evaluar $L$, sin importar $P$.
 
 </v-click>
 
@@ -443,12 +445,12 @@ En la libreta: la retropropagación tarda menos de un milisegundo; las diferenci
 <div>
 
 ```python
-pt = {k: torch.tensor(M, dtype=torch.float64, requires_grad=True)
-      for k, M in p0.items()}          # los mismos pesos que en NumPy
+pt = {k: torch.tensor(v, dtype=torch.float64, requires_grad=True)
+      for k, v in p0.items()}          # los mismos pesos que en NumPy
 logits = torch.tanh(X @ pt["W1"].T + pt["b1"]) @ pt["W2"].T + pt["b2"]
 perdida = F.cross_entropy(logits, y)  # softmax + entropía cruzada
 perdida.backward()                    # retropropagación
-pt["W1"].grad                         # ∂E/∂W(1)
+pt["W1"].grad                         # ∂L/∂W[1]
 ```
 
 <v-click>
@@ -485,12 +487,12 @@ Diferencia máxima con nuestro `atras`: $4 \times 10^{-17}$, el último dígito 
 <LunasFrontera>
 <div class="pequeno" style="margin-top: 14px">
 
-Red 2-16-2 con $\tanh$, minilotes de 20, $\eta = 0.3$. Con pesos chicos, $\tanh z \approx z$: en la época 0 la red es casi lineal.
+Red 2-16-2 con $\tanh$, minilotes de 20, tasa de aprendizaje $\eta = 0.3$. Con pesos chicos, $\tanh z \approx z$: en la época 0 la red es casi lineal.
 
 </div>
 <div class="pequeno" v-click>
 
-Exactitud en 2,000 puntos nuevos: **0.943**, contra 0.857 de la regresión logística. Los picos de la curva son ruido de los minilotes (siguiente clase).
+Exactitud en 2,000 puntos nuevos: **0.943**, contra 0.857 de la regresión logística. Los picos de la curva son ruido de los minilotes.
 
 </div>
 </LunasFrontera>
@@ -501,12 +503,12 @@ Recorrer las épocas con los botones: 0, 5, 20, 100, 300. Hacia la época 20 la 
 
 ---
 
-# Los dígitos de la Unidad 4
+# Los dígitos escritos a mano
 
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-1,347 dígitos de entrenamiento y 450 de prueba (la misma partición). Red 64-64-10 con ReLU, minilotes de 32, $\eta = 0.1$, 40 épocas.
+1,347 dígitos de 8 × 8 de entrenamiento y 450 de prueba. Red 64-64-10 con ReLU, minilotes de 32, $\eta = 0.1$, 40 épocas. En la logística, $C = 1/\lambda$ es el inverso de la regularización.
 
 | modelo | exactitud | errores |
 |---|---|---|
@@ -518,7 +520,7 @@ Recorrer las épocas con los botones: 0, 5, 20, 100, 300. Hacia la época 20 la 
 
 <div class="pequeno tenue">
 
-Con 450 imágenes, cada error vale 0.2 puntos: **no hay una ventaja clara**. Los dígitos de 8 × 8 son casi lineales; las redes se lucen con imágenes más grandes (próximas clases).
+Con 450 imágenes, cada error vale 0.2 puntos: **no hay una ventaja clara**. Los dígitos de 8 × 8 son casi lineales; las redes se lucen con imágenes más grandes.
 
 </div>
 
@@ -537,7 +539,7 @@ Los 12 errores de la red de PyTorch: dígito real → predicho.
 </div>
 
 <!--
-Las dos redes no son idénticas: PyTorch inicializa con otra distribución (uniforme, parecida a Xavier), baraja con otro generador y trabaja en precisión simple. Con otra semilla cambian uno o dos errores. El SVM gaussiano de la Unidad 4 llegó a 99.3 %: la red pequeña no lo supera aquí.
+Las dos redes no son idénticas: PyTorch inicializa con otra distribución (uniforme, parecida a Xavier), baraja con otro generador y trabaja en precisión simple. Con otra semilla cambian uno o dos errores. Un SVM con kernel gaussiano llega a 99.3 % en estos datos: la red pequeña no lo supera aquí.
 -->
 
 ---
@@ -556,7 +558,7 @@ Que la señal y el gradiente sobrevivan a muchas capas.
 <div class="cols" style="grid-template-columns: 5fr 6fr; gap: 36px">
 <div>
 
-Con $z = \sum_{j=1}^{n_{\text{in}}} w_j a_j$, pesos independientes de media cero:
+Una neurona con $n_{\text{in}}$ entradas $a_j$ y pesos $w_j$ independientes de media cero, $z = \sum_{j=1}^{n_{\text{in}}} w_j a_j$:
 
 $$
 \Var(z) = n_{\text{in}} \Var(w)\, \E[a^2] .
@@ -570,7 +572,7 @@ Si $n_{\text{in}}\Var(w) \ne 1$ (en la escala que toca), la señal **crece o se 
 
 <v-clicks>
 
-- $\tanh$: $\E[a^2] \approx \Var(z)$; promediando adelante y atrás, **Xavier**: $\Var(w) = 2/(n_{\text{in}} + n_{\text{out}})$.
+- $\tanh$: $\E[a^2] \approx \Var(z)$; promediando adelante y atrás ($n_{\text{out}}$: salidas de la capa), **Xavier**: $\Var(w) = 2/(n_{\text{in}} + n_{\text{out}})$.
 - ReLU anula la mitad: $\E[a^2] = \tfrac12\Var(z)$, así que **He**: $\Var(w) = 2/n_{\text{in}}$.
 
 </v-clicks>
@@ -598,7 +600,7 @@ Con He la desviación estándar se mantiene en 0.72 hasta la capa 20. Con Xavier
 <div class="cols" style="grid-template-columns: 5fr 6fr; gap: 36px">
 <div>
 
-Hacia atrás, cada capa multiplica por $W^{(\ell)\top}$ y por $\sigma'(\mathbf z^{(\ell)})$. Con la sigmoide,
+Hacia atrás, cada capa $\ell$ multiplica por $\vW^{[\ell]\top}$ y por la derivada de la activación, $g'(\vz^{[\ell]})$. Con la sigmoide $\sigma(z) = 1/(1 + e^{-z})$,
 
 $$
 \sigma'(z) = \sigma(z)\big(1 - \sigma(z)\big) \le \tfrac14 .
@@ -614,7 +616,7 @@ Red de 10 capas de 64: con sigmoides, la capa 1 recibe un gradiente **455,000 ve
 
 <div class="nota">
 
-Remedios del resto de la unidad: ReLU, buena inicialización, normalización por lotes, conexiones residuales y, en las redes recurrentes, las compuertas de la LSTM.
+Remedios: ReLU, buena inicialización, normalización por lotes, conexiones residuales y, en las redes recurrentes, las compuertas de la LSTM.
 
 </div>
 
@@ -641,7 +643,7 @@ Norma del gradiente por capa en la inicialización, con 256 dígitos.
 
 1. Una capa oculta **aprende una representación** en la que el problema es lineal; sin no linealidad, todo se colapsa a un modelo lineal.
 2. Una capa ancha aproxima cualquier función continua, pero el teorema no dice cuántas neuronas, cómo encontrarlas ni si generalizan.
-3. Retropropagación: el error $\boldsymbol\delta^{(\ell)}$ viaja hacia atrás por $W\T$ y el gradiente de cada capa es $\boldsymbol\delta^{(\ell)}\mathbf a^{(\ell-1)\top}$; cuesta lo que unas pocas pasadas hacia adelante.
+3. Retropropagación: el error $\boldsymbol\delta^{[\ell]} = \partial \ell / \partial \vz^{[\ell]}$ viaja hacia atrás por $\vW^{[\ell]\top}$; el gradiente de los pesos $\vW^{[\ell]}$ es $\boldsymbol\delta^{[\ell]}\va^{[\ell-1]\top}$. Cuesta unas pocas pasadas hacia adelante.
 4. Todo gradiente hecho a mano se **verifica** con diferencias centradas.
 5. La escala inicial de los pesos decide si la señal sobrevive: Xavier para $\tanh$, He para ReLU.
 

@@ -7,12 +7,12 @@ const H = (datos as any).hiper
 <template>
   <div class="oh">
     <div>
-      <div class="oh__t">Atributos por división, m <span>(hojas de un dato)</span></div>
+      <div class="oh__t">Atributos sorteados por división, n<sub>s</sub> <span>(hojas de un dato)</span></div>
       <LineasLog :x="H.m" :series="{ ' ': H.auc_m }" :y-log="false" :y-dominio="[0.89, 0.92]" :y-ticks="[0.89, 0.9, 0.91, 0.92]" :x-dominio="[1, 12]" :x-ticks="H.m"
-                 :formato-y="(v: number) => v.toFixed(2)" marcadores x-titulo="m   (m = 12: bagging)" y-titulo="AUC fuera de la bolsa" :ancho="540" :alto="360" :derecha="20" />
+                 :formato-y="(v: number) => v.toFixed(2)" marcadores x-titulo="nₛ   (nₛ = 12: bagging)" y-titulo="AUC fuera de la bolsa" :ancho="540" :alto="360" :derecha="20" />
     </div>
     <div>
-      <div class="oh__t">Tamaño mínimo de hoja <span>(m = {{ H.m_mejor }})</span></div>
+      <div class="oh__t">Tamaño mínimo de hoja <span>(n<sub>s</sub> = {{ H.m_mejor }})</span></div>
       <LineasLog :x="H.hojas" :series="{ ' ': H.auc_hoja }" x-log :y-log="false" :y-dominio="[0.89, 0.92]" :y-ticks="[0.89, 0.9, 0.91, 0.92]" :x-dominio="[1, 50]" :x-ticks="H.hojas"
                  :formato-y="(v: number) => v.toFixed(2)" marcadores x-titulo="datos por hoja (como mínimo)" y-titulo="AUC fuera de la bolsa" :ancho="540" :alto="360" :derecha="20" />
     </div>

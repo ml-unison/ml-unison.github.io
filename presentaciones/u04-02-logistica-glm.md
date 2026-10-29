@@ -70,7 +70,7 @@ Con **todos** los vuelos, el patrón aparece: los 4 vuelos por debajo de 65 °F 
 
 <div class="nota">
 
-Quitar los casos «sin evento» es un **sesgo de selección**. Es la misma lección de la Unidad 1: los datos que no vemos también son datos.
+Quitar los casos «sin evento» es un **sesgo de selección**: los datos que no vemos también son datos.
 
 </div>
 
@@ -85,10 +85,10 @@ Quitar los casos «sin evento» es un **sesgo de selección**. Es la misma lecci
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-Queremos $P(y = 1 \mid \vx)$. Una recta no sirve: se sale de $[0, 1]$. Modelamos los **log-momios**:
+Queremos $\Prob(y = 1 \mid \vx)$, la probabilidad de la clase 1 dados los atributos $\vx$. Una recta no sirve: se sale de $[0, 1]$. Modelamos los **log-momios** como lineales, con pesos $\vw$ y sesgo $b$:
 
 $$
-\ln \frac{P(y = 1 \mid \vx)}{1 - P(y = 1 \mid \vx)} = \vw\T \vx
+\ln \frac{\Prob(y = 1 \mid \vx)}{1 - \Prob(y = 1 \mid \vx)} = \vw\T \vx + b
 $$
 
 <v-click>
@@ -96,8 +96,10 @@ $$
 y despejando,
 
 $$
-P(y = 1 \mid \vx) = \theta(\vw\T\vx), \qquad \theta(s) = \frac{1}{1 + e^{-s}} .
+\Prob(y = 1 \mid \vx) = \sigma(\vw\T\vx + b), \qquad \sigma(z) = \frac{1}{1 + e^{-z}} ,
 $$
+
+con $\sigma$ la **función logística**.
 
 </v-click>
 </div>
@@ -109,7 +111,7 @@ $$
 
 <div class="pequeno">
 
-**Interpretación:** subir $x_j$ en una unidad multiplica los momios por $e^{w_j}$, la **razón de momios**.
+**Interpretación:** subir el atributo $x_j$ en una unidad multiplica los momios por $e^{w_j}$, con $w_j$ su peso: la **razón de momios**.
 
 </div>
 
@@ -124,15 +126,15 @@ $$
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-Con $y_n \in \{0, 1\}$ y $p_n = \theta(\vw\T \vx_n)$, la log-verosimilitud negativa promedio es la **entropía cruzada**:
+Con $M$ datos, $y^{(i)} \in \{0, 1\}$ y $p^{(i)} = \sigma(\vw\T \vx^{(i)} + b)$ la probabilidad predicha, la log-verosimilitud negativa promedio es la **entropía cruzada**:
 
 $$
-\Ein(\vw) = -\frac1N \sum_{n} \big[ y_n \ln p_n + (1 - y_n) \ln(1 - p_n) \big] .
+L(\vw, b) = -\frac1M \sum_{i=1}^{M} \big[ y^{(i)} \ln p^{(i)} + (1 - y^{(i)}) \ln(1 - p^{(i)}) \big] .
 $$
 
 <div class="pequeno tenue">
 
-Con $y_n \in \{-1, +1\}$, como en *Learning From Data*, es lo mismo: $\Ein = \frac1N \sum_n \ln\big(1 + e^{-y_n \vw\T \vx_n}\big)$.
+Con $y^{(i)} \in \{-1, +1\}$, como en *Learning From Data*, es lo mismo: $L = \frac1M \sum_i \ln\big(1 + e^{-y^{(i)} (\vw\T \vx^{(i)} + b)}\big)$.
 
 </div>
 </div>
@@ -140,23 +142,19 @@ Con $y_n \in \{-1, +1\}$, como en *Learning From Data*, es lo mismo: $\Ein = \fr
 
 <v-click>
 
-Como $\theta'(s) = \theta(s)(1 - \theta(s))$:
+Como $\sigma'(z) = \sigma(z)(1 - \sigma(z))$, respecto a $\tilde\vw = (b, \vw)$:
 
 $$
-\nabla \Ein = \frac1N X\T(\mathbf{p} - \mathbf{y}),
+\nabla L = \tfrac1M \tilde\vX\T(\mathbf{p} - \vy), \quad \nabla^2 L = \tfrac1M \tilde\vX\T \mathbf{S} \tilde\vX ,
 $$
 
-$$
-\nabla^2 \Ein = \frac1N X\T S X ,
-$$
-
-con $S = \operatorname{diag}\big(p_n(1 - p_n)\big)$.
+con $\tilde\vX = [\,\mathbf{1} \;\; \vX\,]$ (datos con una columna de unos), $\mathbf{p} = (p^{(i)})$ y $\mathbf{S}$ la matriz diagonal con entradas $p^{(i)}(1 - p^{(i)})$.
 
 </v-click>
 
 <v-click>
 
-$S$ tiene diagonal positiva, así que la hessiana es semidefinida positiva: **convexa**, sin mínimos locales. Pero $\nabla \Ein = 0$ no tiene solución en forma cerrada.
+$\mathbf{S}$ tiene diagonal positiva, así que la hessiana es semidefinida positiva: **convexa**, sin mínimos locales. Pero $\nabla L = \mathbf{0}$ no tiene solución en forma cerrada.
 
 </v-click>
 </div>
@@ -170,26 +168,28 @@ $S$ tiene diagonal positiva, así que la hessiana es semidefinida positiva: **co
 <div>
 
 $$
-\vw_{t+1} = \vw_t - \big(X\T S X\big)^{-1} X\T(\mathbf{p} - \mathbf{y})
+\tilde\vw_{t+1} = \tilde\vw_t - \big(\tilde\vX\T \mathbf{S} \tilde\vX\big)^{-1} \tilde\vX\T(\mathbf{p} - \vy)
 $$
+
+con $\tilde\vw = (b, \vw)$, $\tilde\vX = [\,\mathbf{1} \;\; \vX\,]$, y las probabilidades $\mathbf{p}$ y la matriz $\mathbf{S} = \operatorname{diag}\big(p^{(i)}(1 - p^{(i)})\big)$ evaluadas en la iteración $t$.
 
 <v-click>
 
 Reacomodando,
 
 $$
-\vw_{t+1} = \big(X\T S X\big)^{-1} X\T S\, \mathbf{z}, \quad \mathbf{z} = X\vw_t + S^{-1}(\mathbf{y} - \mathbf{p}) :
+\tilde\vw_{t+1} = \big(\tilde\vX\T \mathbf{S} \tilde\vX\big)^{-1} \tilde\vX\T \mathbf{S}\, \vz, \quad \vz = \tilde\vX\tilde\vw_t + \mathbf{S}^{-1}(\vy - \mathbf{p}) :
 $$
 
-mínimos cuadrados **ponderados** con pesos $S$ y respuesta de trabajo $\mathbf{z}$. Por eso se llama IRLS.
+mínimos cuadrados **ponderados** con pesos $\mathbf{S}$ y respuesta de trabajo $\vz$. Por eso se llama IRLS.
 
 </v-click>
 </div>
 <div v-click>
 
-Challenger, $x$ = temperatura en °F, desde $\vw = 0$:
+Challenger, un solo atributo $x$ = temperatura en °F, desde $b = w = 0$:
 
-| iteración | $w_0$ | $w_1$ | log-verosimilitud |
+| iteración | $b$ | $w$ | log-verosimilitud |
 |---|---|---|---|
 | 0 | 0 | 0 | −15.94 |
 | 1 | 9.62 | −0.150 | −10.59 |
@@ -221,7 +221,7 @@ $e^{0.232} = 1.26$: **cada grado Fahrenheit menos multiplica los momios de daño
 
 <v-click>
 
-A 31 °F el modelo da $P = 0.9996$. La banda contiene el 90 % central de 1,000 réplicas bootstrap; a 31 °F va de 0.96 a 1.
+A 31 °F el modelo da $\Prob(\text{daño}) = 0.9996$. La banda contiene el 90 % central de 1,000 réplicas bootstrap; a 31 °F va de 0.96 a 1.
 
 </v-click>
 
@@ -244,10 +244,10 @@ A 31 °F el modelo da $P = 0.9996$. La banda contiene el 90 % central de 1,000 r
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 40px">
 <div>
 
-Si existe $\vw$ con $\vw\T\vx_n > 0$ para todos los $y_n = 1$ y $< 0$ para los $y_n = 0$, entonces $c\vw$ con $c \to \infty$ hace $p_n \to y_n$ y
+Si existen $\vw, b$ con $\vw\T\vx^{(i)} + b > 0$ para todos los $y^{(i)} = 1$ y $< 0$ para los $y^{(i)} = 0$, entonces $(c\vw, cb)$ con $c \to \infty$ hace que cada probabilidad predicha $p^{(i)} \to y^{(i)}$ y la entropía cruzada
 
 $$
-\Ein(c\vw) \to 0 \quad \text{sin alcanzarlo.}
+L(c\vw, cb) \to 0 \quad \text{sin alcanzarlo.}
 $$
 
 <v-click>
@@ -258,7 +258,7 @@ El mínimo no existe: el algoritmo hace crecer $\norm{\vw}$ para siempre y la cu
 
 <v-click>
 
-**Remedio:** regularizar, $\Ein(\vw) + \lambda\norm{\vw}^2$, que es lo que scikit-learn hace por omisión (`C = 1`).
+**Remedio:** regularizar, $L(\vw, b) + \lambda\norm{\vw}^2$ con $\lambda > 0$, que es lo que scikit-learn hace por omisión (`C = 1`, el inverso de la fuerza de la regularización).
 
 </v-click>
 </div>
@@ -281,23 +281,23 @@ Challenger sin los tres vuelos con daño a 70 y 75 °F: los 20 restantes se sepa
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-Un vector de pesos por clase, $\vw_1, \dots, \vw_K$:
+Con $K$ clases, unos pesos y un sesgo por clase, $(\vw_k, b_k)$ para $k = 1, \dots, K$:
 
 $$
-P(y = k \mid \vx) = \frac{e^{\vw_k\T \vx}}{\sum_{j=1}^{K} e^{\vw_j\T \vx}} .
+\Prob(y = k \mid \vx) = \frac{e^{\vw_k\T \vx + b_k}}{\sum_{k'=1}^{K} e^{\vw_{k'}\T \vx + b_{k'}}} .
 $$
 
 <v-click>
 
-Con $K = 2$ se recupera la logística con $\vw = \vw_1 - \vw_2$. La pérdida sigue siendo la entropía cruzada, ahora $-\frac1N\sum_n \ln P(y_n \mid \vx_n)$, y sigue siendo convexa.
+Con $K = 2$ se recupera la logística con $\vw = \vw_1 - \vw_2$ y $b = b_1 - b_2$. La pérdida sigue siendo la entropía cruzada, ahora $-\frac1M\sum_{i=1}^{M} \ln \Prob(y^{(i)} \mid \vx^{(i)})$, y sigue siendo convexa.
 
 </v-click>
 </div>
 <div v-click>
 
-- Solo importan las **diferencias** $\vw_k - \vw_j$: los pesos no son identificables sin regularización o sin fijar una clase de referencia.
+- Solo importan las **diferencias** $\vw_k - \vw_{k'}$ entre clases: los pesos no son identificables sin regularización o sin fijar una clase de referencia.
 - Las fronteras entre cada par de clases son **hiperplanos**.
-- Es la última capa de casi todas las redes neuronales clasificadoras (Unidad 6).
+- Es la última capa de casi todas las redes neuronales clasificadoras.
 
 </div>
 </div>
@@ -318,32 +318,34 @@ Una sola receta para medias, probabilidades y conteos.
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-La **familia exponencial** (con dispersión fija):
+La **familia exponencial** (con dispersión fija), con parámetro natural $\theta$:
 
 $$
-p(y \mid \eta) = h(y) \exp\big(\eta\, y - A(\eta)\big), \qquad \E[y] = A'(\eta) .
+p(y \mid \theta) = c(y) \exp\big(\theta\, y - A(\theta)\big), \qquad \E[y] = A'(\theta) ,
 $$
+
+donde $A$ normaliza la distribución y $c(y)$ no depende de $\theta$.
 
 <v-click>
 
-Un **GLM** hace lineal el parámetro natural, $\eta = \vw\T\vx$; la **liga** $g$ conecta la media: $g(\mu) = \vw\T\vx$.
+Un **GLM** hace lineal el parámetro natural, $\theta = \vw\T\vx + b,$ y la **liga** $g$ conecta la media $\mu = \E[y]$ con la misma parte lineal: $g(\mu) = \vw\T\vx + b$ también.
 
 </v-click>
 </div>
 <div v-click>
 
-| respuesta | distribución | $A(\eta)$ | liga canónica |
+| respuesta | distribución | $A(\theta)$ | liga canónica |
 |---|---|---|---|
-| real | normal | $\eta^2/2$ | identidad |
-| 0/1 | Bernoulli | $\ln(1 + e^\eta)$ | logit |
-| conteo | Poisson | $e^\eta$ | logaritmo |
+| real | normal | $\theta^2/2$ | identidad |
+| 0/1 | Bernoulli | $\ln(1 + e^\theta)$ | logit |
+| conteo | Poisson | $e^\theta$ | logaritmo |
 
 </div>
 </div>
 
 <div v-click class="nota" style="margin-top: 20px">
 
-**Un solo gradiente.** Con la liga canónica, $\ell(\vw) = \sum_n \big[y_n \vw\T\vx_n - A(\vw\T\vx_n)\big] + \text{cte}$, así que $\nabla \ell = X\T(\mathbf{y} - \boldsymbol\mu)$ y $\nabla^2 \ell = -X\T \operatorname{diag}\big(A''(\eta_n)\big) X$. Mínimos cuadrados y logística son casos particulares, y Newton es IRLS en todos.
+**Un solo gradiente.** Con la liga canónica, $\theta^{(i)} = \vw\T\vx^{(i)} + b$ y la log-verosimilitud es $\ln \mathcal{L} = \sum_i \big[y^{(i)} \theta^{(i)} - A(\theta^{(i)})\big] + \text{cte}$. Respecto a $\tilde\vw = (b, \vw)$, con $\tilde\vX = [\,\mathbf{1} \;\; \vX\,]$ y $\boldsymbol\mu$ el vector de medias $\mu^{(i)} = A'(\theta^{(i)})$: $\nabla \ln \mathcal{L} = \tilde\vX\T(\vy - \boldsymbol\mu)$ y $\nabla^2 \ln \mathcal{L} = -\tilde\vX\T \operatorname{diag}\big(A''(\theta^{(i)})\big) \tilde\vX$. Mínimos cuadrados y logística son casos particulares, y Newton es IRLS en todos.
 
 </div>
 
@@ -355,14 +357,16 @@ Un **GLM** hace lineal el parámetro natural, $\eta = \vw\T\vx$; la **liga** $g$
 <div>
 
 $$
-y \mid \vx \sim \operatorname{Poisson}(\mu), \qquad \ln \mu = \vw\T \vx .
+y \mid \vx \sim \operatorname{Poisson}(\mu), \qquad \ln \mu = \vw\T \vx + b ,
 $$
+
+con $y$ las rentas en una hora y $\mu$ su media dados los atributos $\vx$.
 
 <v-clicks>
 
-- $\mu = e^{\vw\T\vx} > 0$ siempre: **no hay predicciones negativas**.
+- $\mu = e^{\vw\T\vx + b} > 0$ siempre: **no hay predicciones negativas**.
 - $\Var[y] = \mu$: la varianza crece con la media, como el embudo de los residuos.
-- Los efectos son **multiplicativos**: la lluvia no quita 72 bicicletas a toda hora; multiplica por $e^{w} = 0.61$, un 39 % menos, a las 3 de la mañana y a las 8.
+- Los efectos son **multiplicativos**: la lluvia no quita 72 bicicletas a toda hora; multiplica por $e^{w_j} = 0.61$ ($w_j$: el peso de la lluvia), un 39 % menos, a las 3 de la mañana y a las 8.
 
 </v-clicks>
 </div>
@@ -418,10 +422,10 @@ Elegir la familia es elegir **qué ruido esperamos**. La pérdida cuadrática su
 <div class="cols cols-6-4" style="flex: 1">
 <div style="font-size: 25px; line-height: 1.4">
 
-1. La logística modela los **log-momios** como lineales; $e^{w_j}$ es una razón de momios.
+1. La logística modela los **log-momios** como lineales; $e^{w_j}$, con $w_j$ el peso del atributo $j$, es una razón de momios.
 2. Entropía cruzada convexa, sin forma cerrada: **Newton = IRLS**.
 3. Con datos separables, sin regularizar, el estimador no existe.
-4. GLM: familia exponencial + liga; gradiente $X\T(\mathbf{y} - \boldsymbol\mu)$ para todos.
+4. GLM: familia exponencial + liga; el mismo gradiente para todos, datos por residuos $\vy - \boldsymbol\mu$ (salidas menos medias predichas).
 5. Los ceros, la extrapolación y la familia también son decisiones con consecuencias.
 
 </div>

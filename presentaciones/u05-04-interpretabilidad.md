@@ -80,7 +80,7 @@ El modelo no está "mal": describe correctamente los datos. El problema es que l
 
 <v-clicks>
 
-- **Depurar:** encontrar el asma, las fugas de información (Unidad 1) o un atributo mal codificado.
+- **Depurar:** encontrar el asma, las fugas de información (atributos que no se tendrán al predecir) o un atributo mal codificado.
 - **Confianza:** un médico o un valuador no usa lo que no entiende.
 - **Ciencia:** descubrir qué patrones hay en los datos.
 - **Regulación:** en crédito, por ejemplo, hay que darle al solicitante rechazado las razones principales.
@@ -108,7 +108,7 @@ Todo lo que veremos hoy es post hoc: funciona para cualquier modelo, pero hay qu
 <div class="cols cols-6-4 cols-centro" style="flex: 1">
 <div>
 
-- Las 1,456 ventas de casas de Ames, Iowa (2006–2010) de las unidades 1 y 3; 1,164 para entrenar y 292 de prueba.
+- 1,456 ventas de casas de Ames, Iowa (2006–2010); 1,164 para entrenar y 292 de prueba.
 - 12 atributos legibles: área habitable, calidad general, año de construcción, sótano, cochera, terreno, baños, barrio…
 - Predecimos $\ln(\text{precio})$: el error se lee como error relativo y las explicaciones, como **factores**.
 - Modelo: *gradient boosting* (LightGBM, 600 árboles de 8 hojas). Rival: regresión ridge.
@@ -127,7 +127,7 @@ Todo lo que veremos hoy es post hoc: funciona para cualquier modelo, pero hay qu
 </div>
 
 <!--
-Usamos la misma partición de la Unidad 3. El barrio entra al boosting como el precio mediano de su barrio en entrenamiento (codificación por la respuesta, solo con entrenamiento). Las áreas, en metros cuadrados.
+La partición entrenamiento/prueba es fija (80/20). El barrio entra al boosting como el precio mediano de su barrio en entrenamiento (codificación por la respuesta, solo con entrenamiento). Las áreas, en metros cuadrados.
 -->
 
 ---
@@ -155,14 +155,22 @@ Importancia por permutación.
 
 # Importancia por permutación
 
-<div class="cols" style="grid-template-columns: 5fr 6fr; gap: 40px">
+<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 40px">
 <div>
 
 **Barajar** la columna $j$ en prueba rompe su relación con $y$ sin cambiar su distribución:
 
 $$
-I_j = \frac1K \sum_{k=1}^{K} L\big(\mathbf{y}, \hat f(X^{\pi_k}_{(j)})\big) - L\big(\mathbf{y}, \hat f(X)\big)
+I_j = \frac1R \sum_{r=1}^{R} L\big(\vy, \hat f(\vX^{\pi_r}_{(j)})\big) - L\big(\vy, \hat f(\vX)\big)
 $$
+
+<div class="pequeno tenue">
+
+$\vX$, $\vy$: datos de prueba; $\vX^{\pi_r}_{(j)}$: $\vX$ con la columna $j$ barajada (permutación $\pi_r$, $R$ barajadas); $L$: pérdida en prueba (aquí, la RECM).
+
+</div>
+
+<div class="pequeno">
 
 <v-clicks>
 
@@ -173,6 +181,8 @@ $$
 </v-clicks>
 
 </div>
+
+</div>
 <div>
 
 <PermutacionGemela />
@@ -181,7 +191,7 @@ $$
 </div>
 
 <!--
-K = 10 permutaciones por atributo. La pérdida L es la RECM en logaritmo del precio. La importancia de los baños casi nula no quiere decir que los baños no se relacionen con el precio: quiere decir que, dados los demás atributos (sobre todo el área), no agregan información.
+R = 10 permutaciones por atributo. La pérdida L es la RECM en logaritmo del precio. La importancia de los baños casi nula no quiere decir que los baños no se relacionen con el precio: quiere decir que, dados los demás atributos (sobre todo el área), no agregan información.
 -->
 
 ---
@@ -224,12 +234,12 @@ Dependencia parcial y curvas ICE.
 <div>
 
 $$
-\hat f_S(x_S) = \frac1N \sum_{i=1}^{N} \hat f\big(x_S, \vx_C^{(i)}\big)
+\hat f_S(x_S) = \frac1M \sum_{i=1}^{M} \hat f\big(x_S, \vx_C^{(i)}\big)
 $$
 
 <div class="pequeno">
 
-Friedman (2001). Estima $\E_{X_C}\big[\hat f(x_S, X_C)\big]$.
+$x_S$: el valor que fijamos del atributo de interés; $\vx_C^{(i)}$: los demás atributos de la casa $i$, entre las $M$ casas. Friedman (2001). Estima $\E_{X_C}\big[\hat f(x_S, X_C)\big]$, con $X_C$ los demás atributos al azar.
 
 <v-clicks>
 
@@ -304,10 +314,10 @@ Repartir una predicción entre los atributos.
 ¿Por qué **esta** casa vale lo que el modelo dice? Los atributos son **jugadores**; una **coalición** $S$ es lo que sabemos de la casa. Lo que «gana» una coalición:
 
 $$
-v(S) = \E\big[\hat f(\vx_S, X_C)\big] \approx \frac{1}{100} \sum_{i} \hat f\big(\vx_S, \vx_C^{(i)}\big)
+v(S) = \E\big[\hat f(\vx_S, X_C)\big] \approx \frac{1}{100} \sum_{i=1}^{100} \hat f\big(\vx_S, \vx_C^{(i)}\big)
 $$
 
-con los demás atributos tomados de 100 casas de **fondo**.
+con $\vx_S$ los valores de la casa en los atributos de $S$, y los demás atributos ($C$) tomados de 100 casas de **fondo**.
 
 <v-click>
 
@@ -362,17 +372,21 @@ Leer un renglón: la casa promedio vale 179.8; si primero sabemos el área, sube
 
 # El valor de Shapley (1953)
 
-<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
+<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 32px">
 <div>
 
-Cuatro propiedades de un reparto justo $\phi_1, \dots, \phi_d$:
+<div class="pequeno">
+
+Cuatro propiedades de un reparto justo $\phi_1, \dots, \phi_n$ entre los $n$ atributos, con $v(S)$ lo que gana la coalición $S$:
+
+</div>
 
 <v-clicks>
 
 1. **Eficiencia:** $\sum_j \phi_j = v(\text{todos}) - v(\varnothing)$.
-2. **Simetría:** si $j$ y $k$ aportan lo mismo a toda coalición, $\phi_j = \phi_k$.
+2. **Simetría:** si $j$ y $j'$ aportan igual a toda coalición, $\phi_j = \phi_{j'}$.
 3. **Jugador nulo:** si $j$ nunca aporta, $\phi_j = 0$.
-4. **Aditividad:** el reparto de $v + w$ es la suma de los repartos.
+4. **Aditividad:** el reparto del juego suma $v + v'$ es la suma de los repartos.
 
 </v-clicks>
 
@@ -384,21 +398,21 @@ Cuatro propiedades de un reparto justo $\phi_1, \dots, \phi_d$:
 Hay un **único** reparto que cumple las cuatro:
 
 $$
-\phi_j = \sum_{S \subseteq D \setminus \{j\}} \frac{|S|!\,(d - |S| - 1)!}{d!}\,\big[v(S \cup \{j\}) - v(S)\big]
+\phi_j = \sum_{S \subseteq \{1, \dots, n\} \setminus \{j\}} \frac{|S|!\,(n - |S| - 1)!}{n!}\,\big[v(S \cup \{j\}) - v(S)\big]
 $$
 
 </Caja>
 
 <div class="pequeno">
 
-El peso es la fracción de los $d!$ órdenes en los que, justo antes de $j$, llegaron exactamente los de $S$: la fórmula es el promedio sobre órdenes de la lámina anterior.
+El peso es la fracción de los $n!$ órdenes en los que, justo antes de $j$, llegaron exactamente los de $S$: la fórmula es el promedio sobre órdenes de la lámina anterior.
 
 </div>
 </div>
 </div>
 
 <!--
-D = {1, ..., d}. Shapley la propuso para repartir ganancias entre jugadores de un juego cooperativo; le dieron el Nobel de Economía en 2012 (junto con A. Roth), aunque por su trabajo en asignaciones estables. Idea de la unicidad: los juegos "de unanimidad" (ganan 1 si S contiene a un conjunto T) forman una base de todos los juegos; simetría, jugador nulo y eficiencia fijan el reparto en cada uno, y la aditividad lo extiende.
+Shapley la propuso para repartir ganancias entre jugadores de un juego cooperativo; le dieron el Nobel de Economía en 2012 (junto con A. Roth), aunque por su trabajo en asignaciones estables. Idea de la unicidad: los juegos "de unanimidad" (ganan 1 si S contiene a un conjunto T) forman una base de todos los juegos; simetría, jugador nulo y eficiencia fijan el reparto en cada uno, y la aditividad lo extiende.
 -->
 
 ---
@@ -408,21 +422,19 @@ D = {1, ..., d}. Shapley la propuso para repartir ganancias entre jugadores de u
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-Lundberg y Lee (2017): con el juego $v_{\vx}(S) = \E\big[\hat f(\vx_S, X_C)\big]$ (**intervencional**),
+Lundberg y Lee (2017): con el juego $v_{\vx}(S) = \E\big[\hat f(\vx_S, X_C)\big]$ (**intervencional**: los atributos $C$ fuera de $S$ se toman al azar del fondo),
 
 $$
-\hat f(\vx) = \phi_0 + \sum_{j=1}^{d} \phi_j(\vx), \qquad \phi_0 = \E\big[\hat f(X)\big].
+\hat f(\vx) = \phi_0 + \sum_{j=1}^{n} \phi_j(\vx), \qquad \phi_0 = \E\big[\hat f(X)\big],
 $$
+
+con $\phi_j(\vx)$ la parte de la predicción que le toca al atributo $j$ y $\phi_0$ la predicción promedio.
 
 <v-click>
 
 <Caja tipo="ejemplo" nombre="modelo lineal">
 
-Si $\hat f(\vx) = w_0 + \vw\T\vx$, la contribución de $j$ a **cualquier** coalición es $w_j\big(x_j - \E[X_j]\big)$, así que
-
-$$
-\phi_j = w_j\big(x_j - \E[X_j]\big).
-$$
+Si $\hat f(\vx) = \vw\T\vx + b$, con pesos $w_j$ y sesgo $b$, la contribución de $j$ es la misma en **cualquier** coalición, así que $\phi_j = w_j\big(x_j - \E[X_j]\big)$.
 
 </Caja>
 
@@ -466,7 +478,7 @@ Intervencional: fijamos los atributos de S y tomamos los demás de su distribuci
 
 <div class="pequeno tenue" style="margin-top: 4px">
 
-245 m², construida en 1880 y remodelada en 2003, en un barrio barato. Los $\phi_j$ se suman en logaritmo; en dólares, cada atributo **multiplica** el precio por $e^{\phi_j}$.
+245 m², construida en 1880 y remodelada en 2003, en un barrio barato. Los $\phi_j$ se suman en logaritmo ($\phi_j$: valor SHAP del atributo $j$); en dólares, cada atributo **multiplica** el precio por $e^{\phi_j}$.
 
 </div>
 
@@ -486,7 +498,7 @@ Leer de arriba abajo: la referencia es e^{phi_0}, el precio "promedio" (geométr
 </div>
 <div class="pequeno">
 
-Un punto por casa de prueba y atributo, ordenados por $\frac1N \sum_i |\phi_j(\vx_i)|$.
+Un punto por casa de prueba y atributo. Los atributos se ordenan por $\frac1M \sum_{i=1}^{M} \lvert\phi_j(\vx^{(i)})\rvert$, el tamaño medio de su valor SHAP en las $M$ casas.
 
 <v-clicks>
 
@@ -546,7 +558,7 @@ SHAP describe $\hat f$, no el mecanismo que produce los precios. Que la chimenea
 
 ### Muchos modelos, muchas explicaciones
 
-Con el área del vendedor, el modelo es igual de bueno y $\overline{|\phi|}$ del área baja de 0.085 a 0.062; la gemela se lleva 0.022. Sumadas, 0.085. Breiman lo llamó el **efecto Rashomon**.
+Con el área del vendedor, el modelo es igual de bueno y el promedio de $\lvert\phi_j\rvert$ del área baja de 0.085 a 0.062; la gemela se lleva 0.022. Sumadas, 0.085. Breiman lo llamó el **efecto Rashomon**.
 
 </div>
 <div v-click>

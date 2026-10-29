@@ -47,7 +47,7 @@ Dejar que el grupo conteste en voz alta. La idea que hay que sacar: la incertidu
 
 # Predecir la siguiente letra
 
-<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 56px">
+<div class="cols" style="grid-template-columns: minmax(0, 9fr) minmax(0, 11fr); gap: 40px">
 <div>
 
 **Datos:** el *Quijote* completo (Proyecto Gutenberg), **2,110,727 caracteres** de **92 símbolos**: letras, acentos, puntuación, rayas de diálogo, espacios y saltos de línea.
@@ -72,23 +72,21 @@ Partir letra por letra al azar dejaría a las vecinas de cada letra de validaci�
 
 <v-click>
 
-Por la regla de la cadena, **sin suponer nada**:
+Con $x_t$ la letra en la posición $t = 1, \dots, T$ (subíndice $t$, como en una serie de tiempo) y $x_{<t}$ las anteriores, por la regla de la cadena, **sin suponer nada**:
 
 $$
-P(x_1, \dots, x_T) = \prod_{t=1}^{T} P(x_t \mid x_{<t}) .
+\Prob(x_1, \dots, x_T) = \prod_{t=1}^{T} \Prob(x_t \mid x_{<t}) .
 $$
 
 </v-click>
 
 <v-click>
 
-Cada factor es un clasificador de 92 clases cuya entrada es el pasado. Se entrena con la **entropía cruzada**
+Cada factor es un clasificador de 92 clases cuya «etiqueta» es la letra que sigue (aprendizaje **autosupervisado**); se entrena minimizando la **entropía cruzada** promedio ($\vth$: los parámetros):
 
 $$
-H = -\frac1N \sum_{t} \ln P_\theta(x_t \mid x_{<t}) .
+L(\vth) = -\frac1T \sum_{t=1}^{T} \ln \Prob_{\vth}(x_t \mid x_{<t}) .
 $$
-
-La «etiqueta» es la letra que de verdad sigue: aprendizaje **autosupervisado**.
 
 </v-click>
 </div>
@@ -102,10 +100,10 @@ La «etiqueta» es la letra que de verdad sigue: aprendizaje **autosupervisado**
 <div>
 
 $$
-\text{perplejidad} = e^{H} = \Big(\prod_{t=1}^{N} \frac{1}{P_\theta(x_t \mid x_{<t})}\Big)^{1/N}
+\text{perplejidad} = e^{L} = \Big(\prod_{t=1}^{T} \frac{1}{\Prob_{\vth}(x_t \mid x_{<t})}\Big)^{1/T}
 $$
 
-Si el modelo duda **por igual entre $k$ opciones** (y la correcta está entre ellas), la perplejidad es exactamente $k$.
+con $L$ la entropía cruzada promedio en las $T$ letras. Si el modelo duda **por igual entre $m$ opciones** (y la correcta está entre ellas), la perplejidad es exactamente $m$.
 
 <v-clicks>
 
@@ -139,33 +137,32 @@ Las gráficas son del bigrama de Laplace. Después de una "q" hay prácticamente
 <div class="cols" style="grid-template-columns: 11fr 9fr; gap: 40px">
 <div>
 
+<div style="width: 90%; margin: 0 auto">
 <NgramasCurva v-if="$clicks < 1" :suave="false" />
 <NgramasCurva v-else />
-
 </div>
-<div>
 
-Contexto = las $n - 1$ letras anteriores, con el **suavizado de Laplace** de Bayes ingenuo (Unidad 4):
-
-$$
-\hat P(x \mid c) = \frac{N(c, x) + \alpha}{N(c) + \alpha V} .
-$$
-
-<v-click>
-
-Con $\alpha = 0.01$ el mejor es $n = 5$: **4.40**. Después, la validación empeora: la curva de sobreajuste de la Unidad 3.
-
-</v-click>
-
-<v-click>
-
-<div class="nota">
+<div v-click="2" class="nota">
 
 Con 7 letras de contexto, el **18 %** de los 7-gramas de validación nunca aparece en 1.9 millones de letras. «dijo don Quijo» y «dijo don Quij» son filas **sin relación**: hace falta compartir información entre contextos parecidos.
 
 </div>
+</div>
+<div>
 
-</v-click>
+Un $n$-grama usa como contexto $c$ las $n - 1$ letras anteriores, con el **suavizado de Laplace** de Bayes ingenuo:
+
+$$
+\hat \Prob(x \mid c) = \frac{\#(c, x) + \alpha}{\#(c) + \alpha V} ,
+$$
+
+con $\#(c, x)$ las veces que la letra $x$ sigue al contexto $c$, $\#(c)$ las veces que aparece $c$, $V = 92$ símbolos y $\alpha > 0$ el suavizado.
+
+<div v-click="1">
+
+Con $\alpha = 0.01$ el mejor es $n = 5$: **4.40**. Después, la validación empeora: la curva típica del sobreajuste.
+
+</div>
 </div>
 </div>
 
@@ -186,41 +183,53 @@ Un estado que resume todo lo leído.
 
 # Una red recurrente y su gradiente
 
-<div class="cols" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px">
+<div class="cols" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px">
 <div>
 
 $$
-\mathbf{h}_t = \tanh\big(W\mathbf{h}_{t-1} + U\mathbf{e}_{x_t} + \mathbf{b}\big)
+\mathbf{h}_t = \tanh\big(\vW\mathbf{h}_{t-1} + \mathbf U\mathbf{e}_{x_t} + \mathbf{b}_h\big)
 $$
 
-y se predice con $\operatorname{softmax}(A\mathbf{h}_t + \mathbf{c})$. Las mismas $W, U, A$ en **todas** las posiciones; $\mathbf{e}_{x_t}$ es el **encaje** aprendido de la letra.
+y se predice con $\operatorname{softmax}(\mathbf A\mathbf{h}_t + \mathbf{b}_y)$. $\mathbf h_t$ es el **estado** tras leer la letra $t$; $\mathbf{e}_{x_t}$, el **encaje** aprendido de la letra (un vector); $\vW, \mathbf U, \mathbf A$ son matrices de pesos y $\mathbf b_h, \mathbf b_y$ sesgos, los mismos en **todas** las posiciones.
 
-<v-click>
+</div>
+<div v-click>
 
 Retropropagación **en el tiempo**:
 
 $$
-\frac{\partial \mathbf{h}_T}{\partial \mathbf{h}_t} = \prod_{s=t+1}^{T} \operatorname{diag}\big(1 - \mathbf{h}_s^2\big)\, W
+\frac{\partial \mathbf{h}_T}{\partial \mathbf{h}_t} = \prod_{s=t+1}^{T} \operatorname{diag}\big(1 - \mathbf{h}_s^2\big)\, \vW
 $$
 
-Como $0 < 1 - h^2 \le 1$, cada factor tiene norma $\le \sigma_{\max}(W)$: la norma del producto queda acotada por $\sigma_{\max}(W)^{T-t}$, **exponencial** en la distancia.
+($1 - \mathbf h_s^2$ es la derivada de $\tanh$). Como $0 < 1 - h^2 \le 1$, cada factor tiene norma $\le \norm{\vW}_2$, el mayor valor singular de $\vW$: la norma del producto queda acotada por $\norm{\vW}_2^{\,T-t}$, **exponencial** en la distancia $T - t$.
 
-</v-click>
 </div>
-<div v-click>
+</div>
+
+---
+
+# El gradiente se desvanece o explota
+
+<div class="cols" style="grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 40px">
+<div>
 
 <JacobianasRNN />
 
-<div class="pequeno tenue">
-
-RNN de 256 unidades con $W = \rho Q$, $Q$ ortogonal. Con $\rho = 0.8$, $10^{-10}$ a 50 letras; con $\rho = 3$, $10^{13}$ a 100.
-
 </div>
+<div>
+
+RNN de 256 unidades con $\vW = \rho\,\mathbf O$: $\mathbf O$ ortogonal y $\rho$ su escala, que fija $\norm{\vW}_2 = \rho$.
+
+<v-click>
+
+Con $\rho = 0.8$, $\norm{\partial \mathbf h_T / \partial \mathbf h_t}$ cae a $10^{-10}$ a 50 letras; con $\rho = 3$, sube a $10^{13}$ a 100.
+
+</v-click>
 </div>
 </div>
 
 <!--
-Es el mismo fenómeno de las redes profundas de la clase 1, agravado porque se multiplica la misma matriz una y otra vez. Con ρ = 1 también se desvanece: las derivadas de tanh son menores que 1. La franja buena (aquí cerca de ρ = 1.5) es angosta y depende de cuánto se saturan las tanh, o sea, de los datos.
+Es el mismo desvanecimiento del gradiente de las redes profundas, agravado porque se multiplica la misma matriz una y otra vez. Con ρ = 1 también se desvanece: las derivadas de tanh son menores que 1. La franja buena (aquí cerca de ρ = 1.5) es angosta y depende de cuánto se saturan las tanh, o sea, de los datos.
 -->
 
 ---
@@ -230,17 +239,17 @@ Es el mismo fenómeno de las redes profundas de la clase 1, agravado porque se m
 <div class="cols" style="grid-template-columns: 9fr 11fr; gap: 40px">
 <div>
 
-Si la norma del gradiente completo pasa de un umbral $c$, se reescala:
+Si la norma del gradiente completo $\mathbf g$ (respecto a todos los parámetros) pasa de un umbral $\gamma$, se reescala:
 
 $$
-\mathbf{g} \leftarrow \mathbf{g} \cdot \min\Big(1, \frac{c}{\norm{\mathbf{g}}}\Big) .
+\mathbf{g} \leftarrow \mathbf{g} \cdot \min\Big(1, \frac{\gamma}{\norm{\mathbf{g}}}\Big) .
 $$
 
 La dirección se conserva; el paso no se dispara.
 
 <v-click>
 
-En nuestra LSTM, con $c = 1$: mediana **0.13**, y el recorte actuó en **2 de 1,200 pasos**, los dos al principio.
+En nuestra LSTM, con $\gamma = 1$: mediana **0.13**, y el recorte actuó en **2 de 1,200 pasos**, los dos al principio.
 
 </v-click>
 
@@ -268,7 +277,7 @@ Es un seguro barato. Contra el **desvanecimiento** no sirve reescalar: hay que c
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 40px">
 <div>
 
-Tres **compuertas** en $(0, 1)$, función de $\mathbf{h}_{t-1}$ y $\mathbf{e}_{x_t}$: olvido $\mathbf{f}_t$, entrada $\mathbf{i}_t$, salida $\mathbf{o}_t$; y un candidato $\tilde{\mathbf{c}}_t$.
+Una **celda** de memoria $\mathbf c_t$ junto al estado $\mathbf h_t$. Tres **compuertas** con valores en $(0, 1)$, función de $\mathbf{h}_{t-1}$ y $\mathbf{e}_{x_t}$: olvido $\mathbf{f}_t$, entrada $\mathbf{i}_t$, salida $\mathbf{o}_t$; y un candidato $\tilde{\mathbf{c}}_t$ ($\odot$: producto entrada por entrada).
 
 $$
 \mathbf{c}_t = \mathbf{f}_t \odot \mathbf{c}_{t-1} + \mathbf{i}_t \odot \tilde{\mathbf{c}}_t,
@@ -278,7 +287,7 @@ $$
 
 <v-click>
 
-Por el camino de la celda, $\dfrac{\partial \mathbf{c}_t}{\partial \mathbf{c}_{t-1}} = \operatorname{diag}(\mathbf{f}_t)$: **sin $W$ ni $\tanh$**. Si $f \approx 1$, el gradiente pasa casi intacto.
+Por el camino de la celda, $\dfrac{\partial \mathbf{c}_t}{\partial \mathbf{c}_{t-1}} = \operatorname{diag}(\mathbf{f}_t)$: **sin $\vW$ ni $\tanh$**. Si $\mathbf f_t \approx 1$, el gradiente pasa casi intacto.
 
 </v-click>
 
@@ -286,7 +295,7 @@ Por el camino de la celda, $\dfrac{\partial \mathbf{c}_t}{\partial \mathbf{c}_{t
 
 <div class="pequeno tenue">
 
-Hochreiter y Schmidhuber (1997). Es la misma idea que las conexiones residuales: $\partial(\mathbf{x} + F(\mathbf{x}))/\partial\mathbf{x} = I + \cdots$
+Hochreiter y Schmidhuber (1997). Es la misma idea que las conexiones residuales, donde cada bloque suma a su entrada $\va$ una corrección $F(\va)$: $\partial(\va + F(\va))/\partial\va = \mathbf I + \cdots$
 
 </div>
 
@@ -305,7 +314,7 @@ Influencia de cada letra en el gradiente de la última predicción. Entrenada: $
 </div>
 
 <!--
-Sin entrenar, la compuerta de olvido vale cerca de σ(0) = 0.5 y la LSTM se comporta como una RNN con ρ < 1: 10⁻¹² a 60 letras, y a 120 el número se vuelve cero en punto flotante. Entrenada, aprendió a abrir la autopista en algunas unidades. La LSTM (encaje de 64, estado de 256, 359,260 parámetros) se entrenó 1,200 pasos de 32 ventanas de 128 letras, con AdamW, calentamiento y coseno.
+Sin entrenar, la compuerta de olvido (una logística) vale cerca de σ(0) = 0.5 y la LSTM se comporta como una RNN con ρ < 1: 10⁻¹² a 60 letras, y a 120 el número se vuelve cero en punto flotante. Entrenada, aprendió a abrir la autopista en algunas unidades. La LSTM (encaje de 64, estado de 256, 359,260 parámetros) se entrenó 1,200 pasos de 32 ventanas de 128 letras, con AdamW, calentamiento y coseno.
 -->
 
 ---
@@ -332,9 +341,15 @@ $$
 \text{salida}_t = \sum_{s \le t} \alpha_{ts}\, \mathbf{v}_s .
 $$
 
+<div class="pequeno">
+
+$\mathbf q_t$: consulta de la posición $t$; $\mathbf k_s$, $\mathbf v_s$: clave y valor de la posición $s$, vectores de dimensión $d_k$; $\alpha_{ts}$: peso que $t$ le da a $s$ (suman 1).
+
+</div>
+
 <v-click>
 
-**Autoatención:** $\mathbf{q}, \mathbf{k}, \mathbf{v}$ salen de la misma secuencia, con proyecciones aprendidas $W_Q, W_K, W_V$.
+**Autoatención:** $\mathbf{q}, \mathbf{k}, \mathbf{v}$ salen de la misma secuencia, con proyecciones aprendidas $\vW_Q, \vW_K, \vW_V$.
 
 </v-click>
 </div>
@@ -361,17 +376,17 @@ La componente es interactiva: clic en cualquier letra para ver a dónde mira. El
 <div class="cols" style="grid-template-columns: 9fr 11fr; gap: 40px">
 <div>
 
-Si las componentes de $\mathbf{q}$ y $\mathbf{k}$ son independientes, con media 0 y varianza 1:
+Si las $d_k$ componentes $q_j, k_j$ de $\mathbf{q}$ y $\mathbf{k}$ son independientes, con media 0 y varianza 1:
 
 $$
-\Var(q_i k_i) = \E[q_i^2]\,\E[k_i^2] = 1
+\Var(q_j k_j) = \E[q_j^2]\,\E[k_j^2] = 1
 \;\Rightarrow\;
 \Var(\mathbf{q}\T\mathbf{k}) = d_k .
 $$
 
 <v-click>
 
-Con $d_k = 64$ los puntajes andan en $\pm 8$: el softmax se vuelve casi *one-hot*, y su jacobiana $\operatorname{diag}(\mathbf{p}) - \mathbf{p}\mathbf{p}\T$ se acerca a **cero**: no fluye el gradiente.
+Con $d_k = 64$ los puntajes andan en $\pm 8$: el softmax se vuelve casi *one-hot*, y su jacobiana $\operatorname{diag}(\mathbf{p}) - \mathbf{p}\mathbf{p}\T$, con $\mathbf p$ los pesos que produce, se acerca a **cero**: no fluye el gradiente.
 
 </v-click>
 
@@ -387,7 +402,7 @@ Dividir entre $\sqrt{d_k}$ devuelve los puntajes a varianza 1 **para cualquier d
 
 <div class="pequeno tenue">
 
-2,000 consultas, 64 claves cada una, $\mathbf{q}, \mathbf{k} \sim N(0, I)$. Con $d_k = 1024$ sin escalar, el 95 % del peso va a una sola clave y la jacobiana mide 0.065, contra 0.18 escalando.
+2,000 consultas, 64 claves cada una, $\mathbf{q}, \mathbf{k} \sim \mathcal N(\mathbf 0, \mathbf I)$ (normal estándar). Con $d_k = 1024$ sin escalar, el 95 % del peso va a una sola clave y la jacobiana mide 0.065, contra 0.18 escalando.
 
 </div>
 </div>
@@ -397,21 +412,27 @@ Dividir entre $\sqrt{d_k}$ devuelve los puntajes a varianza 1 **para cualquier d
 
 # El bloque *transformer*
 
-<div class="cols" style="grid-template-columns: minmax(0, 11fr) minmax(0, 9fr); gap: 40px">
+<div class="cols" style="grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 36px">
 <div>
 
 $$
-\operatorname{Atención}(Q, K, V) = \operatorname{softmax}\Big(\frac{QK\T}{\sqrt{d_k}} + M\Big) V
+\operatorname{Atención}(\mathbf Q, \mathbf K, \mathbf V) = \operatorname{softmax}\Big(\frac{\mathbf Q\mathbf K\T}{\sqrt{d_k}} + \mathbf C\Big) \mathbf V
 $$
 
-<div style="font-size: 22px">
+<div class="pequeno">
+
+$\mathbf Q, \mathbf K, \mathbf V$: consultas, claves y valores de las $T$ posiciones, una por renglón.
+
+</div>
+
+<div style="font-size: 21px">
 
 <v-clicks>
 
-- **Máscara causal**: $M_{ts} = -\infty$ si $s > t$ (y 0 si no); nadie ve el futuro; las $T$ predicciones de una ventana salen en una sola pasada, en paralelo.
-- **Varias cabezas**: $H$ atenciones con $d_k = d/H$, concatenadas.
+- **Máscara causal** $\mathbf C$: $C_{ts} = -\infty$ si $s > t$ (y 0 si no); nadie ve el futuro y las $T$ predicciones de la ventana salen en paralelo.
+- **Varias cabezas**: $H$ atenciones con $d_k = d/H$, concatenadas; $d$ es la dimensión de los encajes.
 - **Posición**: la atención no conoce el orden; se suma un encaje de posición (senos y cosenos en Vaswani et al., 2017; aprendido aquí).
-- **Bloque**: $\mathbf{x} \leftarrow \mathbf{x} + \operatorname{Atención}(\operatorname{NC}(\mathbf{x}))$, luego $\mathbf{x} \leftarrow \mathbf{x} + \operatorname{MLP}(\operatorname{NC}(\mathbf{x}))$, con normalización de capa NC.
+- **Bloque**: con $\mathbf R$ la ventana representada (un renglón por posición), $\mathbf{R} \leftarrow \mathbf{R} + \operatorname{Atención}(\operatorname{NC}(\mathbf{R}))$, luego $\mathbf{R} \leftarrow \mathbf{R} + \operatorname{MLP}(\operatorname{NC}(\mathbf{R}))$, con normalización de capa NC.
 - **Costo**: $O(T^2 d)$ la atención, $O(T d^2)$ el resto.
 
 </v-clicks>
@@ -420,13 +441,13 @@ $$
 </div>
 <div>
 
-<div style="width: 400px; margin: 0 auto">
+<div style="width: 380px; margin: 0 auto">
 <MapaAtencion :bloque="1" :cabeza="2" :botones="false" />
 </div>
 
 <div class="pequeno tenue">
 
-Pesos $\alpha_{ts}$ de una cabeza sobre las últimas 40 letras de una frase: triangular por la máscara.
+Pesos $\alpha_{ts}$ (renglón: consulta $t$; columna: letra atendida $s$) de una cabeza sobre las últimas 40 letras de una frase: triangular por la máscara.
 
 </div>
 </div>
@@ -443,7 +464,7 @@ Nuestro transformer: d = 128, 4 cabezas (d_k = 32), 2 bloques, contexto de 128 l
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 40px">
 <div class="pequeno">
 
-Peso promedio en 64 ventanas de validación (cabeza 1.2 = bloque 1, cabeza 2):
+Peso promedio en 64 ventanas de validación (cabeza 1.2 = bloque 1, cabeza 2); $t-1$, $t-2$, $t-3$: una, dos y tres letras antes de la posición $t$:
 
 | cabeza | $t-1$ | $t-2$ | $t-3$ | inicio de palabra | saltos de línea |
 |---|---|---|---|---|---|
@@ -467,6 +488,10 @@ Nadie programó estas reglas: salieron de minimizar la entropía cruzada.
 
 </div>
 </div>
+
+<style>
+:root .slidev-layout td { padding-top: 10px; padding-bottom: 10px; }
+</style>
 
 <!--
 Bloque.cabeza. Los saltos de línea son el 1.9 % de los caracteres, y la cabeza 2.4 les pone el 61 % de su peso: mide cuánto lleva la línea actual. El texto de Gutenberg tiene saltos de línea cada 70 a 75 caracteres, y por eso el texto generado también los tiene. Las cabezas 1.4, 2.1 y 2.3 (omitidas en la tabla) reparten el peso sin un patrón tan claro. Los botones cambian de cabeza.
@@ -542,7 +567,7 @@ Pero a 120 letras, en el *transformer* la influencia es $2.8 \times 10^{-3}$: **
 
 # ¿Dónde duda el modelo?
 
-Sorpresa $-\log_2 P(x_t \mid x_{<t})$ del *transformer* en cada letra de una frase de validación:
+Sorpresa $-\log_2 \Prob(x_t \mid x_{<t})$ del *transformer* en cada letra $x_t$ de una frase de validación, en bits:
 
 <SorpresaLetras />
 
@@ -565,10 +590,10 @@ Frase del capítulo LIX de la segunda parte (validación). Promedio en la frase:
 <div class="cols" style="grid-template-columns: 6fr 14fr; gap: 36px">
 <div>
 
-Se muestrea una letra de $P(x_t \mid x_{<t})$, se agrega al contexto y se repite. La **temperatura** $\tau$ divide los *logits*:
+Se muestrea una letra de $\Prob(x_t \mid x_{<t})$, se agrega al contexto y se repite. La **temperatura** $\tau$ divide los *logits* $z_k$, uno por cada símbolo $k$:
 
 $$
-p_i(\tau) = \frac{e^{z_i/\tau}}{\sum_j e^{z_j/\tau}} .
+p_k(\tau) = \frac{e^{z_k/\tau}}{\sum_{k'} e^{z_{k'}/\tau}} .
 $$
 
 <div class="pequeno">
@@ -621,13 +646,13 @@ Nuestro modelo escribe «vuesa merced» y abre diálogos con raya porque eso es 
 # Para llevarse
 
 <div class="cols cols-6-4" style="flex: 1">
-<div style="font-size: 25px; line-height: 1.4">
+<div style="font-size: 23px; line-height: 1.4">
 
-1. Un modelo de lenguaje factoriza $P(x_1, \dots, x_T) = \prod_t P(x_t \mid x_{<t})$; la **perplejidad** $e^H$ es el número efectivo de opciones.
+1. Un modelo de lenguaje factoriza $\Prob(x_1, \dots, x_T) = \prod_t \Prob(x_t \mid x_{<t})$; la **perplejidad** $e^L$, con $L$ la entropía cruzada promedio, es el número efectivo de opciones.
 2. Los $n$-gramas no comparten información entre contextos: con contextos largos, memorizan.
 3. En una RNN el gradiente es un **producto de jacobianas**: se desvanece o explota. La celda de la LSTM es una autopista; el recorte, un seguro.
-4. Atención: $\operatorname{softmax}(QK\T/\sqrt{d_k} + M)V$; el $\sqrt{d_k}$ mantiene la varianza 1.
-5. Camino corto entre posiciones y cálculo en paralelo, a cambio de $O(T^2)$.
+4. Atención: $\operatorname{softmax}(\mathbf Q\mathbf K\T/\sqrt{d_k} + \mathbf C)\mathbf V$, con consultas, claves, valores y máscara causal; el $\sqrt{d_k}$ mantiene la varianza 1.
+5. Camino corto entre posiciones y cálculo en paralelo, a cambio de un costo $O(T^2)$ en la longitud $T$ de la ventana.
 
 </div>
 <div>

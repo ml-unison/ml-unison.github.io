@@ -35,7 +35,7 @@ layout: pregunta
 
 <v-click>
 
-Lo **medimos**, con datos que el modelo no vio. Hoeffding vuelve a funcionar, ahora con $M = 1$.
+Lo **medimos**, con datos que el modelo no vio. La desigualdad de Hoeffding (el promedio de una muestra aleatoria se acerca a la media verdadera) vuelve a funcionar, porque evaluamos una sola hipótesis ya elegida.
 
 </v-click>
 
@@ -46,21 +46,23 @@ Lo **medimos**, con datos que el modelo no vio. Hoeffding vuelve a funcionar, ah
 <div class="cols" style="gap: 48px">
 <div>
 
-Apartamos $K$ de los $N$ datos. Entrenamos $g^-$ con los $N - K$ restantes y medimos
+Apartamos $M_{\text{val}}$ de los $M$ datos, el conjunto $\Dat_{\text{val}}$. Entrenamos $g^-$ con los $M - M_{\text{val}}$ restantes y medimos
 
 $$
-E_{\text{val}}(g^-) = \frac{1}{K} \sum_{k=1}^{K} e\big(g^-(\vx_k), y_k\big) .
+E_{\text{val}}(g^-) = \frac{1}{M_{\text{val}}} \sum_{\vx^{(i)} \in \Dat_{\text{val}}} \ell\big(y^{(i)}, g^-(\vx^{(i)})\big) ,
 $$
+
+con $\ell$ la pérdida en un dato.
 
 <v-click>
 
-Como $g^-$ no vio esos $K$ datos:
+Como $g^-$ no vio esos $M_{\text{val}}$ datos:
 
 $$
-\E\big[E_{\text{val}}(g^-)\big] = \Eout(g^-), \qquad \Var\big[E_{\text{val}}(g^-)\big] = \frac{\sigma^2}{K} .
+\E\big[E_{\text{val}}(g^-)\big] = \Eout(g^-), \qquad \Var\big[E_{\text{val}}(g^-)\big] = \frac{\sigma^2}{M_{\text{val}}} .
 $$
 
-Insesgado, y con desviación que baja como $1/\sqrt{K}$.
+Aquí $\Eout$ es el error fuera de la muestra y $\sigma^2$ la varianza de la pérdida en un dato. Insesgado, y con desviación que baja como $1/\sqrt{M_{\text{val}}}$.
 
 </v-click>
 </div>
@@ -68,7 +70,7 @@ Insesgado, y con desviación que baja como $1/\sqrt{K}$.
 
 ### Casas de Ames, error en log del precio
 
-| $K$ | desviación de $E_{\text{val}}$ | $\sigma/\sqrt{K}$ |
+| $M_{\text{val}}$ | desviación de $E_{\text{val}}$ | $\sigma/\sqrt{M_{\text{val}}}$ |
 |---|---|---|
 | 10 | 0.0116 | 0.0112 |
 | 100 | 0.0035 | 0.0035 |
@@ -84,28 +86,28 @@ Con $\Eout(g^-) = 0.0145$. La teoría y la simulación coinciden.
 
 ---
 
-# El dilema de $K$
+# El dilema de $M_{\text{val}}$
 
 <div class="cols" style="gap: 48px">
 <div>
 
 $$
-\Eout(g) \;\overset{\text{(pequeño } K)}{\approx}\; \Eout(g^-) \;\overset{\text{(grande } K)}{\approx}\; E_{\text{val}}(g^-)
+\Eout(g) \;\overset{\text{(pequeño } M_{\text{val}})}{\approx}\; \Eout(g^-) \;\overset{\text{(grande } M_{\text{val}})}{\approx}\; E_{\text{val}}(g^-)
 $$
 
 <v-clicks>
 
-- $K$ **grande**: $E_{\text{val}}$ es un buen estimador… de un modelo $g^-$ entrenado con pocos datos, peor que $g$.
-- $K$ **pequeño**: $g^-$ se parece a $g$, pero $E_{\text{val}}$ es muy ruidoso.
-- Regla común: $K \approx N/5$. Al final, reentrenar con **todos** los datos.
+- $M_{\text{val}}$ **grande**: $E_{\text{val}}$ es un buen estimador… de un modelo $g^-$ entrenado con pocos datos, peor que $g$ (el modelo entrenado con todos).
+- $M_{\text{val}}$ **pequeño**: $g^-$ se parece a $g$, pero $E_{\text{val}}$ es muy ruidoso.
+- Regla común: $M_{\text{val}} \approx M/5$. Al final, reentrenar con **todos** los datos.
 
 </v-clicks>
 </div>
 <div v-click>
 
-### Ames con $N = 600$
+### Ames con $M = 600$
 
-| $K$ | $\Eout(g^-)$ | desviación de $E_{\text{val}}$ |
+| $M_{\text{val}}$ | $\Eout(g^-)$ | desviación de $E_{\text{val}}$ |
 |---|---|---|
 | 25 | 0.0149 | 0.0064 |
 | 200 | 0.0159 | — |
@@ -126,7 +128,7 @@ numero: 1
 
 # Elegir contamina
 
-Las 1,000 monedas otra vez.
+Como la moneda con menos caras entre mil.
 
 ---
 
@@ -137,22 +139,22 @@ Las 1,000 monedas otra vez.
 
 <Optimismo />
 
+<div v-click="2" style="margin-top: 16px">
+
+La cota de la unión dice cuánto: $\;\Eout \le E_{\text{val}} + O\Big(\sqrt{\tfrac{\ln |\Hyp|}{M_{\text{val}}}}\Big)$, con $|\Hyp|$ el número de modelos comparados. Elegir entre pocos modelos cuesta poco; probar miles, mucho.
+
+</div>
+
 </div>
 <div>
 
-$M$ modelos que **adivinan al azar** (error real 0.5), evaluados en los mismos 100 datos de validación. Nos quedamos con el de menor $E_{\text{val}}$.
+Varios modelos que **adivinan al azar** (error real 0.5), evaluados en los mismos 100 datos de validación. Nos quedamos con el de menor error de validación $E_{\text{val}}$.
 
-<v-click>
+<div v-click="1">
 
-Con 100 modelos, el elegido parece tener error de 0.37. Es el mismo fenómeno de la moneda con menos caras.
+Con 100 modelos, el elegido parece tener error de 0.37. Es el mismo fenómeno que elegir, entre mil monedas justas, la que sacó menos caras: parece especial sin serlo.
 
-</v-click>
-
-<v-click>
-
-La cota de la unión dice cuánto: $\;\Eout \le E_{\text{val}} + O\Big(\sqrt{\tfrac{\ln M}{K}}\Big)$. Elegir entre pocos modelos cuesta poco; probar miles, mucho.
-
-</v-click>
+</div>
 </div>
 </div>
 
@@ -186,7 +188,7 @@ Para **reportar**, una sola vez, al final. Si se usa para decidir algo, deja de 
 
 <div v-click class="nota">
 
-En la Unidad 1 vimos la versión más común de este error: preprocesar con todos los datos. Elegir el umbral, las variables o el modelo mirando la prueba es la misma trampa.
+La versión más común de este error es preprocesar (estandarizar, imputar) con todos los datos antes de partirlos. Elegir el umbral, las variables o el modelo mirando la prueba es la misma trampa.
 
 </div>
 
@@ -201,25 +203,27 @@ Que cada dato valide una vez.
 
 ---
 
-# Validación cruzada con $k$ particiones
+# Validación cruzada con $K$ particiones
 
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 40px">
 <div>
 
 <PliegosK />
 
+$$
+E_{\text{cv}} = \frac{1}{K} \sum_{k=1}^{K} e_k
+$$
+
+donde $e_k$ es el error de validación en la partición $k$.
+
 </div>
 <div>
 
-$$
-E_{\text{cv}} = \frac{1}{k} \sum_{i=1}^{k} e_i
-$$
-
 <v-clicks>
 
-- Cada modelo entrena con $N(1 - 1/k)$ datos: casi todos.
-- Cada dato valida **una vez**: usamos los $N$ para validar.
-- Las $e_i$ no son independientes (comparten datos de entrenamiento), así que $\Var[E_{\text{cv}}]$ no es simplemente $\Var[e_i]/k$. El error estándar que se reporta es aproximado.
+- Cada modelo entrena con $M(1 - 1/K)$ datos: casi todos.
+- Cada dato valida **una vez**: usamos los $M$ para validar.
+- Las $e_k$ no son independientes (comparten datos de entrenamiento), así que $\Var[E_{\text{cv}}]$ no es simplemente $\Var[e_k]/K$. El error estándar que se reporta es aproximado.
 
 </v-clicks>
 </div>
@@ -234,21 +238,21 @@ $$
 
 ### Ames, ridge con $\lambda = 10$, 30 semillas
 
-| $k$ | $E_{\text{cv}}$ medio | variación entre semillas |
+| $K$ | $E_{\text{cv}}$ medio | variación entre semillas |
 |---|---|---|
 | 2 | 0.01491 | 0.00054 |
 | 5 | 0.01429 | 0.00019 |
 | 10 | 0.01415 | 0.00014 |
-| $N$ (LOO) | 0.01411 | — |
+| $M$ (LOO) | 0.01411 | — |
 
 </div>
 <div>
 
 <v-clicks>
 
-- Con $k = 2$ cada modelo entrena con la mitad: **sesgo pesimista**.
-- Con $k = N$, **dejar uno fuera** (LOO), casi sin sesgo, pero $N$ entrenamientos.
-- En la práctica, $k = 5$ o $10$.
+- Con $K = 2$ cada modelo entrena con la mitad: **sesgo pesimista**.
+- Con $K = M$, **dejar uno fuera** (LOO), casi sin sesgo, pero $M$ entrenamientos.
+- En la práctica, $K = 5$ o $10$.
 
 </v-clicks>
 
@@ -262,29 +266,31 @@ $$
 <div class="cols" style="gap: 48px">
 <div>
 
-Para regresión lineal o ridge, $\hat{\mathbf y} = H \mathbf y$ con la **matriz sombrero** $H = X(X\T X + \lambda I)^{-1} X\T$. Entonces
+Para regresión lineal o ridge, $\hat{\vy} = \mathbf{H} \vy$ con la **matriz sombrero** $\mathbf{H} = \vX(\vX\T \vX + \lambda \mathbf{I})^{-1} \vX\T$, donde $\vX$ es la matriz de datos y $\lambda$ la fuerza de la regularización. Entonces
 
 $$
-E_{\text{LOO}} = \frac{1}{N} \sum_{n=1}^{N} \left( \frac{y_n - \hat y_n}{1 - H_{nn}} \right)^2 .
+E_{\text{LOO}} = \frac{1}{M} \sum_{i=1}^{M} \left( \frac{y^{(i)} - \hat y^{(i)}}{1 - H_{ii}} \right)^2 .
 $$
 
 <v-click>
 
-Un solo ajuste en lugar de $N$.
+Un solo ajuste en lugar de $M$.
 
 </v-click>
 </div>
 <div v-click>
 
-**Idea de la prueba.** Quitar el punto $n$ cambia $X\T X$ por $X\T X - \vx_n \vx_n\T$, una corrección de rango 1. Con la fórmula de Sherman–Morrison,
+**Idea de la prueba.** Quitar el punto $i$ cambia $\vX\T \vX$ por $\vX\T \vX - \vx^{(i)} \vx^{(i)\top}$, una corrección de rango 1. Con la fórmula de Sherman–Morrison,
 
 $$
-y_n - g^{(-n)}(\vx_n) = \frac{y_n - \hat y_n}{1 - H_{nn}} .
+y^{(i)} - g^{(-i)}(\vx^{(i)}) = \frac{y^{(i)} - \hat y^{(i)}}{1 - H_{ii}} ,
 $$
+
+con $g^{(-i)}$ el modelo entrenado sin el punto $i$.
 
 <div class="pequeno tenue">
 
-En la libreta: 200 casas, fuerza bruta 0.0132385041 contra fórmula 0.0132385041, 400 veces más rápido. Y $\mathrm{tr}(H)$ son los grados de libertad efectivos de la clase pasada.
+En la libreta: 200 casas, fuerza bruta 0.0132385041 contra fórmula 0.0132385041, 400 veces más rápido. Y la traza $\mathrm{tr}(\mathbf{H})$ son los grados de libertad efectivos del modelo.
 
 </div>
 </div>
@@ -407,7 +413,7 @@ Pacientes con varias consultas, estudiantes de la misma escuela, fotos de la mis
 
 ### Tiempo
 
-Si se predice el futuro, se valida con el futuro: entrenar hasta $t$, validar después. Barajar mezcla el pasado con el futuro (Unidad 7).
+Si se predice el futuro, se valida con el futuro: entrenar hasta $t$, validar después. Barajar mezcla el pasado con el futuro.
 
 </div>
 <div v-click>
@@ -430,9 +436,9 @@ La pregunta no es «¿cómo parto los datos?», sino «¿qué datos <em>verá</e
 <div class="cols cols-6-4" style="flex: 1">
 <div style="font-size: 25px; line-height: 1.4">
 
-1. $E_{\text{val}}$ es insesgado si el modelo no vio esos datos; su ruido baja como $1/\sqrt{K}$.
+1. $E_{\text{val}}$ es insesgado si el modelo no vio esos datos; su ruido baja como $1/\sqrt{M_{\text{val}}}$.
 2. **Elegir** con la validación la vuelve optimista: crece con el número de opciones.
-3. Validación cruzada: $k = 5$ o $10$; LOO gratis para modelos lineales.
+3. Validación cruzada: $K = 5$ o $10$ particiones; LOO gratis para modelos lineales.
 4. Regla de una desviación estándar y CV anidada.
 5. La partición debe imitar cómo se usará el modelo: **grupos**, **tiempo**, **estratos**.
 

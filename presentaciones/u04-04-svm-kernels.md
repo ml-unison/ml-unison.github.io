@@ -52,7 +52,7 @@ Con la que deja **más espacio** a los dos lados: si un pingüino nuevo cae un p
 </div>
 <div>
 
-Adelie contra Gentoo, 274 pingüinos, dos medidas estandarizadas. Las punteadas son tres corridas del perceptrón.
+Adelie contra Gentoo, 274 pingüinos, dos medidas estandarizadas. Las punteadas son tres corridas del perceptrón; todas tienen error de entrenamiento $\Ein$ igual a cero.
 
 <v-click>
 
@@ -79,18 +79,18 @@ Distancia del punto más cercano a cada recta: 0.06, 0.18 y 0.08 en las del perc
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-La distancia de $\vx_n$ al hiperplano $\vw\T\vx + b = 0$ es
+Con etiquetas $y^{(i)} \in \{-1, +1\}$, pesos $\vw$ y sesgo $b$, la distancia de $\vx^{(i)}$ al hiperplano $\vw\T\vx + b = 0$ es
 
 $$
-\frac{|\vw\T\vx_n + b|}{\norm{\vw}} .
+\frac{|\vw\T\vx^{(i)} + b|}{\norm{\vw}} .
 $$
 
 <v-click>
 
-$(\vw, b)$ y $(c\vw, cb)$ son el mismo hiperplano. Fijamos la escala con $\min_n y_n(\vw\T\vx_n + b) = 1$; entonces el margen es $1/\norm{\vw}$ y maximizarlo es
+$(\vw, b)$ y $(c\vw, cb)$ son el mismo hiperplano. Fijamos la escala con $\min_i y^{(i)}(\vw\T\vx^{(i)} + b) = 1$; entonces el margen es $1/\norm{\vw}$ y maximizarlo es
 
 $$
-\min_{\vw, b}\; \tfrac12 \norm{\vw}^2 \quad \text{s.a.} \quad y_n(\vw\T\vx_n + b) \ge 1 .
+\min_{\vw, b}\; \tfrac12 \norm{\vw}^2 \quad \text{s.a.} \quad y^{(i)}(\vw\T\vx^{(i)} + b) \ge 1, \quad i = 1, \dots, M .
 $$
 
 </v-click>
@@ -99,7 +99,7 @@ $$
 
 <v-click>
 
-Un **problema cuadrático convexo** con $N$ restricciones lineales: tiene solución única y hay algoritmos eficientes.
+Un **problema cuadrático convexo** con $M$ restricciones lineales: solución única y algoritmos eficientes.
 
 </v-click>
 
@@ -107,13 +107,11 @@ Un **problema cuadrático convexo** con $N$ restricciones lineales: tiene soluci
 
 <Caja tipo="idea">
 
-**¿Por qué ayuda el margen?** Los hiperplanos «gordos», con margen $\rho$, no pueden producir todas las dicotomías: si los datos caben en una bola de radio $R$,
+**¿Por qué ayuda el margen?** Los hiperplanos con margen $\rho$ no producen todas las dicotomías: si los datos caben en una bola de radio $R$, con cualquier número de atributos,
 
 $$
-d_{\text{VC}}(\rho) \le \big\lceil R^2/\rho^2 \big\rceil + 1 ,
+d_{\text{VC}}(\rho) \le \big\lceil R^2/\rho^2 \big\rceil + 1 .
 $$
-
-sin importar la dimensión $d$. La Unidad 3, otra vez.
 
 </Caja>
 
@@ -128,18 +126,18 @@ sin importar la dimensión $d$. La Unidad 3, otra vez.
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-Lagrangiano, con $\alpha_n \ge 0$:
+Lagrangiano, con un multiplicador $\alpha^{(i)} \ge 0$ por restricción:
 
 $$
-\mathcal{L} = \tfrac12\norm{\vw}^2 - \sum_n \alpha_n\big(y_n(\vw\T\vx_n + b) - 1\big)
+\mathcal{L} = \tfrac12\norm{\vw}^2 - \sum_{i=1}^{M} \alpha^{(i)}\big(y^{(i)}(\vw\T\vx^{(i)} + b) - 1\big)
 $$
 
 <v-click>
 
-$\partial_\vw \mathcal{L} = 0$ y $\partial_b \mathcal{L} = 0$ dan
+$\partial_\vw \mathcal{L} = \mathbf{0}$ y $\partial_b \mathcal{L} = 0$ dan
 
 $$
-\vw = \sum_n \alpha_n y_n \vx_n, \qquad \sum_n \alpha_n y_n = 0 .
+\vw = \sum_{i} \alpha^{(i)} y^{(i)} \vx^{(i)}, \qquad \sum_{i} \alpha^{(i)} y^{(i)} = 0 .
 $$
 
 </v-click>
@@ -151,16 +149,16 @@ $$
 Sustituyendo:
 
 $$
-\max_{\boldsymbol\alpha \ge 0}\; \sum_n \alpha_n - \tfrac12 \sum_{n,m} \alpha_n\alpha_m y_n y_m\, \vx_n\T \vx_m
+\max_{\boldsymbol\alpha \ge 0}\; \sum_i \alpha^{(i)} - \tfrac12 \sum_{i,i'} \alpha^{(i)}\alpha^{(i')} y^{(i)} y^{(i')}\, \vx^{(i)\top} \vx^{(i')}
 $$
 
-con $\sum_n \alpha_n y_n = 0$.
+con $\sum_i \alpha^{(i)} y^{(i)} = 0$; $i$ e $i'$ recorren los $M$ datos.
 
 </v-click>
 
 <v-click>
 
-**KKT:** $\alpha_n\big(y_n(\vw\T\vx_n + b) - 1\big) = 0$. Solo los puntos **sobre el margen** tienen $\alpha_n > 0$: son los vectores de soporte. En los pingüinos, $\boldsymbol\alpha = (4.37,\ 3.76,\ 0.60)$ y 271 ceros.
+**KKT** (condiciones de optimalidad): $\alpha^{(i)}\big(y^{(i)}(\vw\T\vx^{(i)} + b) - 1\big) = 0$. Solo los puntos **sobre el margen** tienen $\alpha^{(i)} > 0$: son los vectores de soporte. En los pingüinos, $\boldsymbol\alpha = (4.37,\ 3.76,\ 0.60)$ y 271 ceros.
 
 </v-click>
 
@@ -168,7 +166,7 @@ con $\sum_n \alpha_n y_n = 0$.
 
 <div class="nota">
 
-Los datos solo aparecen en **productos internos** $\vx_n\T\vx_m$. Esta es la puerta a los kernels.
+Los datos solo aparecen en **productos internos** $\vx^{(i)\top}\vx^{(i')}$. Esta es la puerta a los kernels.
 
 </div>
 
@@ -188,10 +186,10 @@ Los datos solo aparecen en **productos internos** $\vx_n\T\vx_m$. Esta es la pue
 Para la SVM de margen duro,
 
 $$
-E_{\text{cv}} \le \frac{\#\,\text{vectores de soporte}}{N} ,
+E_{\text{cv}} \le \frac{\#\,\text{vectores de soporte}}{M} ,
 $$
 
-donde $E_{\text{cv}}$ es el error de dejar uno fuera.
+donde $E_{\text{cv}}$ es el error de dejar uno fuera y $M$ el número de datos.
 
 </Caja>
 
@@ -228,14 +226,14 @@ Cuando ninguna recta separa los datos.
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-Adelie y Chinstrap se enciman: el problema de margen duro **no tiene solución**. Permitimos violaciones $\xi_n \ge 0$, con un precio:
+Adelie y Chinstrap se enciman: el problema de margen duro **no tiene solución**. Permitimos que cada dato viole el margen en $\xi^{(i)} \ge 0$ (su **holgura**), con un precio $C > 0$ por unidad:
 
 $$
-\min_{\vw, b, \boldsymbol\xi}\; \tfrac12\norm{\vw}^2 + C\sum_n \xi_n
+\min_{\vw, b, \boldsymbol\xi}\; \tfrac12\norm{\vw}^2 + C\sum_{i=1}^{M} \xi^{(i)}
 $$
 
 $$
-\text{s.a.}\quad y_n(\vw\T\vx_n + b) \ge 1 - \xi_n,\quad \xi_n \ge 0 .
+\text{s.a.}\quad y^{(i)}(\vw\T\vx^{(i)} + b) \ge 1 - \xi^{(i)},\quad \xi^{(i)} \ge 0 .
 $$
 
 </div>
@@ -243,8 +241,8 @@ $$
 
 <v-clicks>
 
-- $0 < \xi_n \le 1$: dentro del margen pero bien clasificado; $\xi_n > 1$: mal clasificado.
-- En el dual cambia una sola cosa: $0 \le \alpha_n \le C$.
+- $0 < \xi^{(i)} \le 1$: dentro del margen pero bien clasificado; $\xi^{(i)} > 1$: mal clasificado.
+- En el dual cambia una sola cosa: los multiplicadores quedan acotados, $0 \le \alpha^{(i)} \le C$.
 - $C$ grande: casi margen duro (poco sesgo, más varianza). $C$ chico: margen ancho, muchos vectores de soporte.
 
 </v-clicks>
@@ -257,6 +255,12 @@ $$
 
 <MargenSuave />
 
+<div class="pequeno tenue">
+
+$C$: el precio de cada violación del margen; $\norm{\vw}$: la norma de los pesos.
+
+</div>
+
 ---
 
 # La SVM es pérdida bisagra más regularización
@@ -264,15 +268,15 @@ $$
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 40px">
 <div>
 
-En el óptimo, $\xi_n = \max\big(0,\; 1 - y_n s_n\big)$ con $s_n = \vw\T\vx_n + b$. Sustituyendo y dividiendo entre $CN$:
+En el óptimo, la holgura es $\xi^{(i)} = \max\big(0,\; 1 - y^{(i)} z^{(i)}\big)$, con $z^{(i)} = \vw\T\vx^{(i)} + b$ la salida lineal. Sustituyendo y dividiendo entre $CM$:
 
 $$
-\min_{\vw, b}\; \frac1N \sum_n \max(0,\, 1 - y_n s_n) + \lambda\norm{\vw}^2, \quad \lambda = \frac{1}{2CN} .
+\min_{\vw, b}\; \frac1M \sum_{i=1}^{M} \max(0,\, 1 - y^{(i)} z^{(i)}) + \lambda\norm{\vw}^2, \quad \lambda = \frac{1}{2CM} .
 $$
 
 <v-click>
 
-Es el mismo esquema de la Unidad 3: **error en la muestra + regularización**, con otra pérdida.
+Es el esquema **pérdida promedio + regularización** (con fuerza $\lambda$), con la pérdida bisagra $\ell(y, z) = \max(0, 1 - yz)$.
 
 </v-click>
 </div>
@@ -315,7 +319,7 @@ En $(x_1, x_2)$ ninguna recta separa los anillos. En $\Phi(\vx) = (x_1, x_2, x_1
 </div>
 <div v-click>
 
-Pero $\Phi$ puede tener muchísimas dimensiones. El dual solo necesita $\Phi(\vx)\T\Phi(\vx')$: si lo calculamos **sin construir** $\Phi$, no pagamos la dimensión.
+Pero $\Phi$ puede tener muchísimas dimensiones. El dual solo usa $\Phi(\vx)\T\Phi(\vx')$: si lo calculamos **sin construir** $\Phi$, no pagamos la dimensión.
 
 </div>
 </div>
@@ -327,7 +331,7 @@ Pero $\Phi$ puede tener muchísimas dimensiones. El dual solo necesita $\Phi(\vx
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-Un **kernel** es $K(\vx, \vx') = \Phi(\vx)\T\Phi(\vx')$. Polinomial de grado 2 en $\R^2$:
+Un **kernel** es $K(\vx, \vx') = \Phi(\vx)\T\Phi(\vx')$: el producto interno de dos instancias tras la transformación $\Phi$. Polinomial de grado 2 en $\R^2$, con $\vx = (x_1, x_2)$:
 
 $$
 (1 + \vx\T\vx')^2 = \Phi(\vx)\T\Phi(\vx'),
@@ -339,7 +343,7 @@ $$
 
 <v-click>
 
-Con grado $Q$ en $\R^d$, $\Phi$ tiene $\binom{d+Q}{Q}$ coordenadas, pero $K$ cuesta $O(d)$.
+Con grado $Q$ y $n$ atributos, $\Phi$ tiene $\binom{n+Q}{Q}$ coordenadas, pero $K$ cuesta $O(n)$.
 
 </v-click>
 </div>
@@ -347,7 +351,7 @@ Con grado $Q$ en $\R^d$, $\Phi$ tiene $\binom{d+Q}{Q}$ coordenadas, pero $K$ cue
 
 <v-click>
 
-**Gaussiano (RBF):** $K(\vx, \vx') = e^{-\gamma\norm{\vx - \vx'}^2}$. Expandiendo $e^{2\gamma\vx\T\vx'}$ en serie de Taylor aparecen monomios de **todos** los grados: $\Phi$ tiene dimensión infinita.
+**Gaussiano (RBF):** $K(\vx, \vx') = e^{-\gamma\norm{\vx - \vx'}^2}$, con $\gamma > 0$. Expandiendo $e^{2\gamma\vx\T\vx'}$ en serie de Taylor aparecen monomios de **todos** los grados: $\Phi$ tiene dimensión infinita.
 
 </v-click>
 
@@ -355,7 +359,7 @@ Con grado $Q$ en $\R^d$, $\Phi$ tiene $\binom{d+Q}{Q}$ coordenadas, pero $K$ cue
 
 <Caja tipo="teorema">
 
-**Mercer.** $K$ simétrica es un kernel válido si y solo si toda matriz de Gram $[K(\vx_n, \vx_m)]$ es semidefinida positiva.
+**Mercer.** $K$ simétrica es un kernel válido si y solo si toda matriz de Gram $\big[K(\vx^{(i)}, \vx^{(i')})\big]$ es semidefinida positiva.
 
 </Caja>
 
@@ -365,7 +369,7 @@ Con grado $Q$ en $\R^d$, $\Phi$ tiene $\binom{d+Q}{Q}$ coordenadas, pero $K$ cue
 
 <div class="pequeno">
 
-La predicción: $g(\vx) = \operatorname{signo}\big(\sum_{n \in \text{VS}} \alpha_n y_n K(\vx_n, \vx) + b\big)$.
+La predicción: $h(\vx) = \operatorname{signo}\big(\sum_{i \in \text{VS}} \alpha^{(i)} y^{(i)} K(\vx^{(i)}, \vx) + b\big)$, sumando solo sobre los vectores de soporte (VS).
 
 </div>
 
@@ -382,7 +386,7 @@ La predicción: $g(\vx) = \operatorname{signo}\big(\sum_{n \in \text{VS}} \alpha
 <div class="cols" style="gap: 40px; margin-top: 14px">
 <div>
 
-200 puntos de las «lunas» con ruido, $C = 1$. $\gamma$ es el inverso del radio de influencia de cada vector de soporte.
+200 puntos de las «lunas» con ruido, con precio por violación $C = 1$. $\gamma$, en el kernel $e^{-\gamma\norm{\vx - \vx'}^2}$, es el inverso del radio de influencia de cada vector de soporte.
 
 </div>
 <div v-click>
@@ -403,7 +407,7 @@ $\gamma$ chico: casi lineal, **subajuste**. $\gamma$ grande: una isla alrededor 
 
 <div class="pequeno tenue">
 
-Exactitud (%) por validación cruzada en 1,347 dígitos de 8 × 8 (Unidad 2), con kernel gaussiano.
+Exactitud (%) por validación cruzada en 1,347 dígitos de 8 × 8, con kernel gaussiano: $C$ es el precio por violación y $\gamma$ el inverso del ancho.
 
 </div>
 </div>
@@ -414,7 +418,7 @@ Exactitud (%) por validación cruzada en 1,347 dígitos de 8 × 8 (Unidad 2), co
 - Mejor combinación en esta malla: $C = 10$, $\gamma = 0.1$. Exactitud de prueba **99.3 %** (3 errores en 450), contra 97.1 % de la logística.
 - 545 de los 1,347 dígitos son vectores de soporte (40 %).
 - **Escala los atributos**: $\gamma$ mide distancias.
-- Entrenar cuesta entre $O(N^2)$ y $O(N^3)$: con cientos de miles de datos se usa una SVM lineal o características aleatorias de Fourier (Rahimi y Recht, 2007).
+- Entrenar cuesta entre $O(M^2)$ y $O(M^3)$, con $M$ datos: con cientos de miles de datos se usa una SVM lineal o características aleatorias de Fourier (Rahimi y Recht, 2007).
 
 </v-clicks>
 </div>
@@ -431,11 +435,11 @@ Exactitud (%) por validación cruzada en 1,347 dígitos de 8 × 8 (Unidad 2), co
 | regresión de Poisson | conteo esperado | devianza de Poisson | Newton (IRLS) |
 | LDA y QDA | probabilidad | verosimilitud conjunta | medias y covarianzas |
 | Bayes ingenuo | probabilidad | verosimilitud conjunta | conteos |
-| SVM | clase | bisagra + $\lambda\norm{\vw}^2$ | programación cuadrática (dual) |
+| SVM | clase | bisagra + $\lambda\norm{\vw}^2$ (regularización) | programación cuadrática (dual) |
 
 <div v-click class="nota" style="margin-top: 20px">
 
-Todos son lineales en algún espacio: en los atributos, en los log-momios, en el logaritmo de la media o, con un kernel, en un espacio que nunca se construye. La Unidad 5 deja de serlo.
+Todos son lineales en algún espacio: en los atributos, en los log-momios, en el logaritmo de la media o, con un kernel, en un espacio que nunca se construye.
 
 </div>
 
@@ -446,11 +450,11 @@ Todos son lineales en algún espacio: en los atributos, en los log-momios, en el
 <div class="cols cols-6-4" style="flex: 1">
 <div style="font-size: 25px; line-height: 1.4">
 
-1. Margen máximo: $\min \tfrac12\norm{\vw}^2$ con $y_n(\vw\T\vx_n + b) \ge 1$.
-2. El dual depende solo de productos internos; los $\alpha_n > 0$ marcan los vectores de soporte.
-3. $E_{\text{cv}} \le \#\text{VS}/N$.
-4. Margen suave = pérdida bisagra + regularización; $C$ controla el compromiso.
-5. Kernel: un producto interno en otro espacio. $C$ y $\gamma$ se eligen con validación cruzada.
+1. Margen máximo: $\min \tfrac12\norm{\vw}^2$ con $y^{(i)}(\vw\T\vx^{(i)} + b) \ge 1$ para cada dato, $y^{(i)} \in \{-1, +1\}$.
+2. El dual depende solo de productos internos; los multiplicadores $\alpha^{(i)} > 0$ marcan los vectores de soporte.
+3. Error de dejar uno fuera $E_{\text{cv}} \le \#\text{VS}/M$: la fracción de vectores de soporte.
+4. Margen suave = pérdida bisagra + regularización; el precio $C$ controla el compromiso.
+5. Kernel: un producto interno en otro espacio. $C$ y el ancho $\gamma$ se eligen con validación cruzada.
 
 </div>
 <div>

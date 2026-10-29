@@ -11,5 +11,5 @@ const sup = (e: number) => `10${String(e).replace('-', '⁻').replace(/\d/g, (d:
 
 <template>
   <LineasLog :x="lam" :series="s" x-log :y-dominio="[0.001, 1]" :y-ticks="[0.001, 0.01, 0.1, 1]" :x-ticks="[1e-4, 1e-3, 1e-2, 1e-1, 1, 10]" :formato-x="(v: number) => sup(Math.round(Math.log10(v)))"
-             x-titulo="λ (escala log)" y-titulo="error cuadrático medio (escala log)" :colores="['#24398A', '#D5433C', '#1A2133']" :punteadas="['varianza']" marcadores :ancho="720" :alto="400" :derecha="120" />
+             x-titulo="λ (escala log)" y-titulo="error cuadrático medio (escala log)" :colores="['#24398A', '#D5433C', '#1A2133']" :punteadas="['varianza']" marcadores :ancho="720" :alto="330" :derecha="120" />
 </template>

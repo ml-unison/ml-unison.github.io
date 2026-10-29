@@ -17,16 +17,16 @@ const xb = scaleLinear().domain([0, 40]).range([m.l, W - m.r]), yb = scaleLinear
 const xc = scaleLinear().domain([0, 950]).range([m.l, W - m.r]), yc = scaleLinear().domain([0, 0.24]).range([H - m.b, m.t])
 const curva = (k: string) => line<number>().x((_, i) => xb(C.curva[k].x[i])).y(v => yb(v))(C.curva[k].y)!
 const paneles = [
-  { t: 'P(x) · temperatura de marzo', n: 1 },
-  { t: 'P(y | x) · rentas según la temperatura', n: 2 },
-  { t: 'P(y) · rentas por hora en junio', n: 3 },
+  { t: 'ℙ(<b>x</b>) · temperatura de marzo', n: 1 },
+  { t: 'ℙ(y | <b>x</b>) · rentas según la temperatura', n: 2 },
+  { t: 'ℙ(y) · rentas por hora en junio', n: 3 },
 ]
 </script>
 
 <template>
   <div class="tc">
     <div v-for="p in paneles" :key="p.n" :style="{ opacity: mostrar >= p.n ? 1 : 0, transition: 'opacity .4s' }">
-      <div class="tc__t">{{ p.t }}</div>
+      <div class="tc__t" v-html="p.t"></div>
       <svg class="grafica" :viewBox="`0 0 ${W} ${H}`">
         <template v-if="p.n === 1">
           <Ejes :x="xa" :y="ya" :x-ticks="[0, 10, 20, 30]" :y-ticks="[0, 0.1, 0.2, 0.3]" x-titulo="°C" />

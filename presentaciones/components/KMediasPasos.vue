@@ -39,7 +39,7 @@ const rastro = (j: number) => L.pasos.slice(0, paso.value + 1).map((p: any) => p
         <text :x="m.l - 40" :y="18" class="titulo-eje" style="font-size: 17px">J (suma de distancias²)</text>
       </svg>
       <div class="kp__j">J = <b>{{ P.J.toFixed(1) }}</b></div>
-      <p class="kp__nota">400 clientes de la tienda en línea, k = 4, con un inicio malo a propósito: tres centroides amontonados abajo.</p>
+      <p class="kp__nota">400 clientes de la tienda en línea, K = 4 grupos, con un inicio malo a propósito: tres centroides amontonados abajo.</p>
     </div>
   </div>
 </template>

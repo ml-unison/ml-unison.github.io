@@ -5,7 +5,7 @@ import datos from '../datos/u08-01.json'
 const C = (datos as any).corridas as { nombre: string, familia: string, auc: number, auc_de: number, logloss: number }[]
 withDefaults(defineProps<{ logloss?: boolean }>(), { logloss: true })
 const color: Record<string, string> = { logistica: '#24398A', bosque: '#D5433C', boosting: '#C9971C' }
-const W = 1120, H = 410, m = { l: 290, t: 50, b: 84 }
+const W = 1120, H = 380, m = { l: 290, t: 50, b: 84 }
 const p1 = [m.l, 760], p2 = [830, W - 20]
 const xa = scaleLinear().domain([0.70, 0.79]).range(p1)
 const xl = scaleLinear().domain([0.40, 0.66]).range(p2)

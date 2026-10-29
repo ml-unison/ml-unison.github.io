@@ -8,7 +8,7 @@ import datos from '../datos/u07-03.json'
 const V = (datos as any).ventana
 const Y = V.y as number[], o = V.origen as number
 const h = ref(12)
-const W = 1120, H = 360, m = { l: 66, r: 20, t: 44, b: 40 }
+const W = 1120, H = 340, m = { l: 66, r: 20, t: 44, b: 40 }
 const x = scaleLinear().domain([0, Y.length - 1]).range([m.l, W - m.r])
 const y = scaleLinear().domain([0, 1000]).range([H - m.b, m.t])
 const DIA = ['dom', 'lun', 'mar', 'mié', 'jue', 'vie', 'sáb']

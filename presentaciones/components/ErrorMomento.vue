@@ -16,7 +16,7 @@ const potencia = (v: number) => v === 0 ? '1' : `10${String(v).replace('-', '⁻
 
 <template>
   <svg class="grafica" :viewBox="`0 0 ${W} ${H}`">
-    <Ejes :x="x" :y="y" :x-ticks="[0, 100, 200, 300, 400]" :y-ticks="[0, -3, -6, -9]" :y-formato="potencia" x-titulo="iteración" y-titulo="error relativo ‖w_t − w*‖ / ‖w_0 − w*‖" />
+    <Ejes :x="x" :y="y" :x-ticks="[0, 100, 200, 300, 400]" :y-ticks="[0, -3, -6, -9]" :y-formato="potencia" x-titulo="iteración" y-titulo="error relativo ‖θ_t − θ*‖ / ‖θ_0 − θ*‖" />
     <line :x1="m.l" :x2="W - m.r" :y1="y(-6)" :y2="y(-6)" stroke="#5E6678" stroke-dasharray="4 4" />
     <clipPath id="em-clip"><rect :x="m.l" :y="m.t - 10" :width="W - m.l - m.r" :height="H - m.t - m.b + 10" /></clipPath>
     <g clip-path="url(#em-clip)">

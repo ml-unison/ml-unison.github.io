@@ -5,7 +5,7 @@ import { scaleLinear } from 'd3-scale'
 import datos from '../datos/u08-01.json'
 const S = (datos as any).semillas
 const props = withDefaults(defineProps<{ filas?: number, referencia?: boolean }>(), { filas: 2, referencia: false })
-const W = 1100, H = 330, m = { l: 330, r: 30, t: 30, b: 76 }
+const W = 1100, H = 310, m = { l: 330, r: 30, t: 30, b: 76 }
 const x = scaleLinear().domain([-2, 2]).range([m.l, W - m.r])
 const y = scaleLinear().domain([-0.5, 1.5]).range([m.t, H - m.b])
 const yEje = scaleLinear().domain([0, 1]).range([H - m.b, m.t])

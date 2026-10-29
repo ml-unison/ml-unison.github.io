@@ -15,7 +15,7 @@ const series = [{ k: 'relu', n: 'ReLU, He', c: '#24398A', i: 0, dy: -16 }, { k: 
 <template>
   <svg class="grafica" :viewBox="`0 0 ${W} ${H}`">
     <Ejes :x="x" :y="y" :x-ticks="[1, 2, 3, 4, 5, 6, 7, 8, 9, 10]" :y-ticks="[1e-6, 1e-4, 1e-2, 1]"
-          :y-formato="v => pot(Math.round(Math.log10(v)))" x-titulo="capa oculta (1 = junto a la entrada)" y-titulo="‖∂E/∂W‖ de la capa" />
+          :y-formato="v => pot(Math.round(Math.log10(v)))" x-titulo="capa oculta (1 = junto a la entrada)" y-titulo="‖∂L/∂W‖ de la capa" />
     <g v-for="s in series" :key="s.k">
       <path :d="camino(D[s.k])" fill="none" :stroke="s.c" stroke-width="3" />
       <circle v-for="(v, i) in D[s.k]" :key="i" :cx="x(i + 1)" :cy="y(v)" r="4" :fill="s.c" />

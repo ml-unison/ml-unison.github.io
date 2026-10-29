@@ -142,13 +142,13 @@ export const materiales: Record<string, Material> = {
     presentaciones: [
       { id: 'u05-01-arboles', titulo: 'Árboles de decisión', descripcion: 'Cómo un árbol parte el espacio con preguntas de sí o no: impureza, el algoritmo voraz CART, árboles de regresión, poda por costo–complejidad y por qué los árboles son inestables.' },
       { id: 'u05-02-bosques', titulo: 'Bagging y bosques aleatorios', descripcion: 'Por qué promediar árboles reduce la varianza (y cuánto no), bootstrap, bagging, bosques aleatorios, error fuera de la bolsa e importancia de atributos.' },
-      { id: 'u05-03-boosting', titulo: 'Boosting: de AdaBoost a XGBoost', descripcion: 'Pesos que se concentran en los errores, descenso por gradiente en el espacio de funciones, parada temprana y la ganancia de segundo orden de XGBoost.' },
+      { id: 'u05-03-boosting', titulo: 'Boosting: de AdaBoost a XGBoost, LightGBM y CatBoost', descripcion: 'Pesos que se concentran en los errores, pseudo-residuos y descenso por gradiente en el espacio de funciones, parada temprana, y lo que hay dentro de XGBoost, LightGBM y CatBoost.' },
       { id: 'u05-04-interpretabilidad', titulo: 'Interpretabilidad: qué aprendió el modelo', descripcion: 'Por qué y cómo mirar dentro de un modelo: del asma que «protegía» a los valores de Shapley, con sus límites.' },
     ],
     libretas: [
       { ruta: 'unidades/05-arboles-ensambles/ejemplos/u05-e01-arboles.ipynb', titulo: 'Árboles de decisión: de los pingüinos a las bicicletas', descripcion: 'Un árbol de clasificación desde cero con Gini y árboles de regresión podados con validación cruzada que les ganan a los modelos lineales de la Unidad 4.' },
       { ruta: 'unidades/05-arboles-ensambles/ejemplos/u05-e02-bosques.ipynb', titulo: 'Bosques aleatorios: la sabiduría de muchos árboles', descripcion: 'Bagging y bosque desde cero en el censo, error fuera de la bolsa, sesgo y varianza medidos en las bicicletas, y la trampa de la importancia MDI.' },
-      { ruta: 'unidades/05-arboles-ensambles/ejemplos/u05-e03-boosting.ipynb', titulo: 'Boosting y una campaña de mercadeo bancario', descripcion: 'AdaBoost y gradient boosting desde cero; una fuga de información a propósito; logística, bosque, HistGradientBoosting, XGBoost y LightGBM comparados.' },
+      { ruta: 'unidades/05-arboles-ensambles/ejemplos/u05-e03-boosting.ipynb', titulo: 'Boosting y una campaña de mercadeo bancario', descripcion: 'AdaBoost y gradient boosting desde cero; una fuga de información a propósito; logística, bosque, HistGradientBoosting, XGBoost, LightGBM y CatBoost comparados; categorías codificadas sin fuga.' },
       { ruta: 'unidades/05-arboles-ensambles/ejemplos/u05-e04-interpretabilidad.ipynb', titulo: 'Interpretar un modelo de precios de casas', descripcion: 'Importancia por permutación, dependencia parcial, curvas ICE y valores de Shapley a mano, por enumeración exacta y con SHAP.' },
     ],
     laboratorios: [

@@ -1,6 +1,6 @@
 ---
 theme: none
-title: "Boosting: de AdaBoost a XGBoost"
+title: "Boosting: de AdaBoost a XGBoost, LightGBM y CatBoost"
 unidad: Unidad 5
 layout: portada
 subtitulo: Sumar modelos débiles, uno tras otro, para corregir los errores de los anteriores
@@ -25,7 +25,7 @@ info: |
   Reconocimiento de Patrones · Unidad 5 · Licenciatura en Ciencias de la Computación, Universidad de Sonora.
 ---
 
-# *Boosting*: de AdaBoost a XGBoost
+# *Boosting*: de AdaBoost a XGBoost, LightGBM y CatBoost
 
 ---
 layout: pregunta
@@ -143,7 +143,7 @@ En la gráfica, la igualdad entre la pérdida exponencial media y el producto se
 
 # ¿Qué optimiza AdaBoost?
 
-<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
+<div class="cols" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px">
 <div>
 
 Friedman, Hastie y Tibshirani (2000): un **modelo aditivo por etapas**. En cada etapa, sin tocar el modelo $F_{t-1}$ de las rondas anteriores,
@@ -197,6 +197,7 @@ Si AdaBoost es «sumar modelos por etapas para bajar una pérdida», ¿por qué 
 Una consecuencia que vale mencionar: el minimizador poblacional de E[exp(−yF)|x] es la mitad del log-momio, así que AdaBoost estima una logística aditiva (ejercicio 2 de la libreta).
 -->
 
+
 ---
 layout: seccion
 numero: 2
@@ -207,48 +208,171 @@ numero: 2
 Descenso por gradiente donde los parámetros son funciones.
 
 ---
+layout: caso
+caso: Caso · Bicicletas compartidas
+cifra: 17,379
+cifraNota: horas de rentas de Capital Bikeshare en Washington, D. C., de enero de 2011 a diciembre de 2012.
+fuente: H. Fanaee-T y J. Gama, Progress in Artificial Intelligence 2 (2014); Bike Sharing, UCI (CC BY 4.0).
+---
 
-# Descenso por gradiente en el espacio de funciones
+# ¿Cuántas bicicletas se rentarán en esta hora?
 
-<div class="cols" style="grid-template-columns: 5fr 6fr; gap: 40px">
-<div>
+Un sistema de bicicletas compartidas necesita anticipar la demanda para repartir bicicletas entre estaciones y programar el mantenimiento.
 
-Minimizar $\sum_i \ell\big(y^{(i)}, F(\vx^{(i)})\big)$, con $\ell$ la pérdida de un dato, tratando los valores $F(\vx^{(i)})$ como parámetros. En la ronda $t$, con $F_{t-1}$ el modelo de las rondas anteriores:
+<v-click>
+
+**Datos:** por cada hora, las bicicletas rentadas $y$ y siete atributos: hora del día, si es día laboral, año, clima (de 1, despejado, a 3, lluvia o nieve), temperatura, humedad y viento.
+
+**Partición:** días 1 a 19 de cada mes para entrenar (10,886 horas); del 20 en adelante para probar (6,493).
+
+</v-click>
+
+<v-click>
+
+**Métrica:** la raíz del error cuadrático medio, en bicicletas por hora,
 
 $$
-r^{(i)}_t = -\frac{\partial \ell(y^{(i)}, F)}{\partial F}\Big|_{F = F_{t-1}(\vx^{(i)})} .
+\text{RECM} = \sqrt{\frac1M \sum_{i=1}^{M} \big(y^{(i)} - \hat y^{(i)}\big)^2} ,
+$$
+
+con $M$ las horas de prueba, $y^{(i)}$ las rentas reales y $\hat y^{(i)}$ las predichas. Predecir siempre el promedio da **181.8**.
+
+</v-click>
+
+---
+
+# Con la pérdida cuadrática, el residuo es menos la derivada
+
+<div class="cols" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px">
+<div>
+
+Sea $F$ la predicción actual para un dato con respuesta $y$, y su pérdida cuadrática
+
+$$
+\ell(y, F) = \tfrac12 (y - F)^2 \quad\Longrightarrow\quad \frac{\partial \ell}{\partial F} = -(y - F) .
+$$
+
+El residuo $y - F$ es **menos la derivada** de la pérdida respecto a la predicción.
+
+<v-clicks>
+
+- Residuo positivo: **subir** $F$ baja la pérdida; negativo: **bajarla**.
+- Sumarle a $F$ algo parecido a los residuos es moverse **en contra de la derivada**: un paso de descenso por gradiente.
+
+</v-clicks>
+</div>
+<div v-click>
+
+<Caja tipo="ejemplo" nombre="días laborales">
+
+Primera predicción: el promedio, $F_0 = 193$ bicicletas. Un dato típico de cuatro horas:
+
+| hora | $y$ | residuo $y - F_0$ | $\partial \ell / \partial F$ |
+|---|---|---|---|
+| 3:00 | 5 | −188 | +188 |
+| 8:00 | 480 | +287 | −287 |
+| 13:00 | 197 | +4 | −4 |
+| 17:00 | 529 | +336 | −336 |
+
+</Caja>
+
+</div>
+</div>
+
+<!--
+A las 8 y a las 17 hay que subir mucho la predicción; a las 3, bajarla; a las 13, casi nada.
+Los valores de y son los promedios de rentas a esa hora en los días laborales de entrenamiento; F_0 = 193 es el promedio de todas las horas laborales.
+Insistir en el signo: la derivada dice hacia dónde sube la pérdida; el residuo, hacia dónde baja. Son la misma información con signo contrario.
+-->
+
+---
+
+# Las predicciones como parámetros
+
+<div class="cols" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 44px">
+<div>
+
+Tomemos como parámetros las $M$ predicciones en los datos, $F^{(i)} = F(\vx^{(i)})$, y minimicemos
+
+$$
+L\big(F^{(1)}, \dots, F^{(M)}\big) = \frac1M \sum_{i=1}^{M} \ell\big(y^{(i)}, F^{(i)}\big) .
 $$
 
 <v-click>
 
-Los **pseudo-residuos** solo dicen qué hacer en los datos. Friedman (2001): **ajustarles un árbol** $h_t$, que generaliza la dirección a todo $\vx$, y avanzar:
+Cada derivada parcial solo involucra a un dato. Un paso de descenso por gradiente en la ronda $t$, con tasa $\eta$ (que absorbe el $\frac1M$):
+
+$$
+\begin{aligned}
+F^{(i)}_t &= F^{(i)}_{t-1} - \eta\, \frac{\partial \ell\big(y^{(i)}, F\big)}{\partial F}\bigg|_{F = F^{(i)}_{t-1}} \\
+&= F^{(i)}_{t-1} + \eta\, r^{(i)}_t .
+\end{aligned}
+$$
+
+</v-click>
+</div>
+<div>
+
+<v-click>
+
+<Caja tipo="definicion" nombre="pseudo-residuo">
+
+$$
+r^{(i)}_t = -\frac{\partial \ell\big(y^{(i)}, F\big)}{\partial F}\bigg|_{F = F_{t-1}(\vx^{(i)})}
+$$
+
+Hacia dónde y cuánto conviene mover la predicción del dato $i$ en la ronda $t$. Con la pérdida cuadrática es exactamente el residuo $y^{(i)} - F_{t-1}(\vx^{(i)})$; con otras pérdidas no, de ahí el «pseudo».
+
+</Caja>
+
+</v-click>
+
+<v-click>
+
+<div class="nota">
+
+Dos problemas: el paso solo dice qué hacer en los $M$ datos de entrenamiento, no en un $\vx$ nuevo; y con $M$ parámetros libres, repetirlo lleva cada $F^{(i)}$ hasta $y^{(i)}$: **memoriza**.
+
+</div>
+
+</v-click>
+</div>
+</div>
+
+---
+
+# La idea de Friedman: un árbol que imita al gradiente
+
+<div class="cols" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 44px">
+<div>
+
+En la ronda $t$, ajustar un **árbol de regresión** $h_t$ con los pares $\big(\vx^{(i)}, r^{(i)}_t\big)$ como datos, de modo que $h_t(\vx^{(i)}) \approx r^{(i)}_t$ en cada dato. Después se avanza:
 
 $$
 F_t(\vx) = F_{t-1}(\vx) + \eta\, h_t(\vx) .
 $$
 
-</v-click>
+<v-clicks>
+
+- **En los datos**, es el paso de gradiente: $F_t(\vx^{(i)}) \approx F_{t-1}(\vx^{(i)}) + \eta\, r^{(i)}_t$.
+- **En un $\vx$ nuevo**, la corrección es la de la hoja a la que llega.
+- **Regulariza**: una hoja da a todos sus datos la misma corrección, el promedio de sus $r^{(i)}_t$; no persigue el ruido de cada uno.
+
+</v-clicks>
 </div>
 <div v-click>
 
-| pérdida | $\ell(y, F)$ | pseudo-residuo |
-|---|---|---|
-| cuadrática | $\frac12 (y - F)^2$ | $y - F$ |
-| absoluta | $\lvert y - F \rvert$ | $\operatorname{signo}(y - F)$ |
-| logística | $\ln(1 + e^{F}) - yF$ | $y - p$ |
-| exponencial | $e^{-yF}$ | $y\, e^{-yF}$ |
+<Caja tipo="algoritmo" nombre="gradient boosting (Friedman, 2001)">
 
-<div class="pequeno tenue">
+1. $F_0 = \argmin_c \sum_{i} \ell(y^{(i)}, c)$: la mejor constante (el promedio, con la cuadrática).
+2. Para $t = 1, \dots, B$ (número de árboles):
+   1. pseudo-residuos $r^{(i)}_t$, $i = 1, \dots, M$;
+   2. ajustar el árbol $h_t$ a los pares $\big(\vx^{(i)}, r^{(i)}_t\big)$;
+   3. $F_t = F_{t-1} + \eta\, h_t$, con $\eta \in (0, 1]$ la tasa de aprendizaje.
 
-Logística con $y \in \{0, 1\}$, $F$ el log-momio y $p = \sigma(F) = 1/(1 + e^{-F})$: «etiqueta menos probabilidad». $\eta$ es la **tasa de aprendizaje**.
-
+</Caja>
 </div>
 </div>
-</div>
-
-<!--
-Con la pérdida cuadrática, el algoritmo es: cada árbol se ajusta a lo que los anteriores no explicaron. Con la absoluta solo importa el signo del residuo, así que un atípico no jala más que cualquier otro punto. Para pérdidas que no son la cuadrática, el valor de cada hoja se reoptimiza (mediana para la absoluta, un paso de Newton para la logística); eso lleva directo a XGBoost.
--->
 
 ---
 
@@ -257,9 +381,44 @@ Con la pérdida cuadrática, el algoritmo es: cada árbol se ajusta a lo que los
 <BoostingEtapas />
 
 <!--
-Bicicletas de Washington, solo días laborales de entrenamiento, un solo atributo: la hora. Tocones y η = 0.5.
-Avanzar t: 0 (solo el promedio), 1, 2, 3... A la derecha, los residuos y el tocón rojo que se ajusta en la siguiente ronda: siempre corta donde los residuos cambian de signo en promedio. Con 300 tocones, la suma de escalones casi coincide con el promedio por hora (puntos dorados): es lo mejor que se puede con pérdida cuadrática y un atributo discreto.
+Bicicletas, solo días laborales de entrenamiento, un solo atributo: la hora. Tocones (árboles de una sola pregunta) y η = 0.5.
+Avanzar t: 0 (solo el promedio), 1, 2, 3... A la derecha están los pseudo-residuos r = y − F_t y, en rojo, el tocón h_{t+1} que se les ajusta: es el árbol que imita al gradiente. Siempre corta donde los residuos cambian de signo en promedio. Ese tocón, multiplicado por η, se suma a la curva azul de la izquierda.
+Con 300 tocones, la suma de escalones casi coincide con el promedio por hora (puntos dorados): es lo mejor que se puede con pérdida cuadrática y un atributo discreto.
 -->
+
+---
+
+# Otras pérdidas, el mismo algoritmo
+
+<div class="cols" style="grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: 36px">
+<div>
+
+| pérdida | $\ell(y, F)$ | $r = -\partial \ell / \partial F$ |
+|---|---|---|
+| cuadrática | $\frac12 (y - F)^2$ | $y - F$ |
+| absoluta | $\lvert y - F \rvert$ | $\operatorname{signo}(y - F)$ |
+| Poisson | $e^{F} - yF$ | $y - e^{F}$ |
+| logística | $\ln(1 + e^{F}) - yF$ | $y - p$ |
+| exponencial | $e^{-yF}$ | $y\, e^{-yF}$ |
+
+
+</div>
+<div>
+
+<v-clicks>
+
+- Solo cambia el paso 2.1: el árbol siempre se ajusta por mínimos cuadrados a los $r^{(i)}_t$.
+- Sin la cuadrática, el promedio de los $r$ de una hoja no es el mejor valor: Friedman **reoptimiza cada hoja** (mediana con la absoluta, paso de Newton con la logística). Generalizada, esa idea es XGBoost.
+
+</v-clicks>
+
+<div class="pequeno">
+
+**Absoluta:** regresión robusta a atípicos. **Poisson:** conteos; $F$ es el logaritmo de la media $\mu = e^{F}$. **Logística:** clases $y \in \{0, 1\}$; $F$ es el log-momio y $p = \sigma(F) = 1/(1 + e^{-F})$ la probabilidad. **Exponencial:** la de AdaBoost, con $y \in \{-1, +1\}$.
+
+</div>
+</div>
+</div>
 
 ---
 
@@ -270,30 +429,31 @@ Avanzar t: 0 (solo el promedio), 1, 2, 3... A la derecha, los residuos y el toc�
 
 ```python
 def gradient_boosting(X, y, B, eta, profundidad):
-    F = np.full(len(y), y.mean())
+    F = np.full(len(y), y.mean())       # F_0: el promedio
     arboles = []
     for t in range(B):
-        r = y - F                        # pseudo-residuos
+        r = y - F      # pseudo-residuos: -dℓ/dF, pérdida cuadrática
         h = DecisionTreeRegressor(max_depth=profundidad).fit(X, r)
-        F += eta * h.predict(X)
+        F += eta * h.predict(X)          # F_t = F_{t-1} + η h_t
         arboles.append(h)
     return arboles
 ```
 
 <div class="pequeno tenue" style="margin-top: 14px">
 
-$B = 300$ árboles de profundidad 4, tasa $\eta = 0.1$. Contra `GradientBoostingRegressor`: diferencia máxima de $1.3 \times 10^{-12}$ bicicletas.
+$B = 300$ árboles de profundidad 4, $\eta = 0.1$. Contra `GradientBoostingRegressor` de scikit-learn: diferencia máxima de $1.3 \times 10^{-12}$ bicicletas.
 
 </div>
 </div>
 <div v-click>
 
-Bicicletas de Washington, RECM de prueba con los atributos crudos (sin interacciones a mano):
+RECM de prueba, mismos siete atributos:
 
 | modelo | RECM |
 |---|---|
-| regresión lineal | 86.4 |
-| regresión de Poisson | 72.2 |
+| predecir el promedio | 181.8 |
+| regresión lineal | 143.2 |
+| un árbol de profundidad 10 | 70.2 |
 | *gradient boosting*, cuadrática | **59.9** |
 | `HistGradientBoosting`, Poisson | **56.5** |
 
@@ -301,7 +461,7 @@ Bicicletas de Washington, RECM de prueba con los atributos crudos (sin interacci
 </div>
 
 <!--
-Los árboles de profundidad 4 combinan hora, tipo de día y temperatura en una misma hoja: descubren solos la interacción que el modelo lineal necesitó construida a mano. Y, como con los modelos lineales, para estos conteos la pérdida de Poisson baja un poco más el error.
+La regresión lineal no puede representar los dos picos del día laboral con la hora como número. Los árboles de profundidad 4 combinan hora, tipo de día y temperatura en una misma hoja: encuentran solos las interacciones. Para estos conteos, la pérdida de Poisson baja un poco más el error. HistGradientBoosting es la versión con histogramas de scikit-learn (sección 4).
 Para que coincidan también los desempates, en la libreta se le pasa a cada árbol el mismo generador aleatorio que usa scikit-learn.
 -->
 
@@ -312,7 +472,7 @@ numero: 3
 
 # Una campaña de mercadeo bancario
 
-Cinco modelos, una fuga de información y la parada temprana.
+Seis modelos, una fuga de información y la parada temprana.
 
 ---
 layout: caso
@@ -330,7 +490,13 @@ Un centro de llamadas ofrece depósitos a plazo. Cada llamada cuesta tiempo de u
 
 **Datos:** edad, trabajo, estado civil, escolaridad, saldo, hipoteca, préstamo; día, mes, tipo de contacto y **duración** de la llamada; cuántas veces se le llamó y el resultado de campañas anteriores.
 
-**Problema:** antes de marcar, estimar la probabilidad de que el cliente contrate, para ordenar la lista. Métrica: **AUC**. Partición estratificada 75/25.
+**Problema:** antes de marcar, estimar la probabilidad de que el cliente contrate, para ordenar la lista. Partición estratificada 75/25.
+
+</v-click>
+
+<v-click>
+
+**Métrica:** la **AUC**, el área bajo la curva ROC. Es la probabilidad de que, al tomar un cliente que contrata y uno que no, el modelo le dé mayor probabilidad al primero: 0.5 es ordenar al azar; 1, un orden perfecto.
 
 </v-click>
 
@@ -350,7 +516,7 @@ Con todos los atributos, AUC de prueba:
 
 | modelo | AUC |
 |---|---|
-| logística | 0.905 |
+| regresión logística | 0.905 |
 | `HistGradientBoosting` | **0.934** |
 | solo la duración | 0.800 |
 
@@ -372,22 +538,23 @@ Dejar que el grupo se entusiasme con el 0.93 antes de preguntar cuándo se conoc
 
 ---
 
-# Cinco modelos sin trampa
+# Seis modelos sin trampa
 
 <div class="cols" style="grid-template-columns: 6fr 5fr; gap: 40px">
 <div>
 
 | modelo | AUC | captura al 20 % |
 |---|---|---|
-| logística | 0.773 | 55.6 % |
+| regresión logística | 0.773 | 55.6 % |
 | bosque aleatorio | 0.802 | 61.8 % |
 | `HistGradientBoosting` | 0.804 | 62.8 % |
-| XGBoost | **0.808** | 62.9 % |
+| XGBoost | 0.808 | 62.9 % |
 | LightGBM | 0.806 | 62.9 % |
+| CatBoost | **0.810** | **63.2 %** |
 
 <div class="pequeno tenue">
 
-Sin la duración. Captura: proporción de los que contratan que están en el 20 % de la lista con mayor probabilidad (al azar sería 20 %).
+Sin la duración. **Captura:** de los que contratan, cuántos quedan en el 20 % de la lista con mayor probabilidad (al azar, 20 %). **Bosque:** 500 árboles profundos con remuestras.
 
 </div>
 </div>
@@ -395,23 +562,23 @@ Sin la duración. Captura: proporción de los que contratan que están en el 20 
 
 <v-clicks>
 
-- Los tres *boostings* empatan: las milésimas entre ellos cambiarían con otra partición.
-- Sobre la logística: siete puntos más de captura, cientos de clientes en una campaña.
-- Todos entrenan en segundos o menos; XGBoost y LightGBM, en menos de uno.
+- Los cuatro *boostings* empatan: las milésimas entre ellos cambiarían con otra partición.
+- Sobre la logística, siete puntos más de captura: cientos de clientes en una campaña.
+- Todos entrenan en segundos o menos; CatBoost es el más lento (unos 6 s).
 
 </v-clicks>
 
 <div v-click class="nota">
 
-Lo más importante para el modelo es el **mes** y el tipo de **contacto**: identifican *qué campaña* era. Las filas están en orden temporal; una validación temporal (entrenar con campañas anteriores y probar con las siguientes) sería más honesta.
+Lo más importante para el modelo es el **mes** y el tipo de **contacto**: identifican *qué campaña* era. Las filas están en orden temporal; entrenar con campañas anteriores y probar con las siguientes sería más honesto.
 
 </div>
 </div>
 </div>
 
 <!--
-XGBoost y LightGBM con tasa 0.05 y el número de árboles por parada temprana en un 20 % de validación (365 y 132 árboles), reentrenados con todo el entrenamiento. HistGradientBoosting con sus valores por omisión.
-Captura al 10 %: todos alrededor del 42 %; los clientes más obvios (los que ya contrataron en una campaña anterior) son fáciles para cualquier modelo. La diferencia aparece más abajo en la lista.
+XGBoost, LightGBM y CatBoost con tasa 0.05 y el número de árboles por parada temprana en un 20 % de validación (365, 132 y 557 árboles), reentrenados con todo el entrenamiento. XGBoost con profundidad 4, LightGBM con 15 hojas, CatBoost con profundidad 6 (su valor por omisión). HistGradientBoosting con sus valores por omisión.
+Captura al 10 %: todos alrededor del 42–44 %; los clientes más obvios (los que ya contrataron en una campaña anterior) son fáciles para cualquier modelo. La diferencia aparece más abajo en la lista.
 Importancia por permutación en prueba (caída de AUC): mes 0.089, contacto 0.065, resultado previo 0.027, día 0.024. Las llamadas con contacto «unknown» son casi todas de la primera campaña.
 -->
 
@@ -427,7 +594,7 @@ Importancia por permutación en prueba (caída de AUC): mes 0.089, contacto 0.06
 
 <div class="pequeno tenue" style="margin-top: 10px">
 
-XGBoost, árboles de profundidad 4, en un 20 % de validación. Mínimos: 0.2925 con 33 árboles ($\eta = 0.3$); 0.2899 con 175 ($\eta = 0.1$) y con 406 ($\eta = 0.03$).
+XGBoost, profundidad 4. Error: entropía cruzada, $-\frac1M\sum_i \big[y^{(i)} \ln p^{(i)} + (1 - y^{(i)}) \ln(1 - p^{(i)})\big]$, con $p^{(i)}$ la probabilidad estimada. Mínimos: 0.2925 (33 árboles, $\eta = 0.3$) y 0.2899 (175 con $\eta = 0.1$; 406 con $\eta = 0.03$).
 
 </div>
 </div>
@@ -453,64 +620,127 @@ layout: seccion
 numero: 4
 ---
 
-# XGBoost y LightGBM por dentro
+# XGBoost, LightGBM y CatBoost por dentro
 
-Segundo orden, regularización e histogramas.
+Segundo orden, histogramas y categorías sin fugas.
 
 ---
 
-# El peso óptimo de una hoja
+# XGBoost: usar también la curvatura
 
-<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 44px">
+<div class="cols" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 44px">
 <div>
 
-XGBoost (Chen y Guestrin, 2016) agrega al árbol nuevo $f$, con $J$ hojas de valores $w_1, \dots, w_J$, una penalización
+El *gradient boosting* solo usa la **pendiente** de la pérdida. XGBoost (Chen y Guestrin, 2016) usa también la **curvatura**. Si a la predicción actual $F$ de un dato le sumamos una corrección $w$, por Taylor:
 
 $$
-\Omega(f) = \gamma J + \tfrac{\lambda}{2} \textstyle\sum_{q=1}^{J} w_q^2
+\ell(y, F + w) \approx \ell(y, F) + g\, w + \tfrac12 h\, w^2 ,
 $$
 
-($\gamma$: precio por hoja; $\lambda$: fuerza de la regularización)
+con $g = \partial \ell / \partial F$ y $h = \partial^2 \ell / \partial F^2$, ambas evaluadas en $F$.
 
 <v-click>
 
-y aproxima la pérdida a **segundo orden** alrededor de $F_{t-1}$, con las derivadas de la pérdida $\ell$ de cada dato $g^{(i)} = \partial_F \ell$ y $h^{(i)} = \partial^2_F \ell$:
-
-$$
-\sum_i \Big[ g^{(i)} f(\vx^{(i)}) + \tfrac12 h^{(i)} f(\vx^{(i)})^2 \Big] + \Omega(f) .
-$$
+Es una parábola en $w$, con mínimo en $w^* = -g/h$: un **paso de Newton**. La pendiente dice hacia dónde moverse; la curvatura, cuánto.
 
 </v-click>
 </div>
-<div>
+<div v-click>
 
-<v-click>
-
-Agrupando por hojas, con $G_q = \sum_{i \in q} g^{(i)}$ y $H_q = \sum_{i \in q} h^{(i)}$ (sumas sobre los datos de la hoja $q$), cada hoja es una parábola independiente:
-
-$$
-\sum_{q=1}^{J} \Big[ G_q w_q + \tfrac12 (H_q + \lambda)\, w_q^2 \Big] + \gamma J
-$$
-
-</v-click>
-
-<v-click>
-
-$$
-w_q^* = -\frac{G_q}{H_q + \lambda}, \qquad \text{pérdida} = -\frac12 \sum_q \frac{G_q^2}{H_q + \lambda} + \gamma J .
-$$
-
-</v-click>
-
-<v-click>
+| pérdida | $g$ | $h$ |
+|---|---|---|
+| cuadrática | $F - y$ | $1$ |
+| logística | $p - y$ | $p(1 - p)$ |
+| Poisson | $e^{F} - y$ | $e^{F}$ |
 
 <div class="pequeno">
 
-Logística, con $p = \sigma(F)$: $g = p - y$, $h = p(1-p)$; con $\lambda = 0$ es un **paso de Newton** por hoja. Cuadrática: $h = 1$, el promedio de los residuos encogido por $\lambda$.
+$p = \sigma(F)$, la probabilidad estimada. Con la cuadrática, $w^* = y - F$: el residuo completo. Con la logística, la curvatura $p(1 - p)$ es casi cero cuando el modelo ya está muy seguro ($p$ cerca de 0 o de 1); si además se equivoca, $g$ es cercano a $\pm 1$ y el paso de Newton es enorme. Por eso XGBoost lo regulariza.
 
 </div>
+</div>
+</div>
+
+---
+
+# El objetivo de cada ronda
+
+<div class="cols" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 44px">
+<div>
+
+Un árbol con $J$ hojas es constante por pedazos: $f(\vx) = w_{q(\vx)}$, con $q(\vx) \in \{1, \dots, J\}$ la hoja a la que llega $\vx$ y $w_q$ su valor. En la ronda $t$, XGBoost elige el árbol $f$ que minimiza
+
+$$
+\sum_{i=1}^{M} \ell\big(y^{(i)}, F_{t-1}(\vx^{(i)}) + f(\vx^{(i)})\big) + \Omega(f) ,
+$$
+
+$$
+\Omega(f) = \gamma J + \tfrac{\lambda}{2} \textstyle\sum_{q=1}^{J} w_q^2 .
+$$
+
+<div class="pequeno">
+
+$\gamma$: precio de cada hoja, castiga los árboles grandes. $\lambda$: encoge los $w_q$ hacia 0, frena los pasos enormes.
+
+</div>
+</div>
+<div v-click>
+
+Con Taylor alrededor de $F_{t-1}(\vx^{(i)})$ en cada dato, y quitando los términos que no dependen de $f$, queda:
+
+$$
+\sum_{i=1}^{M} \Big[ g^{(i)} f(\vx^{(i)}) + \tfrac12 h^{(i)} f(\vx^{(i)})^2 \Big] + \Omega(f) ,
+$$
+
+con $g^{(i)}$ y $h^{(i)}$ la primera y la segunda derivadas de la pérdida del dato $i$ en $F_{t-1}(\vx^{(i)})$.
+
+<div class="nota">
+
+Se calculan una vez por ronda; después, construir el árbol solo requiere **sumar** $g$ y $h$. Sirve para cualquier pérdida con dos derivadas.
+
+</div>
+</div>
+</div>
+
+---
+
+# El valor óptimo de cada hoja
+
+<div class="cols" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 44px">
+<div>
+
+Sea $I_q = \{i : q(\vx^{(i)}) = q\}$, los datos que llegan a la hoja $q$. Todos reciben el mismo valor $w_q$; con las sumas
+
+$$
+G_q = \sum_{i \in I_q} g^{(i)}, \qquad H_q = \sum_{i \in I_q} h^{(i)} ,
+$$
+
+el objetivo se separa en una parábola por hoja:
+
+$$
+\sum_{q=1}^{J} \Big[ G_q w_q + \tfrac12 (H_q + \lambda)\, w_q^2 \Big] + \gamma J .
+$$
+
+</div>
+<div>
+
+<v-click>
+
+Derivando cada parábola respecto a $w_q$ e igualando a cero:
+
+$$
+w_q^* = -\frac{G_q}{H_q + \lambda} .
+$$
 
 </v-click>
+
+<v-clicks>
+
+- **Cuadrática:** $h^{(i)} = 1$, $H_q$ es el número de datos de la hoja y $-G_q$ la suma de sus residuos: $w_q^*$ es su **promedio, encogido** por $\lambda$.
+- **Logística con $\lambda = 0$:** un paso de Newton por hoja.
+- Con $w_q^*$, cada hoja baja el objetivo en $\frac12 G_q^2 / (H_q + \lambda)$: con eso se comparan árboles.
+
+</v-clicks>
 </div>
 </div>
 
@@ -518,33 +748,38 @@ Logística, con $p = \sigma(F)$: $g = p - y$, $h = p(1-p)$; con $\lambda = 0$ es
 
 # La ganancia de una división
 
-<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 44px">
+<div class="cols" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px">
 <div>
 
-Si una hoja se divide en dos, con sumas de derivadas $(G_I, H_I)$ a la izquierda y $(G_D, H_D)$ a la derecha, la pérdida baja en
+Una hoja se parte en izquierda y derecha, con sumas $(G_I, H_I)$ y $(G_D, H_D)$. El objetivo mínimo antes de partirla, menos el de después:
 
 $$
-\frac12 \left[ \frac{G_I^2}{H_I + \lambda} + \frac{G_D^2}{H_D + \lambda} - \frac{(G_I + G_D)^2}{H_I + H_D + \lambda} \right] - \gamma .
+\tfrac12 \left[ \frac{G_I^2}{H_I + \lambda} + \frac{G_D^2}{H_D + \lambda} - \frac{(G_I + G_D)^2}{H_I + H_D + \lambda} \right] - \gamma .
 $$
 
-<v-click>
+<v-clicks>
 
-Es el criterio para elegir divisiones (en vez de Gini o suma de cuadrados). Si ninguna gana más que $\gamma$, la hoja no se divide: **poda incorporada**, porque cada hoja nueva cuesta $\gamma$.
+- Se calcula para cada atributo y umbral, y gana la mayor: es el criterio de división, en lugar de una impureza.
+- Si ninguna es positiva, la hoja no se divide: **poda incorporada**.
 
-</v-click>
+</v-clicks>
 </div>
 <div v-click>
 
 <Caja tipo="ejemplo" nombre="verificación con XGBoost">
 
-Un árbol de profundidad 1 sobre la edad, logística, $\lambda = 1$, desde $p = 0.5$; $G$ y $H$ suman las derivadas de cada hoja:
+<div class="pequeno">
 
-| | $G$ | $H$ | $w^*$ |
-|---|---|---|---|
-| edad < 61 | 12,910.0 | 8,249.00 | −1.5648 |
-| edad ≥ 61 | 77.0 | 228.00 | −0.3362 |
+Banco, un árbol de profundidad 1 sobre la edad, logística, $\lambda = 1$, desde $p = 0.5$: $g^{(i)} = 0.5 - y^{(i)}$ y $h^{(i)} = 0.25$.
+
+| hoja | datos | contratan | $G$ | $H$ | $w^*$ |
+|---|---|---|---|---|---|
+| < 61 | 32,996 | 3,588 | 12,910 | 8,249 | −1.565 |
+| ≥ 61 | 912 | 379 | 77 | 228 | −0.336 |
 
 Ganancia a mano: **167.0**. XGBoost reporta 334.0 (omite el $\frac12$) y las mismas hojas.
+
+</div>
 
 </Caja>
 
@@ -552,53 +787,292 @@ Ganancia a mano: **167.0**. XGBoost reporta 334.0 (omite el $\frac12$) y las mis
 </div>
 
 <!--
-Las dos hojas son negativas porque partimos de p = 0.5 y solo el 11.7 % contrata; la de 61 años o más baja mucho menos el log-momio (en ese grupo contrata una proporción mucho mayor). Por eso en la práctica se parte del log-momio de la prevalencia.
+H es la cuarta parte de los datos de la hoja y G la mitad de los datos menos los que contratan.
+Las dos hojas son negativas porque partimos de p = 0.5 y solo el 11.7 % contrata; la de 61 años o más baja mucho menos el log-momio porque ahí contrata el 42 %, contra el 11 % de los menores. Por eso en la práctica se parte del log-momio de la prevalencia.
 -->
 
 ---
 
-# Histogramas, crecimiento por hojas y GOSS
+# Los hiperparámetros de XGBoost, en la fórmula
 
-<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
+<div class="cols" style="grid-template-columns: minmax(0, 7fr) minmax(0, 5fr); gap: 40px">
+<div class="pequeno">
+
+| hiperparámetro | qué controla |
+|---|---|
+| `learning_rate` | la tasa $\eta$ en $F_t = F_{t-1} + \eta f_t$ |
+| `n_estimators` | las rondas $B$ (mejor, con parada temprana) |
+| `max_depth` | la profundidad de cada árbol |
+| `reg_lambda` | $\lambda$: encoge los $w_q$ |
+| `gamma` | $\gamma$: ganancia mínima para dividir |
+| `min_child_weight` | el $H_q$ mínimo de una hoja |
+| `subsample`, `colsample_bytree` | fracción de datos y de atributos que ve cada árbol |
+
+</div>
 <div>
 
 <v-clicks>
 
-- **Histogramas.** Cada atributo se discretiza una vez en ≤ 255 intervalos. Buscar la división es recorrer 255 sumas de las derivadas $g$ y $h$, no $M$ umbrales; el histograma de una hija es el del padre menos el de su hermana.
-- **Crecimiento por hojas** (LightGBM). Se divide siempre la hoja de mayor ganancia, hasta `num_leaves`. Baja más la pérdida con las mismas hojas; puede sobreajustar.
-- **GOSS** (LightGBM). Los datos con gradiente $\lvert g^{(i)}\rvert$ chico ya están bien ajustados: se usan todos los de gradiente grande y una muestra, reponderada, de los demás.
+- **Faltantes:** cada división prueba mandarlos a la izquierda y a la derecha, y se queda con la de mayor ganancia. No hace falta imputar.
+- **Submuestreo:** cada árbol ve otra parte de los datos y atributos: menos varianza y más rapidez, como en un bosque aleatorio.
 
 </v-clicks>
+</div>
+</div>
+
+<!--
+Con la pérdida cuadrática, h = 1 y min_child_weight es el número mínimo de datos por hoja.
+En el banco usamos max_depth=4, learning_rate=0.05 y parada temprana; lo demás con sus valores por omisión (λ = 1, γ = 0).
+-->
+
+---
+
+# Histogramas: buscar divisiones sin ordenar
+
+<div class="cols" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 44px">
+<div>
+
+El algoritmo **exacto** ordena cada atributo y prueba cada umbral entre valores distintos: hasta $M - 1$ por atributo, en cada nodo de cada árbol.
+
+<v-click>
+
+Con **histogramas** (LightGBM, Ke et al., 2017):
+
+1. Antes de entrenar, cada atributo se parte una vez en ≤ 255 intervalos (por cuantiles).
+2. En cada nodo, una pasada por los datos suma $g$ y $h$ en cada intervalo.
+3. Solo se prueban los bordes; $G_I$ y $H_I$ son sumas acumuladas.
+
+</v-click>
+</div>
+<div>
+
+<v-clicks>
+
+- El saldo del banco toma **6,421** valores distintos; con histogramas, a lo más 255 umbrales.
+- El histograma de una hija es el del padre menos el de su hermana: solo se calcula el de la más chica.
+- Con millones de filas, es la diferencia entre segundos y horas.
+- Hoy lo usan también XGBoost (`tree_method="hist"`, por omisión) y scikit-learn (`HistGradientBoosting`).
+
+</v-clicks>
+</div>
+</div>
+
+<!--
+En la libreta, con 34,000 llamadas y 100 árboles de profundidad 4, el gradient boosting «exacto» de scikit-learn tarda varias veces más que HistGradientBoosting (los tiempos dependen de la máquina).
+Perder precisión en los umbrales casi no cuesta: la tasa de aprendizaje y la suma de cientos de árboles suavizan la diferencia.
+-->
+
+---
+
+# LightGBM: crecer por hojas y muestrear por gradiente
+
+<div class="cols" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px">
+<div>
+
+<div style="display: flex; gap: 8px; justify-content: center">
+<FormasArbol tipo="niveles" :ancho="270" />
+<FormasArbol tipo="hojas" :ancho="270" />
+</div>
+
+<div class="pequeno">
+
+Tres divisiones, numeradas en orden. **Por hojas** (LightGBM) se divide siempre la hoja de mayor ganancia, hasta `num_leaves` hojas: con las mismas hojas baja más la pérdida, pero puede hacer ramas muy profundas.
+
+</div>
+</div>
+<div v-click>
+
+**GOSS:** un dato con $\lvert g^{(i)} \rvert$ chico ya está bien ajustado y aporta poco a la ganancia. En cada ronda:
+
+1. se conserva el $a$ % de los datos con mayor $\lvert g^{(i)} \rvert$;
+2. de los demás se sortea un $b$ %, con $g$ y $h$ multiplicados por $(1 - a)/b$ para no sesgar $G$ y $H$.
+
+<div class="pequeno">
+
+Con $a = 20$ % y $b = 10$ %, cada árbol usa el 30 % de los datos. **EFB:** junta en uno los atributos ralos que nunca son distintos de cero a la vez, como las columnas de un *one-hot*.
+
+</div>
+</div>
+</div>
+
+<!--
+GOSS: gradient-based one-side sampling. Se activa con data_sample_strategy="goss". Las ramas profundas del crecimiento por hojas se limitan con num_leaves y min_child_samples.
+XGBoost crece por niveles por omisión (grow_policy="depthwise").
+-->
+
+---
+
+# CatBoost: el problema de las categorías
+
+<div class="cols" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px">
+<div>
+
+CatBoost (Prokhorenkova et al., 2018) nació para categóricas con muchos valores, como un código postal: con *one-hot* serían miles de columnas. La alternativa es cambiar cada categoría por la **proporción de positivos** que tiene en entrenamiento:
+
+$$
+\hat x^{(i)} = \frac{\sum_{j:\, c^{(j)} = c^{(i)}} y^{(j)} + a\, \bar p}{\#\{j : c^{(j)} = c^{(i)}\} + a}
+$$
+
+<div class="pequeno">
+
+$c^{(i)}$: categoría del dato $i$; $\bar p$: proporción global de positivos; $a > 0$: cuánto pesa $\bar p$ cuando la categoría tiene pocos datos.
+
+</div>
 </div>
 <div>
 
 <v-click>
 
-El saldo toma **6,421** valores distintos en el entrenamiento; con histogramas, a lo más 255.
+<div class="nota">
+
+La suma incluye a $j = i$: **la codificación contiene la propia respuesta**. Con un solo dato en la categoría, $\hat x^{(i)} = (y^{(i)} + a \bar p)/(1 + a)$.
+
+</div>
 
 </v-click>
 
 <v-click>
 
-| biblioteca | histogramas | categóricas nativas |
+<Caja tipo="ejemplo" nombre="una columna sin información">
+
+<div class="pequeno">
+
+Al banco le agregamos un identificador **al azar** (7,888 valores) codificado así. `HistGradientBoosting`, AUC:
+
+| | entrenamiento | prueba |
 |---|---|---|
-| XGBoost | `tree_method="hist"` | sí |
-| LightGBM | siempre | sí |
-| scikit-learn | `HistGradientBoosting` | sí |
-
-<div class="pequeno tenue">
-
-LightGBM: Ke et al. (2017). Con cientos de miles o millones de filas, los histogramas son la diferencia entre entrenar en segundos o en horas.
+| sin el identificador | 0.859 | 0.804 |
+| con el identificador | 0.959 | **0.539** |
 
 </div>
+
+</Caja>
 
 </v-click>
 </div>
 </div>
 
 <!--
-En la libreta, con 34,000 llamadas, 100 árboles de profundidad 4: el gradient boosting «exacto» de scikit-learn tarda varias veces más que HistGradientBoosting (los tiempos dependen de la máquina).
-Las categóricas nativas parten las categorías en dos grupos ordenándolas por G/H, sin one-hot.
+En entrenamiento la columna «predice»; en prueba no dice nada, y el modelo confió en ella. Es una fuga de información creada por el preprocesamiento.
+Con a = 1 y la proporción global de 11.7 %, un cliente que contrató y es el único de su identificador queda codificado como 0.56; uno que no, como 0.06.
+-->
+
+---
+
+# CatBoost: estadísticas ordenadas
+
+<div class="cols" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px">
+<div>
+
+Se barajan los datos de entrenamiento al azar, y cada dato se codifica **solo con los que van antes** que él:
+
+$$
+\hat x^{(i)} = \frac{\sum_{j \prec i,\; c^{(j)} = c^{(i)}} y^{(j)} + a\, \bar p}{\#\{j \prec i : c^{(j)} = c^{(i)}\} + a}
+$$
+
+$j \prec i$: $j$ va antes que $i$ en ese orden. La respuesta del propio dato nunca entra. En prueba se usan todos los datos de entrenamiento.
+
+<v-click>
+
+<div class="pequeno">
+
+**Boosting ordenado:** la misma idea con los pseudo-residuos; el $r^{(i)}$ de un dato se calcula con un modelo que no lo vio (`boosting_type="Ordered"`, útil con pocos datos).
+
+</div>
+
+</v-click>
+</div>
+<div v-click>
+
+<Caja tipo="ejemplo" nombre="el mismo identificador al azar">
+
+AUC de prueba en el banco:
+
+| | AUC |
+|---|---|
+| sin el identificador | 0.804 |
+| codificación con todos los datos | **0.539** |
+| codificación ordenada | 0.805 |
+| CatBoost, como categoría | 0.806 |
+
+Con la codificación ordenada, la columna sin información ya no engaña al modelo.
+
+</Caja>
+
+</div>
+</div>
+
+<!--
+Las tres primeras filas usan HistGradientBoosting; la última, CatBoost con el identificador entre sus categorías.
+El precio: los primeros datos del orden se codifican con muy poca información. CatBoost usa varios órdenes al azar para promediar ese efecto.
+-->
+
+---
+
+# CatBoost: árboles simétricos
+
+<div class="cols" style="grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 44px">
+<div>
+
+<FormasArbol tipo="simetrico" :ancho="480" />
+
+</div>
+<div>
+
+En cada nivel, **la misma pregunta** en todos los nodos. Un árbol de profundidad $d$ es una lista de $d$ preguntas, y la hoja de $\vx$ son sus $d$ respuestas sí/no: un número binario entre 0 y $2^d - 1$.
+
+<v-click>
+
+<div class="pequeno">
+
+Con el árbol de la izquierda, un dato con $x_1 = 3$ y $x_3 = 4$ responde «sí» y «no»: hoja $10$.
+
+</div>
+
+</v-click>
+
+<v-clicks>
+
+- **Predicción muy rápida:** $d$ comparaciones, sin recorrer ramas.
+- **Árboles más restringidos:** sobreajustan menos y funcionan bien con los valores por omisión.
+
+</v-clicks>
+</div>
+</div>
+
+<!--
+CatBoost usa profundidad 6 por omisión: 64 hojas por árbol. También crea combinaciones de categorías (por ejemplo, trabajo × mes) codificadas con la misma estadística ordenada.
+-->
+
+---
+
+# Tres bibliotecas, la misma idea
+
+<div class="pequeno">
+
+| | XGBoost | LightGBM | CatBoost |
+|---|---|---|---|
+| origen | 2016, Chen y Guestrin | 2017, Microsoft (Ke et al.) | 2018, Yandex (Prokhorenkova et al.) |
+| forma del árbol | por niveles | por hojas | simétrico |
+| divisiones | histogramas o exacta | histogramas, GOSS, EFB | histogramas |
+| categóricas | nativas | nativas | estadísticas ordenadas |
+| destaca por | regularización, faltantes | rapidez con muchos datos | categóricas, valores por omisión |
+| banco: AUC de prueba | 0.808 | 0.806 | 0.810 |
+
+</div>
+
+<v-click>
+
+<div class="nota" style="margin-top: 18px">
+
+Las tres usan las derivadas $g$ y $h$, hojas $w^* = -G/(H + \lambda)$ y la ganancia de segundo orden. En el banco quedaron a milésimas: importan más la tasa chica con parada temprana y revisar qué atributos se tendrán al decidir.
+
+</div>
+
+</v-click>
+
+<!--
+Las «categóricas nativas» de XGBoost (enable_categorical), LightGBM y HistGradientBoosting parten las categorías en dos grupos ordenándolas por G/H, sin one-hot.
 -->
 
 ---
@@ -606,13 +1080,13 @@ Las categóricas nativas parten las categorías en dos grupos ordenándolas por 
 # Para llevarse
 
 <div class="cols cols-6-4" style="flex: 1">
-<div style="font-size: 25px; line-height: 1.4">
+<div style="font-size: 22px; line-height: 1.35">
 
 1. *Boosting*: un modelo aditivo **por etapas**; cada término corrige a los anteriores. Reduce sesgo, no varianza.
 2. AdaBoost = pérdida exponencial; su error de entrenamiento cae como $\prod_t 2\sqrt{\varepsilon_t(1 - \varepsilon_t)}$, con $\varepsilon_t$ el error ponderado de la ronda $t$.
-3. *Gradient boosting*: árboles ajustados a los **pseudo-residuos**, $-\partial \ell/\partial F$, con $\ell$ la pérdida de cada dato.
-4. XGBoost: segundo orden, hojas $w^* = -G/(H + \lambda)$ con las sumas de derivadas $G$, $H$; tasa chica y **parada temprana**.
-5. Ningún algoritmo protege de una **fuga**: ¿tendré este dato al decidir?
+3. *Gradient boosting*: descenso por gradiente sobre las predicciones. Un árbol imita los **pseudo-residuos** $r = -\partial \ell/\partial F$ y $F_t = F_{t-1} + \eta h_t$.
+4. XGBoost: segundo orden y penalización, $w^* = -G/(H + \lambda)$. LightGBM: histogramas y crecimiento por hojas. CatBoost: categorías codificadas sin su propia respuesta.
+5. Tasa chica y **parada temprana**. Ningún algoritmo protege de una **fuga**: ¿tendré este dato al decidir?
 
 </div>
 <div>
@@ -625,7 +1099,7 @@ Las categóricas nativas parten las categorías en dos grupos ordenándolas por 
 
 **Laboratorio 5:** árboles y *boosting* desde cero.
 
-**Lectura:** *The Elements of Statistical Learning*, cap. 10 (secciones 10.1–10.6 y 10.9–10.12); T. Chen y C. Guestrin, «XGBoost: a scalable tree boosting system», *KDD* (2016).
+**Lectura:** *The Elements of Statistical Learning*, cap. 10; Chen y Guestrin, «XGBoost», *KDD* (2016); Ke et al., «LightGBM», *NeurIPS* (2017); Prokhorenkova et al., «CatBoost: unbiased boosting with categorical features», *NeurIPS* (2018).
 
 </div>
 </div>

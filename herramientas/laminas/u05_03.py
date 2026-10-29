@@ -87,12 +87,14 @@ def datos() -> dict:
     import rdp
     import xgboost as xgb
     import lightgbm as lgb
+    from catboost import CatBoostClassifier
     from threadpoolctl import threadpool_limits
     from sklearn.model_selection import train_test_split
     from sklearn.compose import make_column_transformer
     from sklearn.pipeline import make_pipeline
     from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
-    from sklearn.linear_model import LogisticRegression
+    from sklearn.linear_model import LinearRegression, LogisticRegression
+    from sklearn.tree import DecisionTreeRegressor
     from sklearn.ensemble import (GradientBoostingRegressor, GradientBoostingClassifier, HistGradientBoostingClassifier,
                                   HistGradientBoostingRegressor, RandomForestClassifier)
     from sklearn.inspection import permutation_importance
@@ -154,7 +156,13 @@ def datos() -> dict:
     out["bicis"] = {"dif_max": float(f"{np.abs(pred_nuestro - pred_sk).max():.1e}"),
                     "recm_nuestro": round(float(root_mean_squared_error(yb_te, pred_nuestro)), 1),
                     "recm_sk": round(float(root_mean_squared_error(yb_te, pred_sk)), 1),
-                    "recm_poisson_hgb": round(float(root_mean_squared_error(yb_te, hgb_b.predict(Xb_te))), 1)}
+                    "recm_poisson_hgb": round(float(root_mean_squared_error(yb_te, hgb_b.predict(Xb_te))), 1),
+                    # referencias con los mismos atributos y la misma partición
+                    "recm_promedio": round(float(root_mean_squared_error(yb_te, np.full(len(yb_te), yb.mean()))), 1),
+                    "recm_lineal": round(float(root_mean_squared_error(yb_te, LinearRegression().fit(Xb, yb).predict(Xb_te))), 1),
+                    "recm_arbol10": round(float(root_mean_squared_error(
+                        yb_te, DecisionTreeRegressor(max_depth=10, random_state=0).fit(Xb, yb).predict(Xb_te))), 1),
+                    "n_entrena": len(entrena), "n_prueba": len(prueba), "n_horas": len(b)}
 
     # etapas con tocones sobre la hora (días laborales)
     lab = entrena[entrena.laboral == 1]
@@ -214,6 +222,13 @@ def datos() -> dict:
     paro_xgb = xgb_modelo(3000, early_stopping_rounds=100).fit(X_a, y_a, eval_set=[(X_v, y_v)], verbose=False)
     paro_lgb = lgb_modelo(3000).fit(X_a, y_a, eval_set=[(X_v, y_v)], callbacks=[lgb.early_stopping(100, verbose=False)])
     n_xgb, n_lgb = paro_xgb.best_iteration + 1, paro_lgb.best_iteration_
+
+    def cb_modelo(n, **kw):
+        return CatBoostClassifier(iterations=n, learning_rate=0.05, depth=6, cat_features=categoricas,
+                                  random_seed=SEMILLA, thread_count=4, verbose=0, allow_writing_files=False, **kw)
+
+    paro_cb = cb_modelo(3000, early_stopping_rounds=100).fit(X_a, y_a, eval_set=(X_v, y_v))
+    n_cb = paro_cb.get_best_iteration() + 1
     modelos = {
         "logística": logistica(cols),
         "bosque aleatorio": make_pipeline(
@@ -222,6 +237,7 @@ def datos() -> dict:
         "HistGradientBoosting": HistGradientBoostingClassifier(categorical_features="from_dtype", random_state=SEMILLA),
         "XGBoost": xgb_modelo(n_xgb),
         "LightGBM": lgb_modelo(n_lgb),
+        "CatBoost": cb_modelo(n_cb),
     }
 
     def captura(p, y, fraccion):
@@ -239,7 +255,7 @@ def datos() -> dict:
                      "captura": [round(float(captura(p, y_te, q)), 3) for q in (0.1, 0.2, 0.3)]})
     imp = permutation_importance(modelos["LightGBM"], Xte, y_te, scoring="roc_auc", n_repeats=5, random_state=SEMILLA, n_jobs=4)
     imp = pd.Series(imp.importances_mean, index=cols).sort_values(ascending=False).head(5)
-    out["comparacion"] = {"modelos": comp, "n_xgb": int(n_xgb), "n_lgb": int(n_lgb),
+    out["comparacion"] = {"modelos": comp, "n_xgb": int(n_xgb), "n_lgb": int(n_lgb), "n_cb": int(n_cb),
                           "importancia": [[k, round(float(v), 3)] for k, v in imp.items()]}
 
     # curvas de tasa de aprendizaje
@@ -280,4 +296,41 @@ def datos() -> dict:
             modelo.fit(X_num, y_tr)
             tiempos[nombre] = round(time.perf_counter() - t0, 2)
     out["histogramas"] = {"saldo_distintos": int(Xtr.saldo.nunique()), "tiempos": tiempos}
+
+    # codificar una categoría con la respuesta: un identificador al azar, sin información
+    azar = np.random.default_rng(0)
+    id_tr = pd.Series(azar.integers(0, 8000, len(Xtr)), index=Xtr.index).astype(str)
+    id_te = pd.Series(azar.integers(0, 8000, len(Xte)), index=Xte.index).astype(str)
+    previa, a = float(y_tr.mean()), 1.0
+
+    def ingenua(c):  # con todos los datos de entrenamiento, incluido el propio
+        g = pd.DataFrame({"c": id_tr, "y": y_tr}).groupby("c").y.agg(["sum", "count"])
+        return ((g["sum"].reindex(c).fillna(0) + a * previa) / (g["count"].reindex(c).fillna(0) + a)).to_numpy()
+
+    def ordenada(c, semilla=0):  # solo con los que van antes en un orden al azar
+        orden = np.random.default_rng(semilla).permutation(len(c))
+        suma, cuenta, cod = {}, {}, np.empty(len(c))
+        for k in orden:
+            ck, yk = c.iloc[k], y_tr.iloc[k]
+            cod[k] = (suma.get(ck, 0) + a * previa) / (cuenta.get(ck, 0) + a)
+            suma[ck] = suma.get(ck, 0) + yk
+            cuenta[ck] = cuenta.get(ck, 0) + 1
+        return cod
+
+    codif = {}
+    for nombre, (c_tr, c_te) in {"sin": (None, None), "ingenua": (ingenua(id_tr), ingenua(id_te)),
+                                 "ordenada": (ordenada(id_tr), ingenua(id_te))}.items():
+        A, B = Xtr.copy(), Xte.copy()
+        if c_tr is not None:
+            A["id"], B["id"] = c_tr, c_te
+        m = HistGradientBoostingClassifier(categorical_features="from_dtype", random_state=SEMILLA).fit(A, y_tr)
+        codif[nombre] = {"auc_tr": round(float(roc_auc_score(y_tr, m.predict_proba(A)[:, 1])), 3),
+                         "auc_te": round(float(roc_auc_score(y_te, m.predict_proba(B)[:, 1])), 3)}
+    A, B = Xtr.copy(), Xte.copy()
+    A["id"], B["id"] = id_tr, id_te
+    m = CatBoostClassifier(iterations=n_cb, learning_rate=0.05, depth=6, cat_features=categoricas + ["id"],
+                           random_seed=SEMILLA, thread_count=4, verbose=0, allow_writing_files=False).fit(A, y_tr)
+    codif["catboost"] = {"auc_te": round(float(roc_auc_score(y_te, m.predict_proba(B)[:, 1])), 3)}
+    codif["n_id"] = int(id_tr.nunique())
+    out["codificacion"] = codif
     return out

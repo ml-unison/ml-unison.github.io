@@ -1,6 +1,7 @@
 """Busca láminas cuyo contenido se sale del área visible o tapa el pie.
 
-Uso: uv run python herramientas/revisar_desborde.py [filtro] [--capturas DIR]
+Uso: uv run python herramientas/revisar_desborde.py [filtro] [--capturas DIR] [--todas]
+(--todas guarda la captura de cada lámina, no solo de las que se desbordan)
 Construye cada presentación (Slidev) en una carpeta temporal, la abre con Chrome
 (playwright) con todos los clics revelados y mide los elementos de cada lámina.
 """
@@ -14,6 +15,7 @@ args = [a for a in sys.argv[1:] if not a.startswith('--')]
 filtro = args[0] if args else ''
 capturas = Path(sys.argv[sys.argv.index('--capturas') + 1]) if '--capturas' in sys.argv else None
 if capturas and str(capturas) in args: args.remove(str(capturas))
+todas = '--todas' in sys.argv
 
 MEDIR = """() => {
   const lay = document.querySelector('.slidev-page-' + %d + ' .slidev-layout') || document.querySelector('.slidev-layout');
@@ -66,9 +68,9 @@ with tempfile.TemporaryDirectory() as tmp, sync_playwright() as pw:
             if res and res[0] > 10:
                 problemas += 1
                 print(f'{f.stem} lámina {i}: se sale {res[0]} px — {res[1]}')
-                if capturas:
-                    capturas.mkdir(parents=True, exist_ok=True)
-                    pag.screenshot(path=str(capturas / f'{f.stem}-{i:02d}.png'))
+            if capturas and (todas or (res and res[0] > 10)):
+                capturas.mkdir(parents=True, exist_ok=True)
+                pag.screenshot(path=str(capturas / f'{f.stem}-{i:02d}.png'))
             i += 1; vistos += 1
         srv.shutdown(); srv.server_close()
         print(f'{f.stem}: {vistos} láminas revisadas')

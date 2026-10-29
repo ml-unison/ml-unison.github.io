@@ -24,13 +24,14 @@
 # 2. demostrar la cota de su **error de entrenamiento** y derivar el peso de cada tocón como el paso óptimo de un **modelo aditivo por etapas con pérdida exponencial**;
 # 3. generalizar a ***gradient boosting***: descenso por gradiente en el espacio de funciones, programado en pocas líneas y verificado contra scikit-learn con las bicicletas de la Unidad 4;
 # 4. predecir quién contrata un depósito a plazo en una **campaña de mercadeo telefónico** de un banco, caer a propósito en una **fuga de información** y salir de ella;
-# 5. comparar logística, bosque, `HistGradientBoostingClassifier`, XGBoost y LightGBM, y estudiar la **tasa de aprendizaje**, el **número de árboles** y la **parada temprana**;
-# 6. derivar el **peso óptimo de una hoja** y la **ganancia de una división** de XGBoost y comprobarlos contra la biblioteca.
+# 5. comparar logística, bosque, `HistGradientBoostingClassifier`, XGBoost, LightGBM y CatBoost, y estudiar la **tasa de aprendizaje**, el **número de árboles** y la **parada temprana**;
+# 6. derivar el **peso óptimo de una hoja** y la **ganancia de una división** de XGBoost y comprobarlos contra la biblioteca;
+# 7. ver por qué codificar una categoría con la respuesta crea una fuga, y cómo la evita CatBoost.
 
 # %% [markdown]
 # ## 0. Preparación del entorno
 #
-# En Colab, la siguiente celda instala el paquete `rdp` del curso (estilo de gráficas, datos y cuestionarios). En tu máquina, si usas el entorno del repositorio, ya está instalado. XGBoost y LightGBM vienen preinstalados en Colab.
+# En Colab, la siguiente celda instala el paquete `rdp` del curso (estilo de gráficas, datos y cuestionarios). En tu máquina, si usas el entorno del repositorio, ya está instalado. XGBoost y LightGBM vienen preinstalados en Colab; CatBoost se instala aquí.
 
 # %%
 import os, sys
@@ -39,6 +40,7 @@ RAMA = "rediseno-2027"  # rama del repositorio del curso de la que se toman paqu
 os.environ["RDP_RAMA"] = RAMA
 if "google.colab" in sys.modules:
     # %pip install -q "rdp @ git+https://github.com/ml-unison/ml-unison.github.io@{RAMA}#subdirectory=paquete"
+    # %pip install -q catboost
     pass
 
 # %%
@@ -54,7 +56,7 @@ from sklearn.model_selection import train_test_split
 from sklearn.compose import make_column_transformer
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import OneHotEncoder, OrdinalEncoder, StandardScaler
-from sklearn.linear_model import LogisticRegression
+from sklearn.linear_model import LinearRegression, LogisticRegression
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.ensemble import (AdaBoostClassifier, GradientBoostingRegressor, GradientBoostingClassifier,
                               HistGradientBoostingClassifier, HistGradientBoostingRegressor,
@@ -63,6 +65,7 @@ from sklearn.metrics import roc_auc_score, root_mean_squared_error
 from threadpoolctl import threadpool_limits
 import xgboost as xgb
 import lightgbm as lgb
+from catboost import CatBoostClassifier
 
 import rdp
 
@@ -378,18 +381,22 @@ print(f"tiempo: nuestro {t_nuestro:.1f} s, scikit-learn {t_sk:.1f} s")
 # %% [markdown]
 # Coinciden hasta el error de redondeo de punto flotante: `GradientBoostingRegressor` con pérdida cuadrática es exactamente este ciclo. (Para que coincidan también los desempates entre divisiones igual de buenas, le pasamos a cada árbol el mismo generador aleatorio que usa scikit-learn.)
 #
-# ¿Qué tan bueno es? La escalera de modelos lineales de la Unidad 4 llegó a una RECM de prueba de 86.4 con la interacción hora × día laboral construida a mano, y la regresión de Poisson a 72.2; un solo árbol de regresión bien elegido, a cerca de 70. Trescientos árboles de profundidad 4, con los atributos crudos:
+# ¿Qué tan bueno es? Lo comparamos con referencias que usan los mismos siete atributos y la misma partición: predecir siempre el promedio, una regresión lineal y un solo árbol de regresión de profundidad 10. (En la Unidad 4, con la interacción hora × día laboral construida a mano, el mejor modelo lineal llegó a 86.4.)
 
 # %%
 hgb_b = HistGradientBoostingRegressor(loss="poisson", random_state=0).fit(Xb, yb)
-tabla_bicis = pd.DataFrame({"RECM de prueba": [86.4, 72.2, root_mean_squared_error(yb_te, pred_sk),
-                                                root_mean_squared_error(yb_te, hgb_b.predict(Xb_te))]},
-                           index=["M4 lineal (Unidad 4)", "M4 Poisson (Unidad 4)",
-                                  "gradient boosting, pérdida cuadrática", "HistGradientBoosting, pérdida de Poisson"])
+referencias = {
+    "predecir el promedio": np.full(len(yb_te), yb.mean()),
+    "regresión lineal": LinearRegression().fit(Xb, yb).predict(Xb_te),
+    "un árbol de profundidad 10": DecisionTreeRegressor(max_depth=10, random_state=0).fit(Xb, yb).predict(Xb_te),
+    "gradient boosting, pérdida cuadrática": pred_sk,
+    "HistGradientBoosting, pérdida de Poisson": hgb_b.predict(Xb_te),
+}
+tabla_bicis = pd.Series({k: root_mean_squared_error(yb_te, v) for k, v in referencias.items()}).to_frame("RECM de prueba")
 tabla_bicis.round(1)
 
 # %% [markdown]
-# El *boosting* le gana con holgura a los modelos lineales sin que nadie le diga qué interacciones buscar: los árboles de profundidad 4 pueden combinar hora, tipo de día y temperatura en una misma hoja. Y la idea de la Unidad 4 sigue valiendo: con la pérdida de Poisson (pseudo-residuos $y - e^{F}$, con $F$ en escala logarítmica) baja un poco más.
+# El *boosting* le gana con holgura a la regresión lineal y al mejor árbol solo, sin que nadie le diga qué interacciones buscar: los árboles de profundidad 4 pueden combinar hora, tipo de día y temperatura en una misma hoja. Y la idea de la Unidad 4 sigue valiendo: con la pérdida de Poisson (pseudo-residuos $y - e^{F}$, con $F$ en escala logarítmica) baja un poco más.
 #
 # ### Cómo se construye la suma
 #
@@ -517,16 +524,16 @@ cols = [c for c in todas if c != "duracion"]
 Xtr, Xte = X_tr[cols], X_te[cols]
 
 # %% [markdown]
-# ## 9. Cinco modelos sin trampa
+# ## 9. Seis modelos sin trampa
 #
 # Comparamos, con los mismos datos de entrenamiento:
 #
 # - **logística** (*one-hot* y estandarización, Unidad 4);
 # - **bosque aleatorio** de 500 árboles (ejemplo anterior), con las categorías codificadas como enteros;
 # - **`HistGradientBoostingClassifier`** de scikit-learn con sus valores por omisión (tasa 0.1, hasta 100 árboles de 31 hojas, parada temprana automática con un 10 % de validación interna);
-# - **XGBoost** (Chen y Guestrin, 2016) y **LightGBM** (Ke et al., 2017), con tasa 0.05 y el número de árboles elegido por parada temprana, como explicamos abajo.
+# - **XGBoost** (Chen y Guestrin, 2016), **LightGBM** (Ke et al., 2017) y **CatBoost** (Prokhorenkova et al., 2018), con tasa 0.05 y el número de árboles elegido por parada temprana, como explicamos abajo. CatBoost recibe las columnas categóricas tal cual y usa árboles de profundidad 6, su valor por omisión.
 #
-# Para los dos últimos separamos un 20 % del entrenamiento como **validación**: entrenamos con el 80 % restante agregando árboles hasta que la pérdida de validación lleva 100 rondas sin mejorar, nos quedamos con el número de árboles del mínimo y, con ese número, reentrenamos con todo el entrenamiento. El conjunto de prueba no se toca hasta el final.
+# Para los tres últimos separamos un 20 % del entrenamiento como **validación**: entrenamos con el 80 % restante agregando árboles hasta que la pérdida de validación lleva 100 rondas sin mejorar, nos quedamos con el número de árboles del mínimo y, con ese número, reentrenamos con todo el entrenamiento. El conjunto de prueba no se toca hasta el final.
 
 # %%
 X_a, X_v, y_a, y_v = train_test_split(Xtr, y_tr, test_size=0.2, stratify=y_tr, random_state=SEMILLA)
@@ -545,7 +552,16 @@ def lgb_modelo(n, eta=0.05):
 paro_xgb = xgb_modelo(3000, early_stopping_rounds=100).fit(X_a, y_a, eval_set=[(X_v, y_v)], verbose=False)
 paro_lgb = lgb_modelo(3000).fit(X_a, y_a, eval_set=[(X_v, y_v)], callbacks=[lgb.early_stopping(100, verbose=False)])
 n_xgb, n_lgb = paro_xgb.best_iteration + 1, paro_lgb.best_iteration_
-print(f"árboles elegidos por parada temprana: XGBoost {n_xgb}, LightGBM {n_lgb}")
+
+
+def cb_modelo(n, **kw):
+    return CatBoostClassifier(iterations=n, learning_rate=0.05, depth=6, cat_features=categoricas,
+                              random_seed=SEMILLA, thread_count=4, verbose=0, allow_writing_files=False, **kw)
+
+
+paro_cb = cb_modelo(3000, early_stopping_rounds=100).fit(X_a, y_a, eval_set=(X_v, y_v))
+n_cb = paro_cb.get_best_iteration() + 1
+print(f"árboles elegidos por parada temprana: XGBoost {n_xgb}, LightGBM {n_lgb}, CatBoost {n_cb}")
 
 # %%
 modelos = {
@@ -556,6 +572,7 @@ modelos = {
     "HistGradientBoosting": HistGradientBoostingClassifier(categorical_features="from_dtype", random_state=SEMILLA),
     "XGBoost": xgb_modelo(n_xgb),
     "LightGBM": lgb_modelo(n_lgb),
+    "CatBoost": cb_modelo(n_cb),
 }
 filas, prob = [], {}
 for nombre, modelo in modelos.items():
@@ -569,7 +586,7 @@ comparacion = pd.DataFrame(filas).set_index("modelo")
 comparacion.style.format({"AUC de prueba": "{:.3f}", "segundos": "{:.2f}"})
 
 # %% [markdown]
-# Sin la duración, el problema se ve como es: difícil. Los tres *boostings* quedan prácticamente empatados (0.804 a 0.808), apenas por encima del bosque (0.802) y claramente por encima de la logística (0.773). Las diferencias de milésimas entre ellos están dentro de lo que cambiaría con otra partición: no hay un ganador. Los tiempos dependen de la máquina; el orden de magnitud es lo que importa: unos cuantos segundos o menos para 34,000 llamadas.
+# Sin la duración, el problema se ve como es: difícil. Los cuatro *boostings* quedan prácticamente empatados (0.804 a 0.810), apenas por encima del bosque (0.802) y claramente por encima de la logística (0.773). Las diferencias de milésimas entre ellos están dentro de lo que cambiaría con otra partición: no hay un ganador. Los tiempos dependen de la máquina; el orden de magnitud es lo que importa: unos cuantos segundos o menos para 34,000 llamadas (CatBoost, con más árboles y más profundos, es el más lento).
 #
 # ¿Cuánto valen tres centésimas de AUC? Traduzcámoslo a la decisión del banco: si solo hay ejecutivos para llamar a una fracción de la lista, ordenada por probabilidad, ¿qué proporción de todos los que contratarían está en esa fracción? (A esto se le llama una curva de **ganancia** o de captura.)
 
@@ -634,7 +651,7 @@ plt.show()
 # 3. **La parada temprana es regularización.** Detenerse en el mínimo de validación limita cuánto se alejan las $F_m$ del punto de partida, de manera parecida a como la penalización $\lambda\lVert\mathbf{w}\rVert^2$ limita los pesos de un modelo lineal.
 
 # %% [markdown]
-# # Parte 4. XGBoost y LightGBM por dentro
+# # Parte 4. XGBoost, LightGBM y CatBoost por dentro
 #
 # ## 11. La aproximación de segundo orden
 #
@@ -713,23 +730,93 @@ for nombre, modelo in [("exacto (GradientBoostingClassifier)", GradientBoostingC
 # %% [markdown]
 # Con 34,000 datos la diferencia ya se nota; como el costo de buscar divisiones deja de crecer con el número de valores distintos, con millones de datos es la diferencia entre poder entrenar o no.
 #
-# ## 13. Cierre
+# ## 13. CatBoost: categorías sin fuga
+#
+# Una columna categórica con muchos valores (un código postal, un producto, un cliente) no cabe bien en un *one-hot*: serían miles de columnas. Una alternativa popular es cambiar cada categoría por la **proporción de positivos** que tiene en el entrenamiento, suavizada hacia la proporción global $\bar p$ con un peso $a > 0$:
+#
+# $$\hat x^{(i)} = \frac{\sum_{j:\, c^{(j)} = c^{(i)}} y^{(j)} + a\,\bar p}{\#\{j : c^{(j)} = c^{(i)}\} + a},$$
+#
+# con $c^{(i)}$ la categoría del dato $i$. El problema: la suma incluye a $j = i$, así que **la codificación de cada dato contiene su propia respuesta**. En una categoría con un solo dato, $\hat x^{(i)} = (y^{(i)} + a\bar p)/(1 + a)$ es la respuesta, apenas disfrazada.
+#
+# Para verlo, agregamos a las llamadas una columna que no dice nada: un identificador **al azar** con unos 8,000 valores posibles.
+
+# %%
+azar = np.random.default_rng(0)
+id_tr = pd.Series(azar.integers(0, 8000, len(Xtr)), index=Xtr.index).astype(str)
+id_te = pd.Series(azar.integers(0, 8000, len(Xte)), index=Xte.index).astype(str)
+previa, a = float(y_tr.mean()), 1.0
+
+
+def codificacion_ingenua(c):
+    """Proporción suavizada de positivos por categoría, con todos los datos de entrenamiento."""
+    g = pd.DataFrame({"c": id_tr, "y": y_tr}).groupby("c").y.agg(["sum", "count"])
+    return ((g["sum"].reindex(c).fillna(0) + a * previa) / (g["count"].reindex(c).fillna(0) + a)).to_numpy()
+
+
+def codificacion_ordenada(c, semilla=0):
+    """Lo mismo, pero cada dato solo ve a los que van antes que él en un orden al azar."""
+    orden = np.random.default_rng(semilla).permutation(len(c))
+    suma, cuenta, cod = {}, {}, np.empty(len(c))
+    for k in orden:
+        ck, yk = c.iloc[k], y_tr.iloc[k]
+        cod[k] = (suma.get(ck, 0) + a * previa) / (cuenta.get(ck, 0) + a)
+        suma[ck] = suma.get(ck, 0) + yk
+        cuenta[ck] = cuenta.get(ck, 0) + 1
+    return cod
+
+
+print(f"identificadores distintos en entrenamiento: {id_tr.nunique():,}")
+filas = []
+for nombre, (c_tr, c_te) in {"sin el identificador": (None, None),
+                             "codificación con todos los datos": (codificacion_ingenua(id_tr), codificacion_ingenua(id_te)),
+                             "codificación ordenada": (codificacion_ordenada(id_tr), codificacion_ingenua(id_te))}.items():
+    A, B = Xtr.copy(), Xte.copy()
+    if c_tr is not None:
+        A["id"], B["id"] = c_tr, c_te
+    m = HistGradientBoostingClassifier(categorical_features="from_dtype", random_state=SEMILLA).fit(A, y_tr)
+    filas.append({"": nombre, "AUC de entrenamiento": roc_auc_score(y_tr, m.predict_proba(A)[:, 1]),
+                  "AUC de prueba": roc_auc_score(y_te, m.predict_proba(B)[:, 1])})
+pd.DataFrame(filas).set_index("").round(3)
+
+# %% [markdown]
+# Con la codificación ingenua, la columna sin información sube la AUC de entrenamiento a casi 0.96 y **derrumba** la de prueba a cerca de 0.54: el modelo aprendió a confiar en una columna que en entrenamiento lleva la respuesta escondida y en prueba no dice nada. Es una fuga de información creada por el preprocesamiento.
+#
+# **Estadísticas ordenadas** (la solución de CatBoost). Se barajan los datos de entrenamiento y cada uno se codifica solo con los que van **antes** que él ($j \prec i$):
+#
+# $$\hat x^{(i)} = \frac{\sum_{j \prec i,\; c^{(j)} = c^{(i)}} y^{(j)} + a\,\bar p}{\#\{j \prec i : c^{(j)} = c^{(i)}\} + a}.$$
+#
+# La respuesta del propio dato nunca entra; en prueba se usan todos los datos de entrenamiento. Con eso, la columna sin información deja de engañar al modelo (tercera fila). CatBoost hace esto internamente con varias permutaciones; si le damos el identificador como una categoría más:
+
+# %%
+A, B = Xtr.copy(), Xte.copy()
+A["id"], B["id"] = id_tr, id_te
+cb_id = CatBoostClassifier(iterations=n_cb, learning_rate=0.05, depth=6, cat_features=categoricas + ["id"],
+                           random_seed=SEMILLA, thread_count=4, verbose=0, allow_writing_files=False).fit(A, y_tr)
+print(f"CatBoost con el identificador como categoría: AUC de prueba {roc_auc_score(y_te, cb_id.predict_proba(B)[:, 1]):.3f}")
+
+# %% [markdown]
+# Otras dos ideas de CatBoost:
+#
+# - **Boosting ordenado** (`boosting_type="Ordered"`): la misma idea aplicada a los pseudo-residuos; el residuo de cada dato se calcula con un modelo que no lo vio. Ayuda sobre todo con pocos datos.
+# - **Árboles simétricos** (*oblivious*): en cada nivel se hace la misma pregunta en todos los nodos. Un árbol de profundidad $d$ es una lista de $d$ preguntas y la hoja de un dato es el número binario formado por sus $d$ respuestas. Predecir es muy rápido y los árboles, más restringidos, sobreajustan menos.
+#
+# ## 14. Cierre
 #
 # - El *boosting* construye un modelo aditivo $F_M = \sum_m \eta\, h_m$ **por etapas**: cada término corrige a los anteriores. AdaBoost es el caso de la pérdida exponencial; *gradient boosting* lo extiende a cualquier pérdida diferenciable ajustando árboles a los pseudo-residuos.
 # - El *bagging* reduce varianza promediando modelos complejos; el *boosting* reduce **sesgo** sumando modelos simples, y por eso sí sobreajusta si se agregan árboles sin control. Tasa de aprendizaje pequeña, árboles moderados y parada temprana son la receta.
-# - XGBoost usa una aproximación de segundo orden con regularización: peso de hoja $-G/(H + \lambda)$ y una ganancia que penaliza cada hoja con $\gamma$. LightGBM y `HistGradientBoosting` hacen lo mismo con histogramas y crecimiento por hojas.
+# - XGBoost usa una aproximación de segundo orden con regularización: peso de hoja $-G/(H + \lambda)$ y una ganancia que penaliza cada hoja con $\gamma$. LightGBM y `HistGradientBoosting` hacen lo mismo con histogramas y crecimiento por hojas. CatBoost codifica las categorías con estadísticas ordenadas, que no dejan entrar la respuesta de cada dato, y usa árboles simétricos.
 # - Ningún algoritmo protege de una **fuga de información**. La pregunta «¿tendré este dato al momento de decidir?» va antes que cualquier comparación de modelos.
 #
-# *Referencias:* Y. Freund y R. E. Schapire, «A decision-theoretic generalization of on-line learning and an application to boosting», *J. Computer and System Sciences* 55 (1997). J. Friedman, T. Hastie y R. Tibshirani, «Additive logistic regression: a statistical view of boosting», *Annals of Statistics* 28 (2000). J. H. Friedman, «Greedy function approximation: a gradient boosting machine», *Annals of Statistics* 29 (2001). T. Chen y C. Guestrin, «XGBoost: a scalable tree boosting system», *KDD* (2016). G. Ke et al., «LightGBM: a highly efficient gradient boosting decision tree», *NeurIPS* (2017). S. Moro, P. Cortez y P. Rita, «A data-driven approach to predict the success of bank telemarketing», *Decision Support Systems* 62 (2014).
+# *Referencias:* Y. Freund y R. E. Schapire, «A decision-theoretic generalization of on-line learning and an application to boosting», *J. Computer and System Sciences* 55 (1997). J. Friedman, T. Hastie y R. Tibshirani, «Additive logistic regression: a statistical view of boosting», *Annals of Statistics* 28 (2000). J. H. Friedman, «Greedy function approximation: a gradient boosting machine», *Annals of Statistics* 29 (2001). T. Chen y C. Guestrin, «XGBoost: a scalable tree boosting system», *KDD* (2016). G. Ke et al., «LightGBM: a highly efficient gradient boosting decision tree», *NeurIPS* (2017). S. Moro, P. Cortez y P. Rita, «A data-driven approach to predict the success of bank telemarketing», *Decision Support Systems* 62 (2014). L. Prokhorenkova et al., «CatBoost: unbiased boosting with categorical features», *NeurIPS* (2018).
 
 # %% [markdown]
-# ## 14. Autoevaluación
+# ## 15. Autoevaluación
 
 # %%
 rdp.quiz.mostrar("u05", ids=["u05-p09", "u05-p10", "u05-p11", "u05-p12"])
 
 # %% [markdown]
-# ## 15. Ejercicios
+# ## 16. Ejercicios
 #
 # 1. **El tocón recién usado queda en la moneda.** Demuestra que, con los pesos actualizados $w^{(t+1)}$, el error ponderado del tocón $h_t$ es exactamente $\tfrac12$. (Pista: calcula por separado el peso total de aciertos y de errores después de multiplicar por $e^{\mp\alpha_t}$ y usa la fórmula de $\alpha_t$.) ¿Qué implica esto sobre el tocón de la ronda $t+1$? Verifícalo con `pesos` y `tocones` de la sección 2.
 # 2. **Qué estima AdaBoost.** Demuestra que la función que minimiza $\mathbb{E}\big[e^{-yF(\mathbf{x})} \mid \mathbf{x}\big]$, con $y \in \{-1, +1\}$, es $F^*(\mathbf{x}) = \tfrac12\ln\frac{P(y=1\mid\mathbf{x})}{P(y=-1\mid\mathbf{x})}$. Deduce una fórmula para convertir $F_T$ en probabilidades y compárala con `predict_proba` de `AdaBoostClassifier` en los pingüinos.

@@ -595,7 +595,7 @@ Las cifras de Strubell suponen GPUs P100 y la mezcla eléctrica promedio de EE. 
 
 **Libreta:** *Entrenar una red con Fashion-MNIST* (Unidad 6, ejemplo 2).
 
-**Laboratorio 6:** retropropagación desde cero y entrenamiento con PyTorch.
+**Laboratorio 6:** diferenciación automática y entrenamiento con PyTorch.
 
 **Lectura:** I. Goodfellow, Y. Bengio y A. Courville, *Deep Learning* (2016), capítulos 7 y 8; S. J. D. Prince, *Understanding Deep Learning* (2023), capítulos 6 y 9.
 

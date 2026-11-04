@@ -1,17 +1,19 @@
-"""Datos de las láminas de u06-01-mlp-backprop (perceptrón multicapa y retropropagación).
+"""Datos de las láminas de u06-01-mlp-backprop (perceptrón multicapa y diferenciación automática).
 
-Mismo código, datos y semillas que la libreta unidades/06-redes-neuronales/ejemplos/u06-e01-mlp-backprop.py,
-para que las cifras de las láminas coincidan con las de la libreta.
+Para que las cifras de las láminas sean exactamente las de la libreta, este módulo ejecuta el código de
+unidades/06-redes-neuronales/ejemplos/u06-e01-mlp-backprop.py (sin gráficas ni cuestionario) y toma los
+resultados de su espacio de nombres.
 """
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
 
 import numpy as np
 
 RAIZ = Path(__file__).resolve().parents[2]
-SEMILLA = 2011
+LIBRETA = RAIZ / "unidades" / "06-redes-neuronales" / "ejemplos" / "u06-e01-mlp-backprop.py"
 
 
 def r(a, d: int = 4):
@@ -32,179 +34,81 @@ def _franjas(etiq, xs, ys):
     return {"x": r(xs, 3), "y": r(ys, 3), "franjas": out}
 
 
-# ---------- la red de la libreta, en NumPy ----------
-ACTIVACIONES = {
-    "tanh": (np.tanh, lambda Z, A: 1 - A**2),
-    "relu": (lambda Z: np.maximum(Z, 0), lambda Z, A: (Z > 0).astype(float)),
-    "identidad": (lambda Z: Z, lambda Z, A: np.ones_like(Z)),
-}
+def _ejecutar_libreta() -> dict:
+    os.environ.setdefault("MPLBACKEND", "Agg")
+    import matplotlib.pyplot as plt
 
-
-def softmax(Z):
-    Z = Z - Z.max(axis=1, keepdims=True)
-    E = np.exp(Z)
-    return E / E.sum(axis=1, keepdims=True)
-
-
-def inicializar(d, H, K, rng, act="tanh"):
-    var1 = 2 / d if act == "relu" else 2 / (d + H)
-    return {"W1": rng.normal(0, np.sqrt(var1), (H, d)), "b1": np.zeros(H),
-            "W2": rng.normal(0, np.sqrt(2 / (H + K)), (K, H)), "b2": np.zeros(K)}
-
-
-def adelante(p, X, act="tanh"):
-    Z1 = X @ p["W1"].T + p["b1"]
-    A1 = ACTIVACIONES[act][0](Z1)
-    Z2 = A1 @ p["W2"].T + p["b2"]
-    return softmax(Z2), (X, Z1, A1)
-
-
-def entropia_cruzada(P, y):
-    return -np.mean(np.log(P[np.arange(len(y)), y]))
-
-
-def atras(p, cache, P, y, act="tanh"):
-    X, Z1, A1 = cache
-    N = len(y)
-    D2 = P.copy()
-    D2[np.arange(N), y] -= 1
-    D2 /= N
-    D1 = (D2 @ p["W2"]) * ACTIVACIONES[act][1](Z1, A1)
-    return {"W1": D1.T @ X, "b1": D1.sum(0), "W2": D2.T @ A1, "b2": D2.sum(0)}
-
-
-def gradiente_numerico(p, X, y, act, h=1e-5):
-    g = {}
-    for nombre, M in p.items():
-        g[nombre] = np.zeros_like(M)
-        for i in np.ndindex(M.shape):
-            original = M[i]
-            M[i] = original + h; e_mas = entropia_cruzada(adelante(p, X, act)[0], y)
-            M[i] = original - h; e_menos = entropia_cruzada(adelante(p, X, act)[0], y)
-            M[i] = original
-            g[nombre][i] = (e_mas - e_menos) / (2 * h)
-    return g
-
-
-def entrenar(p, X, y, act, eta, epocas, tam_lote, rng, guardar_en=()):
-    historia, copias = [], {}
-    if 0 in guardar_en:
-        copias[0] = {k: M.copy() for k, M in p.items()}
-    for epoca in range(1, epocas + 1):
-        orden = rng.permutation(len(y))
-        for i in range(0, len(y), tam_lote):
-            lote = orden[i:i + tam_lote]
-            P, cache = adelante(p, X[lote], act)
-            g = atras(p, cache, P, y[lote], act)
-            for k in p:
-                p[k] -= eta * g[k]
-        historia.append(entropia_cruzada(adelante(p, X, act)[0], y))
-        if epoca in guardar_en:
-            copias[epoca] = {k: M.copy() for k, M in p.items()}
-    return historia, copias
-
-
-def exactitud(p, X, y, act):
-    return float(np.mean(adelante(p, X, act)[0].argmax(1) == y))
-
-
-def nubes_xor(n_por_nube, rng, desv=0.35):
-    centros = np.array([[-1, -1], [1, 1], [-1, 1], [1, -1]])
-    X = np.concatenate([c + desv * rng.standard_normal((n_por_nube, 2)) for c in centros])
-    y = np.repeat([0, 0, 1, 1], n_por_nube)
-    return X, y
+    fuente = LIBRETA.read_text(encoding="utf-8").replace("rdp.quiz.mostrar(", "(lambda *a, **k: None)(")
+    ns: dict = {"__name__": "libreta"}
+    mostrar = plt.show
+    plt.show = lambda *a, **k: plt.close("all")
+    try:
+        exec(compile(fuente, str(LIBRETA), "exec"), ns)
+    finally:
+        plt.show = mostrar
+    return ns
 
 
 def datos() -> dict:
-    import pandas as pd
-    import torch, torch.nn as nn, torch.nn.functional as F
-    from sklearn.datasets import load_digits, make_moons
-    from sklearn.linear_model import LogisticRegression
+    from sklearn.datasets import load_digits
     from sklearn.model_selection import train_test_split
 
-    torch.manual_seed(SEMILLA)
+    L = _ejecutar_libreta()
+    nn, torch = L["nn"], L["torch"]
+    probabilidad, exactitud, red_mlp = L["probabilidad"], L["exactitud"], L["red_mlp"]
     out: dict = {}
 
-    # ---------- dígitos y logística (sección 1)
-    Xd, yd = load_digits(return_X_y=True)
-    Xd = Xd / 16
-    Xd_ent, Xd_pru, yd_ent, yd_pru = train_test_split(Xd, yd, test_size=0.25, stratify=yd, random_state=SEMILLA)
-    logistica = LogisticRegression(C=10, max_iter=5000).fit(Xd_ent, yd_ent)
-    exac_log = float(logistica.score(Xd_pru, yd_pru))
+    # ---------- grafo de cómputo de una neurona logística (sección 4)
+    w, b, x = -0.8, 0.4, 1.5
+    u = w * x; z = u + b; yg = 1 / (1 + np.exp(-z)); l = -np.log(yg)
+    zbar = yg - 1
+    out["grafo"] = {"w": w, "b": b, "x": x, "u": u, "z": z, "yg": round(float(yg), 4), "l": round(float(l), 4),
+                    "barl": 1.0, "baryg": round(float(-1 / yg), 4), "barz": round(float(zbar), 4),
+                    "baru": round(float(zbar), 4), "barb": round(float(zbar), 4), "barw": round(float(zbar * x), 4)}
 
-    # ---------- XOR (secciones 2 y 6)
-    Xx, yx = nubes_xor(50, np.random.default_rng(SEMILLA))
-    log_xor = float(LogisticRegression().fit(Xx, yx).score(Xx, yx))
+    # ---------- costo (sección 5)
+    costo = L["costo"]
+    out["costo"] = {"n_param": int(L["n_param"]), "P": [int(p) for p in costo.index],
+                    "directo": [float(f"{v:.3g}") for v in costo["modo directo (ms)"]],
+                    "inverso": [float(f"{v:.3g}") for v in costo["modo inverso (ms)"]],
+                    "t_inverso_ms": round(1000 * L["t_inverso"], 2), "t_numerico_s": round(L["t_numerico"], 2),
+                    "dif": float(f"{L['dif']:.2g}")}
 
-    # ---------- lunas: verificación del gradiente (sección 5)
-    X_l, y_l = make_moons(400, noise=0.25, random_state=SEMILLA)
-    X_lp, y_lp = make_moons(2000, noise=0.25, random_state=SEMILLA + 1)
-    p = inicializar(2, 8, 2, np.random.default_rng(SEMILLA), "tanh")
-    P, cache = adelante(p, X_l, "tanh")
-    g_atras = atras(p, cache, P, y_l, "tanh")
-    g_num = gradiente_numerico(p, X_l, y_l, "tanh")
-    rel = {k: float(np.max(np.abs(g_atras[k] - g_num[k]) / np.maximum(np.maximum(np.abs(g_atras[k]), np.abs(g_num[k])), 1e-12)))
-           for k in p}
-
-    def error_derivada(h, centrada):
-        M = p["W1"]; original = M[0, 0]
-        M[0, 0] = original + h; e_mas = entropia_cruzada(adelante(p, X_l, "tanh")[0], y_l)
-        M[0, 0] = original - h if centrada else original
-        e_otro = entropia_cruzada(adelante(p, X_l, "tanh")[0], y_l)
-        M[0, 0] = original
-        aprox = (e_mas - e_otro) / (2 * h if centrada else h)
-        return abs(aprox - g_atras["W1"][0, 0]) / abs(g_atras["W1"][0, 0])
-
-    hs = np.logspace(-1, -13, 49)
-    out["difs"] = {"h": [float(f"{h:.4g}") for h in hs],
-                   "adelante": [float(f"{error_derivada(h, False):.3g}") for h in hs],
-                   "centrada": [float(f"{error_derivada(h, True):.3g}") for h in hs],
-                   "rel": {k: float(f"{v:.2g}") for k, v in rel.items()}, "n_param": int(sum(M.size for M in p.values()))}
-
-    # costo (sección 5): solo conteos, los tiempos dependen de la máquina
-    p_dig = inicializar(64, 64, 10, np.random.default_rng(SEMILLA), "relu")
-    out["costo"] = {"n_param": int(sum(M.size for M in p_dig.values()))}
-
-    # ---------- lunas: entrenamiento (sección 6)
-    rng = np.random.default_rng(SEMILLA)
-    p_lunas = inicializar(2, 16, 2, rng, "tanh")
-    epocas_foto = [0, 5, 20, 100, 300]
-    hist, fotos = entrenar(p_lunas, X_l, y_l, "tanh", 0.3, 300, 20, rng, guardar_en=epocas_foto)
-    log_l = LogisticRegression().fit(X_l, y_l)
+    # ---------- lunas (sección 6)
+    X_l, y_l = L["X_lunas"], L["y_lunas"]
+    X_lp, y_lp = L["X_lunas_pru"], L["y_lunas_pru"]
     gx, gy = np.linspace(-2, 3, 126), np.linspace(-1.6, 2.1, 94)
-    malla = np.array([[a, b] for b in gy for a in gx])
-    reg = lambda q, act: _franjas((adelante(q, malla, act)[0][:, 1] > 0.5).astype(int).reshape(len(gy), len(gx)), gx, gy)
-
-    rng = np.random.default_rng(SEMILLA)
-    p_lin = inicializar(2, 16, 2, rng, "identidad")
-    entrenar(p_lin, X_l, y_l, "identidad", 0.3, 300, 20, rng)
+    malla = np.array([[a, c] for c in gy for a in gx])
+    reg = lambda red: _franjas((probabilidad(red, malla)[:, 1] > 0.5).astype(int).reshape(len(gy), len(gx)), gx, gy)
+    copia = red_mlp(2, 16, 2, nn.Tanh)
+    regiones = []
+    for e in L["EPOCAS_FOTO"]:
+        copia.load_state_dict(L["fotos"][e])
+        regiones.append(reg(copia))
+    log_l = L["log_lunas"]
     out["lunas"] = {
         "x": r(X_l[:, 0], 3), "y": r(X_l[:, 1], 3), "g": y_l.tolist(),
-        "epocas": epocas_foto, "regiones": [reg(fotos[e], "tanh") for e in epocas_foto],
-        "perdida": r(hist, 4), "perdida_log": round(float(entropia_cruzada(log_l.predict_proba(X_l), y_l)), 4),
-        "exac_red": exactitud(p_lunas, X_l, y_l, "tanh"), "exac_red_nuevos": exactitud(p_lunas, X_lp, y_lp, "tanh"),
+        "epocas": L["EPOCAS_FOTO"], "regiones": regiones,
+        "perdida": r(L["hist_lunas"], 4), "perdida_log": round(float(L["perdida_log_lunas"]), 4),
+        "exac_red": exactitud(L["red_lunas"], X_l, y_l), "exac_red_nuevos": exactitud(L["red_lunas"], X_lp, y_lp),
         "exac_log": float(log_l.score(X_l, y_l)), "exac_log_nuevos": float(log_l.score(X_lp, y_lp)),
-        "lineal": reg(p_lin, "identidad"), "exac_lineal": exactitud(p_lin, X_l, y_l, "identidad"),
+        "exac_log_a_nuevos": float(L["log_sobre_a"].score(L["A_lunas_pru"], y_lp)),
+        "lineal": reg(L["red_lineal"]), "exac_lineal": exactitud(L["red_lineal"], X_l, y_l),
     }
 
-    # XOR con dos neuronas ocultas
-    rng = np.random.default_rng(SEMILLA)
-    p_xor = inicializar(2, 2, 2, rng, "tanh")
-    entrenar(p_xor, Xx, yx, "tanh", 0.3, 200, 20, rng)
-    _, (_, _, A) = adelante(p_xor, Xx, "tanh")
+    # ---------- XOR con dos neuronas ocultas
+    Xx, yx, red_xor = L["Xx"], L["yx"], L["red_xor"]
     gx2 = np.linspace(-2.2, 2.2, 111)
-    malla2 = np.array([[a, b] for b in gx2 for a in gx2])
+    malla2 = np.array([[a, c] for c in gx2 for a in gx2])
+    A = L["A_xor"]
     out["xor"] = {"x": r(Xx[:, 0], 3), "y": r(Xx[:, 1], 3), "g": yx.tolist(), "a1": r(A[:, 0], 4), "a2": r(A[:, 1], 4),
-                  "W1": r(p_xor["W1"], 4), "b1": r(p_xor["b1"], 4), "W2": r(p_xor["W2"], 4), "b2": r(p_xor["b2"], 4),
-                  "regiones": _franjas((adelante(p_xor, malla2, "tanh")[0][:, 1] > 0.5).astype(int).reshape(111, 111), gx2, gx2),
-                  "exac": exactitud(p_xor, Xx, yx, "tanh"), "exac_log": log_xor}
+                  "W1": r(L["W1_xor"], 4), "b1": r(L["b1_xor"], 4), "W2": r(L["W2_xor"], 4), "b2": r(L["b2_xor"], 4),
+                  "regiones": _franjas((probabilidad(red_xor, malla2)[:, 1] > 0.5).astype(int).reshape(111, 111), gx2, gx2),
+                  "exac": exactitud(red_xor, Xx, yx), "exac_log": float(L["log_xor"].score(Xx, yx)),
+                  "semillas": [round(float(v), 3) for v in L["exactitud_por_semilla"].values()], "exitos": int(L["exitos"])}
 
     # ---------- Hermosillo (sección 7)
-    temp = pd.read_csv(RAIZ / "datos" / "temperatura_hermosillo.csv", parse_dates=["fecha"])
-    temp = temp[~((temp.fecha.dt.month == 2) & (temp.fecha.dt.day == 29))]
-    temp["dia"] = temp.fecha.dt.day_of_year - ((temp.fecha.dt.is_leap_year) & (temp.fecha.dt.month > 2))
-    clima = temp.groupby("dia").tmed.mean()
-    dia, f_dia = clima.index.to_numpy(dtype=float), clima.to_numpy()
+    dia, f_dia, temp = L["dia"], L["f_dia"], L["temp"]
     redes = {}
     for H in [1, 2, 3, 6, 12, 24, 48, 96]:
         t = np.linspace(dia.min(), dia.max(), H + 1)
@@ -216,94 +120,46 @@ def datos() -> dict:
     out["hermosillo"] = {"dia": dia.astype(int).tolist(), "t": r(f_dia, 2), "redes": redes,
                          "anios": [int(temp.fecha.dt.year.min()), int(temp.fecha.dt.year.max())]}
 
-    # ---------- dígitos: NumPy (sección 8) y PyTorch (sección 9)
-    rng = np.random.default_rng(SEMILLA)
-    p_dig = inicializar(64, 64, 10, rng, "relu")
-    entrenar(p_dig, Xd_ent, yd_ent, "relu", 0.1, 40, 32, rng)
-    exac_np = exactitud(p_dig, Xd_pru, yd_pru, "relu")
-
-    p0 = inicializar(2, 8, 2, np.random.default_rng(SEMILLA), "tanh")
-    P, cache = adelante(p0, X_l, "tanh")
-    g_mano = atras(p0, cache, P, y_l, "tanh")
-    pt = {k: torch.tensor(M, dtype=torch.float64, requires_grad=True) for k, M in p0.items()}
-    logits = torch.tanh(torch.tensor(X_l) @ pt["W1"].T + pt["b1"]) @ pt["W2"].T + pt["b2"]
-    F.cross_entropy(logits, torch.tensor(y_l)).backward()
-    dif_autograd = max(float(np.max(np.abs(pt[k].grad.numpy() - g_mano[k]))) for k in pt)
-
-    class MLP(nn.Module):
-        def __init__(self, d, H, K):
-            super().__init__()
-            self.oculta = nn.Linear(d, H)
-            self.salida = nn.Linear(H, K)
-
-        def forward(self, x):
-            return self.salida(F.relu(self.oculta(x)))
-
-    Xe = torch.tensor(Xd_ent, dtype=torch.float32); ye = torch.tensor(yd_ent)
-    Xp = torch.tensor(Xd_pru, dtype=torch.float32)
-    cargador = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(Xe, ye), batch_size=32, shuffle=True,
-                                           generator=torch.Generator().manual_seed(SEMILLA))
-    torch.manual_seed(SEMILLA)
-    mlp = MLP(64, 64, 10)
-    opt = torch.optim.SGD(mlp.parameters(), lr=0.1)
-    perdida_fn = nn.CrossEntropyLoss()
-    for _ in range(40):
-        mlp.train()
-        for xb, yb in cargador:
-            opt.zero_grad(); perdida_fn(mlp(xb), yb).backward(); opt.step()
-    mlp.eval()
-    with torch.no_grad():
-        pred = mlp(Xp).argmax(1).numpy()
-    exac_t = float(np.mean(pred == yd_pru))
-    malos = np.flatnonzero(pred != yd_pru)
+    # ---------- dígitos (sección 8)
+    yd, yd_pru, pred = L["yd"], L["yd_pru"], L["pred_t"]
+    malos = L["malos"]
     imgs = load_digits().images
-    _, idx_pru = train_test_split(np.arange(len(yd)), test_size=0.25, stratify=yd, random_state=SEMILLA)
+    _, idx_pru = train_test_split(np.arange(len(yd)), test_size=0.25, stratify=yd, random_state=L["SEMILLA"])
+    Zx, Za = L["pca_x"].transform(L["Xd_pru"]), L["pca_a"].transform(L["A_pru"])
     out["digitos"] = {
-        "exac_log": exac_log, "exac_np": exac_np, "exac_torch": exac_t,
-        "err_log": int(np.sum(logistica.predict(Xd_pru) != yd_pru)),
-        "err_np": int(np.sum(adelante(p_dig, Xd_pru, "relu")[0].argmax(1) != yd_pru)), "err_torch": int(len(malos)),
-        "dif_autograd": float(f"{dif_autograd:.2g}"),
+        "exac_log": float(L["exac_logistica"]), "exac_torch": float(L["exac_torch"]), "exac_log_a": float(L["exac_log_a"]),
+        "err_log": int(np.sum(L["logistica_digitos"].predict(L["Xd_pru"]) != yd_pru)), "err_torch": int(len(malos)),
+        "err_log_a": int(round((1 - L["exac_log_a"]) * len(yd_pru))),
         "errores": [{"px": imgs[idx_pru[i]].astype(int).ravel().tolist(), "real": int(yd_pru[i]), "pred": int(pred[i])} for i in malos],
+        "pca": {"g": yd_pru.tolist(), "x1": r(Zx[:, 0], 3), "x2": r(Zx[:, 1], 3), "a1": r(Za[:, 0], 3), "a2": r(Za[:, 1], 3)},
+        "silueta_x": round(float(L["silhouette_score"](L["Xd_pru"], yd_pru)), 2),
+        "silueta_a": round(float(L["silhouette_score"](L["A_pru"], yd_pru)), 2),
     }
 
     # ---------- inicialización (sección 10)
-    Xd_est = (Xd_ent - Xd_ent.mean(0)) / (Xd_ent.std(0) + 1e-8)
-    inits = {"pequena": lambda n_in, n_out: 0.01, "xavier": lambda n_in, n_out: np.sqrt(2 / (n_in + n_out)),
-             "he": lambda n_in, n_out: np.sqrt(2 / n_in), "grande": lambda n_in, n_out: 1.0}
-
-    def activaciones_por_capa(X, capas, ancho, desv_w, act, rng):
-        a, desv = X, []
-        for _ in range(capas):
-            W = rng.normal(0, desv_w(a.shape[1], ancho), (ancho, a.shape[1]))
-            a = ACTIVACIONES[act][0](a @ W.T)
-            desv.append(a.std())
-        return np.array(desv)
-
-    out["activaciones"] = {k: [float(f"{v:.3g}") for v in activaciones_por_capa(Xd_est, 20, 256, f, "relu", np.random.default_rng(SEMILLA))]
-                           for k, f in inits.items()}
-
-    def normas_gradiente(activacion, init, capas=10, ancho=64):
-        torch.manual_seed(SEMILLA)
-        lineales = [nn.Linear(64 if i == 0 else ancho, ancho) for i in range(capas)] + [nn.Linear(ancho, 10)]
-        for capa in lineales:
-            init(capa.weight); nn.init.zeros_(capa.bias)
-        partes = []
-        for capa in lineales[:-1]:
-            partes += [capa, activacion()]
-        red = nn.Sequential(*partes, lineales[-1])
-        F.cross_entropy(red(Xe[:256]), ye[:256]).backward()
-        return [float(f"{capa.weight.grad.norm().item():.3g}") for capa in lineales[:-1]]
-
-    out["gradientes"] = {"sigmoide": normas_gradiente(nn.Sigmoid, nn.init.xavier_normal_),
-                         "relu": normas_gradiente(nn.ReLU, lambda w: nn.init.kaiming_normal_(w, nonlinearity="relu"))}
+    bordes = np.linspace(-4, 4, 41)
+    hist = {}
+    for nombre, clave in [("N(0, 1)", "grande"), ("N(0, 0.01²)", "pequena"), ("N(0, 1/n_in)", "justa")]:
+        zs = L["z_por_escala"][nombre]
+        hist[clave] = {"desv": round(float(zs.std()), 2),
+                       "frec": r(np.histogram(np.clip(zs, -4, 4), bins=bordes)[0] / len(zs), 4)}
+    out["escala"] = {"bordes": r(bordes, 2), **hist}
+    out["simetria"] = {"distintos": int(L["torch"].unique(L["W1_sim"].round(decimals=6), dim=0).shape[0]),
+                       "exac": round(L["evaluar"](L["simetrica"], L["Xd_pru_t"], L["yd_pru_t"]), 3)}
+    claves = {"N(0, 0.01²)": "pequena", "Xavier: 2/(n_in + n_out)": "xavier", "He: 2/n_in": "he", "N(0, 1)": "grande"}
+    out["activaciones"] = {claves[k]: [float(f"{v:.3g}") for v in d] for k, d in L["desviaciones"].items()}
+    out["gradientes"] = {"sigmoide": [float(f"{v:.3g}") for v in L["grad_sigmoide"]],
+                         "relu": [float(f"{v:.3g}") for v in L["grad_relu"]]}
+    del torch
     return out
 
 
 if __name__ == "__main__":
-    import json
     d = datos()
-    print(json.dumps({k: (v if k in ("costo",) else "…") for k, v in d.items()}))
-    print({k: d["digitos"][k] for k in d["digitos"] if k != "errores"})
-    print(d["difs"]["rel"], d["xor"]["exac"], d["lunas"]["exac_red_nuevos"], d["lunas"]["exac_log_nuevos"], d["lunas"]["exac_lineal"])
+    print(d["grafo"], d["costo"])
+    print({k: d["digitos"][k] for k in d["digitos"] if k not in ("errores", "pca")})
+    print(d["xor"]["exac"], d["xor"]["exitos"], d["lunas"]["exac_red_nuevos"], d["lunas"]["exac_log_nuevos"],
+          d["lunas"]["exac_log_a_nuevos"], d["lunas"]["exac_lineal"])
     print({k: v["recm"] for k, v in d["hermosillo"]["redes"].items()})
+    print(d["simetria"], {k: d["escala"][k]["desv"] for k in ("grande", "pequena", "justa")})
     print({k: (v[0], v[-1]) for k, v in d["activaciones"].items()}, d["gradientes"]["sigmoide"][-1] / d["gradientes"]["sigmoide"][0])

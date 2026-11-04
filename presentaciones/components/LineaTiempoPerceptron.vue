@@ -1,22 +1,22 @@
 <script setup lang="ts">
-// Línea del tiempo del perceptrón a la retropropagación (1958–2015), con las referencias de la clase.
+// Línea del tiempo del perceptrón a la diferenciación automática (1958–2018), con las referencias de la clase.
 import { scaleLinear } from 'd3-scale'
 const W = 1120, H = 330, ej = 165
-const x = scaleLinear().domain([1955, 2016]).range([30, W - 30])
+const x = scaleLinear().domain([1955, 2021]).range([30, W - 30])
 const hitos = [
   { a: 1958, t: ['Rosenblatt:', 'el perceptrón', 'aprende de ejemplos'], arriba: true, c: '#24398A' },
   { a: 1969, t: ['Minsky y Papert:', 'los límites de', 'una sola capa'], arriba: false, c: '#D5433C' },
-  { a: 1986, t: ['Rumelhart, Hinton', 'y Williams:', 'retropropagación'], arriba: true, c: '#24398A' },
-  { a: 1989, t: ['Cybenko: aproximación', 'universal'], arriba: false, c: '#C9971C' },
-  { a: 2010, t: ['Glorot y Bengio:', 'inicialización'], arriba: true, c: '#C9971C' },
-  { a: 2012, t: ['AlexNet gana', 'ImageNet (tema 3)'], arriba: false, c: '#24398A' },
+  { a: 1970, t: ['Linnainmaa:', 'derivar un programa', 'en modo inverso'], arriba: true, c: '#C9971C' },
+  { a: 1986, t: ['Rumelhart, Hinton', 'y Williams:', 'retropropagación'], arriba: false, c: '#24398A' },
+  { a: 2012, t: ['AlexNet gana', 'ImageNet'], arriba: false, c: '#24398A' },
+  { a: 2016, t: ['TensorFlow, PyTorch, JAX:', 'gradientes automáticos', 'de cualquier programa'], arriba: true, c: '#C9971C' },
 ]
 </script>
 
 <template>
   <svg class="grafica" :viewBox="`0 0 ${W} ${H}`">
-    <line :x1="x(1955)" :x2="x(2016)" :y1="ej" :y2="ej" stroke="#8A91A0" stroke-width="2" />
-    <g v-for="a in [1960, 1970, 1980, 1990, 2000, 2010]" :key="a">
+    <line :x1="x(1955)" :x2="x(2021)" :y1="ej" :y2="ej" stroke="#8A91A0" stroke-width="2" />
+    <g v-for="a in [1960, 1970, 1980, 1990, 2000, 2010, 2020]" :key="a">
       <line :x1="x(a)" :x2="x(a)" :y1="ej - 5" :y2="ej + 5" stroke="#8A91A0" stroke-width="2" />
     </g>
     <g v-for="h in hitos" :key="h.a">

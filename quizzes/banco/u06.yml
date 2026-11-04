@@ -4,18 +4,18 @@ preguntas:
 - id: u06-p01
   tipo: opcion
   enunciado: |
-    En una red con salida *softmax* y pérdida de entropía cruzada, $E = -\sum_k y_k \log \hat y_k$ con $\mathbf{y}$ en *one-hot*, ¿cuánto vale el error de la capa de salida $\boldsymbol\delta^{(L)} = \partial E / \partial \mathbf{z}^{(L)}$?
+    En una red con salida *softmax* y pérdida de entropía cruzada, $\ell = -\sum_k y_k \ln \hat y_k$ con $\mathbf{y}$ en *one-hot*, ¿cuánto vale el error de la capa de salida $\boldsymbol\delta^{[L]} = \partial \ell / \partial \mathbf{z}^{[L]}$?
   opciones:
   - texto: $\hat{\mathbf{y}} - \mathbf{y}$
     correcta: true
   - texto: $(\hat{\mathbf{y}} - \mathbf{y}) \odot \hat{\mathbf{y}} \odot (1 - \hat{\mathbf{y}})$
     retro: Ése sería el resultado con pérdida cuadrática y salidas sigmoides; con entropía cruzada el factor de la derivada se cancela.
   - texto: $-\mathbf{y} / \hat{\mathbf{y}}$
-    retro: Ésa es la derivada respecto de $\hat{\mathbf{y}}$, no respecto de $\mathbf{z}^{(L)}$; falta aplicar la regla de la cadena a través de la *softmax*.
-  - texto: $W^{(L)\top}(\hat{\mathbf{y}} - \mathbf{y})$
-    retro: Multiplicar por $W^{(L)\top}$ es el paso que lleva el error a la capa anterior, no el error de la capa de salida.
+    retro: Ésa es la derivada respecto de $\hat{\mathbf{y}}$, no respecto de $\mathbf{z}^{[L]}$; falta aplicar la regla de la cadena a través de la *softmax*.
+  - texto: $\mathbf{W}^{[L]\top}(\hat{\mathbf{y}} - \mathbf{y})$
+    retro: Multiplicar por $\mathbf{W}^{[L]\top}$ es el paso que lleva el error a la capa anterior, no el error de la capa de salida.
   explicacion: |
-    Como $\log \hat y_k = z_k - \log\sum_j e^{z_j}$, se obtiene $\partial E/\partial z_i = \hat y_i - y_i$: «predicción menos dato», igual que en la regresión logística.
+    Como $\ln \hat y_k = z_k - \ln\sum_j e^{z_j}$, se obtiene $\partial \ell/\partial z_c = \hat y_c - y_c$: «predicción menos dato», igual que en la regresión logística.
 - id: u06-p02
   tipo: numerica
   enunciado: |
@@ -23,14 +23,14 @@ preguntas:
   respuesta: 9620
   tolerancia: 0
   explicacion: |
-    Hay $64 \times 64 + 64 + 64 \times 10 + 10 = 4{,}810$ parámetros y la diferencia centrada evalúa $E(\theta + h)$ y $E(\theta - h)$ para cada uno: $9{,}620$ evaluaciones. La retropropagación obtiene el mismo gradiente con una pasada hacia adelante y una hacia atrás.
+    Hay $64 \times 64 + 64 + 64 \times 10 + 10 = 4{,}810$ parámetros y la diferencia centrada evalúa $L(\theta + h)$ y $L(\theta - h)$ para cada uno: $9{,}620$ evaluaciones. La retropropagación obtiene el mismo gradiente con una pasada hacia adelante y una hacia atrás.
 - id: u06-p03
   tipo: vf
   enunciado: |
-    Una red de diez capas ocultas **sin funciones de activación** ($\sigma(z) = z$) puede representar fronteras de decisión que una regresión *softmax* no puede representar.
+    Una red de diez capas ocultas **sin funciones de activación** ($g(z) = z$) puede representar fronteras de decisión que una regresión *softmax* no puede representar.
   respuesta: false
   explicacion: |
-    Falso. La composición de funciones afines es afín: $W^{(2)}(W^{(1)}\mathbf{x} + \mathbf{b}^{(1)}) + \mathbf{b}^{(2)} = W\mathbf{x} + \mathbf{b}$, y lo mismo con cualquier número de capas. Sin no linealidad, la red es una regresión *softmax* con otra parametrización.
+    Falso. La composición de funciones afines es afín: $\mathbf{W}^{[2]}(\mathbf{W}^{[1]}\mathbf{x} + \mathbf{b}^{[1]}) + \mathbf{b}^{[2]} = \mathbf{W}\mathbf{x} + \mathbf{b}$, y lo mismo con cualquier número de capas. Sin no linealidad, la red es una regresión *softmax* con otra parametrización.
 - id: u06-p04
   tipo: opcion
   enunciado: |
@@ -174,3 +174,41 @@ preguntas:
   respuesta: true
   explicacion: |
     Verdadero. Con $X' = PX$, $Q' = PQ$, $K' = PK$, $V' = PV$, y $\operatorname{softmax}(PQK^\top P^\top/\sqrt{d_k})PV = P\operatorname{softmax}(QK^\top/\sqrt{d_k})V$, porque el softmax por renglones conmuta con permutar renglones y columnas. La atención no sabe en qué orden están las letras: por eso hay que sumarles un encaje de posición.
+- id: u06-p17
+  tipo: opcion
+  enunciado: |
+    En PyTorch se ejecuta dos veces, sin nada en medio, `perdida = modelo(X, y); perdida.backward()` con los mismos datos. ¿Qué queda en `p.grad` para cada parámetro `p`?
+  opciones:
+  - texto: El doble del gradiente, porque `backward()` suma en `.grad`.
+    correcta: true
+  - texto: El gradiente una sola vez, porque el segundo `backward()` lo sobrescribe.
+    retro: PyTorch no sobrescribe `.grad`, lo acumula; por eso el ciclo de entrenamiento empieza con `optimizador.zero_grad()`.
+  - texto: Cero, porque el segundo `backward()` resta el primero.
+    retro: Ninguna operación de autograd resta gradientes; cada `backward()` suma su contribución.
+  - texto: Un error, porque el grafo ya se liberó.
+    retro: El grafo se libera, pero la segunda línea vuelve a evaluar el modelo y construye un grafo nuevo; el error solo aparece si se llama dos veces `backward()` sobre el mismo resultado.
+  explicacion: |
+    `backward()` acumula: hace `p.grad += ∂L/∂p`, igual que un nodo que alimenta a varios otros suma los adjuntos que le llegan. Con dos llamadas, `p.grad` vale $2\,\partial L/\partial p$. Por eso cada paso de entrenamiento empieza borrando los gradientes con `optimizador.zero_grad()`.
+- id: u06-p18
+  tipo: numerica
+  enunciado: |
+    Una capa con $n_{\text{in}} = 100$ entradas y $n_{\text{out}} = 50$ salidas, seguida de $\tanh$, se inicializa con Xavier usando una distribución **uniforme** $U(-r, r)$. ¿Cuánto vale $r$? (Da tres cifras significativas.)
+  respuesta: 0.2
+  tolerancia: 0.001
+  explicacion: |
+    Xavier pide $\operatorname{Var}(w) = 2/(n_{\text{in}} + n_{\text{out}}) = 2/150$. Una uniforme en $(-r, r)$ tiene varianza $r^2/3$, así que $r = \sqrt{3 \cdot 2/150} = \sqrt{6/150} = \sqrt{0.04} = 0.2$.
+- id: u06-p19
+  tipo: opcion
+  enunciado: |
+    Una red debe predecir el número de bicicletas rentadas en una hora (un conteo). Si se ve la última capa como un modelo lineal generalizado con liga canónica, ¿qué salida y qué pérdida corresponden?
+  opciones:
+  - texto: Salida $\hat y = e^{z}$ y pérdida de Poisson, $\hat y - y \ln \hat y$.
+    correcta: true
+  - texto: Salida $\hat y = \sigma(z)$ y entropía cruzada binaria.
+    retro: Eso corresponde a una variable de dos clases (Bernoulli), no a un conteo que puede valer 0, 1, 2, …
+  - texto: Salida $\hat y = \operatorname{softmax}(\mathbf{z})$ con una clase por cada posible conteo.
+    retro: Se podría, pero tira la estructura del problema (que 30 está cerca de 31) y no es el GLM de conteos.
+  - texto: Salida $\hat y = z$ y pérdida cuadrática, porque toda regresión usa error cuadrático.
+    retro: El error cuadrático es la verosimilitud normal; para conteos puede predecir valores negativos y no modela que la varianza crece con la media.
+  explicacion: |
+    El GLM de conteos es la regresión de Poisson: liga logarítmica, $\hat y = e^{z}$, y menos el logaritmo de la verosimilitud, $\ell = \hat y - y\ln\hat y$ (más una constante). En PyTorch es `nn.PoissonNLLLoss(log_input=True)`, que recibe $z$. Como en todo GLM con liga canónica, $\partial \ell/\partial z = \hat y - y$.

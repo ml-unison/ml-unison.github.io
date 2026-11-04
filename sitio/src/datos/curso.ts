@@ -58,7 +58,7 @@ export const unidades: Unidad[] = [
   {
     num: 6, slug: '06-redes-neuronales', titulo: 'Redes neuronales', semanas: '3',
     resumen: 'Del perceptrón multicapa a la atención, con PyTorch.',
-    temas: ['MLP y backprop', 'Optimización', 'Redes convolucionales', 'Transferencia', 'RNN, atención y transformers'],
+    temas: ['MLP y diferenciación automática', 'Optimización', 'Redes convolucionales', 'Transferencia', 'RNN, atención y transformers'],
     disponible: true,
   },
   {

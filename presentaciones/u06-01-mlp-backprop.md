@@ -1,9 +1,9 @@
 ---
 theme: none
-title: "Redes neuronales: perceptrón multicapa y retropropagación"
+title: "Redes neuronales: perceptrón multicapa y diferenciación automática"
 unidad: Unidad 6
 layout: portada
-subtitulo: "Capas que aprenden su propia representación, y cómo calcular su gradiente"
+subtitulo: "Capas que aprenden sus propios atributos, y bibliotecas que calculan su gradiente"
 fecha: 2026-2
 canvasWidth: 1280
 aspectRatio: 16/9
@@ -25,7 +25,7 @@ info: |
   Reconocimiento de Patrones · Unidad 6 · Licenciatura en Ciencias de la Computación, Universidad de Sonora.
 ---
 
-# Perceptrón multicapa y retropropagación
+# Perceptrón multicapa y diferenciación automática
 
 ---
 layout: pregunta
@@ -57,25 +57,25 @@ El perceptrón de Rosenblatt era una sola capa de pesos ajustables, que se corre
 
 ---
 
-# De una capa a muchas
+# De una capa a muchas, y del gradiente a mano al automático
 
 <LineaTiempoPerceptron />
 
 <div class="cols" style="gap: 40px; margin-top: 8px">
 <div class="pequeno">
 
-**1969.** En *Perceptrons*, M. Minsky y S. Papert demostraron qué no puede calcular un perceptrón de una capa; el XOR es el ejemplo más pequeño.
+**1969–1986.** Minsky y Papert mostraron qué no puede calcular una sola capa. La salida eran varias capas, y para entrenarlas había que calcular un gradiente con miles de parámetros: la **retropropagación**.
 
 </div>
 <div class="pequeno" v-click>
 
-**1986.** D. Rumelhart, G. Hinton y R. Williams mostraron en *Nature* 323 que la **retropropagación** entrena redes con capas ocultas y que esas capas aprenden representaciones útiles.
+**2015–2018.** Las bibliotecas calculan el gradiente de **cualquier** programa. Desde entonces, inventar una arquitectura nueva es escribir la pasada hacia adelante.
 
 </div>
 </div>
 
 <!--
-La idea del modo inverso de la diferenciación ya estaba en la tesis de maestría de S. Linnainmaa (1970), y P. Werbos la propuso para redes en su tesis doctoral (1974). El artículo de 1986 la popularizó. Cybenko (1989) y Glorot y Bengio (2010) aparecen más adelante en esta clase.
+La idea del modo inverso de la diferenciación ya estaba en la tesis de maestría de S. Linnainmaa (1970); P. Werbos la propuso para redes en su tesis doctoral (1974) y el artículo de Rumelhart, Hinton y Williams en Nature 323 (1986) la popularizó. Theano (2007) fue la primera biblioteca muy usada que derivaba sola en GPU; TensorFlow (2015), PyTorch (2016) y JAX (2018) son las de hoy.
 -->
 
 ---
@@ -91,25 +91,226 @@ La idea del modo inverso de la diferenciación ya estaba en la tesis de maestrí
 </div>
 <div>
 
-Red 2-2-2 con $\tanh$ en 200 puntos del XOR. Las neuronas ocultas $a^{[1]}_1, a^{[1]}_2$ aprenden dos **franjas** paralelas a la diagonal de los atributos $x_1, x_2$:
+Red 2-2-2 con $\tanh$ en 200 puntos del XOR. Las neuronas ocultas $a^{[1]}_1, a^{[1]}_2$ solo miran la suma $s = x_1 + x_2$ de los atributos:
 
 $$
 \begin{aligned}
-a^{[1]}_1 &\approx \tanh\big(2(x_2 - x_1 + 1)\big)\\
-a^{[1]}_2 &\approx \tanh\big(2(x_1 - x_2 + 1)\big)
+a^{[1]}_1 &\approx \tanh(2.7 - 2.2\,s)\\
+a^{[1]}_2 &\approx \tanh(-2.8 - 2.7\,s)
 \end{aligned}
 $$
 
 <v-click>
 
-Las nubes azules van a la **misma esquina** $(1, 1)$ del espacio oculto; ahí una recta, la logística de salida, separa las clases. Exactitud: 0.975.
+Cada clase va a parar a su propia región del espacio oculto; ahí una recta, la logística de salida, separa las clases. Exactitud: 0.99.
 
 </v-click>
 </div>
 </div>
 
 <!--
-Primero solo el espacio original: la frontera de la red ya no es una recta. Con el clic aparece el espacio oculto. La idea central de las redes: aprender una representación en la que el problema se vuelve lineal. Con pesos a mano también sale: h1 = ReLU(x1 + x2), h2 = ReLU(x1 + x2 − 1), y = h1 − 2 h2 en las cuatro esquinas de {0,1}².
+Primero solo el espacio original: la frontera de la red ya no es una recta. Con el clic aparece el espacio oculto: la nube azul (−1,−1) va a la esquina (1,1), la azul (1,1) a (−0.9,−1) y las dos rojas a (1,−1). Es la misma idea que la solución a mano, que también solo mira x1 + x2: a1 = ReLU(x1 + x2), a2 = ReLU(x1 + x2 − 1), ŷ = a1 − 2 a2 en las cuatro esquinas de {0,1}².
+Detalle para comentar: de 20 inicializaciones al azar, 15 resuelven el XOR y 5 se quedan en un mínimo local (exactitud 0.64–0.74). La red puede, pero el descenso no siempre encuentra cómo.
+-->
+
+---
+layout: seccion
+numero: 1
+---
+
+# Una red aprende sus propios atributos
+
+Las capas ocultas transforman el espacio; la última es un modelo lineal generalizado.
+
+---
+
+# La red en dos partes
+
+<div class="cols" style="grid-template-columns: 6fr 5fr; gap: 56px">
+<div>
+
+Para un ejemplo $\vx^{(i)} \in \R^n$ con $n$ atributos y $K$ clases:
+
+$$
+\underbrace{\va^{[1]} = g\big(\vW^{[1]}\vx^{(i)} + \mathbf b^{[1]}\big)}_{\text{atributos aprendidos } \boldsymbol\phi_\theta(\vx^{(i)})}
+\qquad
+\underbrace{\hat{\mathbf y} = \operatorname{softmax}\big(\vW^{[2]}\va^{[1]} + \mathbf b^{[2]}\big)}_{\text{regresión softmax sobre } \va^{[1]}}
+$$
+
+<div class="pequeno tenue">
+
+$\vW^{[l]}$, $\mathbf b^{[l]}$: pesos y sesgos de la capa $l$; $g$: activación, entrada por entrada; $\theta$: los parámetros de las capas ocultas.
+
+</div>
+</div>
+<div>
+
+<v-click>
+
+Las capas ocultas hacen **ingeniería de características**, como cuando inventábamos cuadrados, productos o un kernel, pero con parámetros que **se aprenden**. Con más capas, una cadena de espacios: $\vx \to \va^{[1]} \to \va^{[2]} \to \cdots$
+
+</v-click>
+
+<v-click>
+
+<div class="nota">
+
+La última capa es un **modelo lineal generalizado** (GLM) que no sabe de dónde salieron sus atributos.
+
+</div>
+
+</v-click>
+</div>
+</div>
+
+---
+
+# Lo que hace la capa oculta con los dígitos
+
+<div class="cols" style="grid-template-columns: 6fr 4fr; gap: 40px">
+<div>
+
+<RepresentacionAprendida />
+
+</div>
+<div>
+
+Los 450 dígitos de prueba proyectados en sus dos **componentes principales**, antes y después de la capa oculta de una red 64-64-10. Cada número marca el centro de su clase.
+
+<v-click>
+
+La **silueta** mide qué tan juntos quedan los de una clase y qué tan lejos de las demás: se **duplica**.
+
+</v-click>
+
+<v-click>
+
+<div class="pequeno tenue">
+
+La red estiró las direcciones que distinguen clases: justo lo que necesita la regresión *softmax* de la última capa.
+
+</div>
+
+</v-click>
+</div>
+</div>
+
+<!--
+En el espacio aprendido el 0, el 4 y el 6 se apartan y el 1 deja de estar encimado con el 7 y el 8. La silueta (0.17 → 0.34) se calcula en las 64 dimensiones completas, con las clases verdaderas como grupos.
+-->
+
+---
+
+# La última capa es una logística
+
+<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 56px">
+<div>
+
+**Experimento.** Entrenamos la red. Luego tiramos su última capa, calculamos los atributos $\va^{[1]}$ de cada ejemplo y le damos esos números a una `LogisticRegression` de scikit-learn, como si alguien los hubiera diseñado.
+
+<v-click>
+
+| lunas, 2,000 puntos nuevos | exactitud |
+|---|---|
+| logística sobre $\vx$ (2 atributos) | 0.857 |
+| logística sobre $\va^{[1]}$ (16 atributos) | **0.941** |
+| red 2-16-2 completa | 0.946 |
+
+</v-click>
+</div>
+<div>
+
+<v-click>
+
+| dígitos, 450 de prueba | exactitud |
+|---|---|
+| logística sobre los píxeles | 0.971 |
+| logística sobre $\va^{[1]}$ (64 atributos) | 0.971 |
+| red 64-64-10 completa | 0.973 |
+
+</v-click>
+
+<v-click>
+
+<div class="nota">
+
+Todo lo que la red gana sobre la logística está en la **representación**. Los dígitos de $8 \times 8$ ya eran casi lineales: ahí no hay mucho que ganar.
+
+</div>
+
+</v-click>
+</div>
+</div>
+
+<!--
+En las lunas el salto es de 0.857 a 0.941 solo por cambiar de espacio. En los dígitos, con 450 imágenes cada error vale 0.2 puntos: 12 contra 13 errores es ruido.
+-->
+
+---
+
+# Por eso usamos las mismas pérdidas
+
+La pérdida es menos el logaritmo de la verosimilitud del GLM de la última capa, con su **liga canónica** $h$: $\hat y = h(z)$, con $z$ la entrada lineal de la última capa.
+
+| tarea | salida $\hat y = h(z)$ | modelo de $y$ | pérdida $\ell$ por ejemplo | en PyTorch |
+|---|---|---|---|---|
+| regresión | $z$ | normal | $\tfrac12(\hat y - y)^2$ | `MSELoss` |
+| dos clases | $\sigma(z)$ | Bernoulli | $-y\ln\hat y - (1-y)\ln(1-\hat y)$ | `BCEWithLogitsLoss` |
+| $K$ clases | $\operatorname{softmax}(\vz)$ | categórica | $-\ln \hat y_{y}$ | `CrossEntropyLoss` |
+| conteos | $e^{z}$ | Poisson | $\hat y - y\ln \hat y$ | `PoissonNLLLoss` |
+
+<v-click>
+
+<div class="cols" style="gap: 48px; margin-top: 18px">
+<div>
+
+En los cuatro casos, $\;\partial \ell / \partial z = \hat y - y$: **predicción menos dato**, como en la regresión logística. En la libreta lo comprueba `autograd`.
+
+</div>
+<div class="pequeno tenue">
+
+Las funciones de PyTorch reciben $z$ (los *logits*), no $\hat y$: aplican $h$ por dentro de forma numéricamente estable. `MSELoss` no lleva el $\tfrac12$, así que su derivada es $2(\hat y - y)$.
+
+</div>
+</div>
+
+</v-click>
+
+---
+
+# Después, la pérdida cambia
+
+<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 56px">
+<div>
+
+En el perceptrón multicapa y en buena parte de las redes que usaremos, la regla es la de los GLM: **atributos aprendidos + verosimilitud**.
+
+<v-click>
+
+<div class="nota">
+
+Lo que **no** cambia: la red es un programa que termina en un número, la pérdida, y su gradiente se obtiene con una llamada a `backward()`.
+
+</div>
+
+</v-click>
+</div>
+<div>
+
+<v-click>
+
+En redes más sofisticadas la pérdida ya no es la de un GLM:
+
+- **contrastiva**: acercar en el espacio aprendido dos versiones del mismo ejemplo y alejar las de ejemplos distintos;
+- **adversarial**: una red genera ejemplos y otra intenta distinguirlos de los reales;
+- **eliminar ruido**: aprender a quitarle ruido a una imagen, para después generarlas.
+
+</v-click>
+</div>
+</div>
+
+<!--
+No profundizar: se trata de que vean que la pérdida es una decisión de diseño y que la herramienta (el gradiente automático) es la misma.
 -->
 
 ---
@@ -129,7 +330,7 @@ con $\vW^{[l]}$ y $\mathbf b^{[l]}$ los pesos y sesgos de la capa $l$.
 
 <v-click>
 
-Con cualquier número de capas, el resultado es una regresión *softmax* con una parametrización complicada.
+La «ingeniería de características» no puede hacer nada que la última capa no hiciera ya: el resultado es una regresión *softmax* con una parametrización complicada.
 
 </v-click>
 
@@ -201,7 +402,7 @@ Leshno et al. (1993): basta con que $g$ no sea un polinomio; incluye ReLU.
 <v-clicks>
 
 - **Cuántas** neuronas: con una malla de nodos se necesitan del orden de $(1/\varepsilon)^{n/2}$, con $n$ atributos; con $n = 64$ es absurdo.
-- **Cómo encontrarlas**: nada garantiza que el descenso por gradiente llegue a ellas.
+- **Cómo encontrarlas**: en el XOR, la red 2-2-2 se atora en un mínimo local en 5 de 20 inicializaciones.
 - Nada de **generalización**: lo que puede aproximar cualquier función también puede memorizar el ruido.
 
 </v-clicks>
@@ -216,181 +417,32 @@ Lo que sí dice: una capa ancha no tiene un **sesgo de aproximación** irreducib
 
 ---
 layout: seccion
-numero: 1
+numero: 2
 ---
 
-# Retropropagación
+# Gradientes automáticos
 
-La regla de la cadena, organizada para no repetir cuentas.
+Una red es un grafo de cómputo, y su gradiente se calcula solo.
 
 ---
+layout: pregunta
+---
 
-# La red y su capa de salida
-
-<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
-<div>
-
-Dos capas, $K$ clases, un ejemplo $\vx^{(i)}$:
-
-$$
-\begin{aligned}
-\vz^{[1]} &= \vW^{[1]}\vx^{(i)} + \mathbf b^{[1]}, & \va^{[1]} &= g\big(\vz^{[1]}\big),\\
-\vz^{[2]} &= \vW^{[2]}\va^{[1]} + \mathbf b^{[2]}, & \hat{\mathbf y} &= \operatorname{softmax}\big(\vz^{[2]}\big),
-\end{aligned}
-$$
-
-$$
-\ell = -\textstyle\sum_{k=1}^{K} y_k \ln \hat y_k \qquad (\mathbf y \text{: la clase en one-hot}).
-$$
-
-<div class="pequeno tenue">
-
-$g$ es la activación oculta y $\ell$ la pérdida del ejemplo. La última capa es una regresión *softmax* (logística de $K$ clases) sobre atributos $\va^{[1]}$ **aprendidos**.
-
-</div>
-</div>
-<div>
+# La red de los dígitos tiene 4,810 parámetros. ¿Cuánto cuesta calcular su gradiente?
 
 <v-click>
 
-Definimos el **error** de cada capa $l$: $\boldsymbol\delta^{[l]} = \partial \ell / \partial \vz^{[l]}$.
+Sin saber nada de la red: mover un parámetro $\theta_j$ un poquito $h$ hacia cada lado y ver cuánto cambia la pérdida $L$,
+$$
+\frac{\partial L}{\partial \theta_j} \approx \frac{L(\theta + h\,\mathbf e_j) - L(\theta - h\,\mathbf e_j)}{2h}
+$$
+($\mathbf e_j$: vale 1 en la posición $j$ y 0 en las demás). Son **dos evaluaciones de $L$ por parámetro**.
 
 </v-click>
-
-<v-click>
-
-Con $z_k$ la componente $k$ de $\vz^{[2]}$, $\ln \hat y_k = z_k - \ln\sum_{k'} e^{z_{k'}}$, así que
-
-$$
-\frac{\partial \ell}{\partial z_c} = -\sum_k y_k\big(\ind{k = c} - \hat y_c\big) = \hat y_c - y_c ,
-$$
-
-</v-click>
-
-<v-click>
-
-$$
-\boldsymbol\delta^{[2]} = \hat{\mathbf y} - \mathbf y .
-$$
-
-«Predicción menos dato», como en la logística y en todo GLM con liga canónica.
-
-</v-click>
-</div>
-</div>
 
 ---
 
-# Hacia atrás, en forma matricial
-
-<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
-<div>
-
-**Pesos.** $W^{[l]}_{pq}$, de la neurona $q$ de la capa $l-1$ a la $p$ de la capa $l$, solo afecta a $z^{[l]}_p$, con $\partial z^{[l]}_p / \partial W^{[l]}_{pq} = a^{[l-1]}_q$:
-
-$$
-\frac{\partial \ell}{\partial \vW^{[l]}} = \boldsymbol\delta^{[l]}\, \va^{[l-1]\top}, \qquad \frac{\partial \ell}{\partial \mathbf b^{[l]}} = \boldsymbol\delta^{[l]} .
-$$
-
-<div class="pequeno tenue">
-
-Error que llega por activación que entra: un producto exterior.
-
-</div>
-
-<v-click>
-
-**Errores.** $a^{[l]}_q$ afecta a **todas** las $z^{[l+1]}_p$: se suman y se multiplica ($\odot$, entrada por entrada) por la derivada $g'$ de la activación:
-
-$$
-\boldsymbol\delta^{[l]} = \Big(\vW^{[l+1]\top}\boldsymbol\delta^{[l+1]}\Big) \odot g'\big(\vz^{[l]}\big) .
-$$
-
-</v-click>
-</div>
-<div>
-
-<v-click>
-
-**Con un minilote $\mathcal B$ de $|\mathcal B|$ ejemplos** (renglones), los productos exteriores sumados son productos de matrices; la pérdida $L$ es el promedio de las $\ell$:
-
-```python
-D2 = P.copy()                     # P: probabilidades Ŷ
-D2[np.arange(nB), y] -= 1         # Δ[2] = Ŷ − Y, nB = |B|
-D2 /= nB                          # L es un promedio
-gW2, gb2 = D2.T @ A1, D2.sum(0)
-D1 = (D2 @ W2) * dg(Z1)           # Δ[1]; dg = g'
-gW1, gb1 = D1.T @ X, D1.sum(0)
-```
-
-</v-click>
-
-<v-click>
-
-<div class="nota">
-
-El error viaja hacia atrás por las **mismas matrices** que la señal hacia adelante, transpuestas.
-
-</div>
-
-</v-click>
-</div>
-</div>
-
-<!--
-Hacer en el pizarrón el caso de un solo peso de la primera capa con la regla de la cadena, y luego reconocer el patrón matricial. En el código cada renglón es un ejemplo, por eso aparece D2.T @ A1 en lugar de δ aᵀ.
--->
-
----
-
-# ¿Está bien? Verificación con diferencias finitas
-
-<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 40px">
-<div>
-
-Sin saber nada de la red:
-
-$$
-\frac{\partial L}{\partial \theta} \approx \frac{L(\theta + h) - L(\theta - h)}{2h}
-$$
-
-para un parámetro $\theta$ de la pérdida $L$ y un paso pequeño $h$, con error de truncamiento $O(h^2)$; la diferencia hacia adelante tiene $O(h)$.
-
-<v-click>
-
-Red 2-8-2 en las lunas, 42 parámetros, $h = 10^{-5}$: error relativo máximo entre $5 \times 10^{-11}$ y $2 \times 10^{-8}$ por grupo de parámetros. **Correcto.**
-
-</v-click>
-
-<v-click>
-
-<div class="pequeno tenue">
-
-Regla práctica: $\lesssim 10^{-7}$ está bien; $\gtrsim 10^{-2}$ es un error en el código. Un gradiente equivocado **entrena mal, pero entrena**: el error puede pasar inadvertido.
-
-</div>
-
-</v-click>
-</div>
-<div>
-
-<DiferenciasFinitasV />
-
-<div class="pequeno tenue">
-
-Derivada respecto de un solo peso; $\varepsilon \approx 10^{-16}$ es la precisión de la máquina. Mejor error: $5 \times 10^{-8}$ hacia adelante; $6 \times 10^{-11}$ centrada.
-
-</div>
-</div>
-</div>
-
-<!--
-La V: a la izquierda domina el truncamiento (pendiente 1 o 2 en escala log-log); a la derecha, el redondeo, que crece como ε/h con ε ≈ 10⁻¹⁶. El mejor h es ≈ √ε para la diferencia hacia adelante y ≈ ε^{1/3} para la centrada.
--->
-
----
-
-# Por qué no entrenamos con diferencias finitas
+# El parteaguas de 1986 fue de costo
 
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
@@ -401,12 +453,12 @@ Red 64-64-10 para los dígitos: **4,810** parámetros.
 <div>
 <span class="comparacion__etiqueta">diferencias finitas</span>
 <span class="comparacion__cifra tenue">9,620</span>
-<span class="comparacion__nota">pasadas hacia adelante: dos por parámetro</span>
+<span class="comparacion__nota">evaluaciones de la pérdida: dos por parámetro</span>
 </div>
 <div v-click>
 <span class="comparacion__etiqueta">retropropagación</span>
 <span class="comparacion__cifra">1 + 1</span>
-<span class="comparacion__nota">una hacia adelante y una hacia atrás, del mismo costo</span>
+<span class="comparacion__nota">una pasada hacia adelante y una hacia atrás, de costo parecido</span>
 </div>
 </div>
 
@@ -415,13 +467,7 @@ Red 64-64-10 para los dígitos: **4,810** parámetros.
 
 <v-click>
 
-**Modo inverso.** Para la pérdida $L: \R^P \to \R$ ($P$ parámetros, una sola salida), el gradiente completo cuesta un múltiplo pequeño y **constante** de evaluar $L$, sin importar $P$.
-
-</v-click>
-
-<v-click>
-
-**Modo directo.** Propagar derivadas hacia adelante junto con los valores necesita una pasada por parámetro, como las diferencias finitas.
+En la libreta: el mismo gradiente (difieren en $10^{-9}$), pero las diferencias finitas tardan **más de mil veces** más.
 
 </v-click>
 
@@ -429,7 +475,17 @@ Red 64-64-10 para los dígitos: **4,810** parámetros.
 
 <div class="nota">
 
-En la libreta: la retropropagación tarda menos de un milisegundo; las diferencias finitas, unos segundos (miles de veces más). Una red moderna tiene miles de millones de parámetros.
+El costo de la retropropagación **no crece** con el número de parámetros. Sin eso no habría redes de miles de millones de parámetros.
+
+</div>
+
+</v-click>
+
+<v-click>
+
+<div class="pequeno tenue">
+
+Las diferencias finitas se quedan para **verificar** una operación nueva en una red diminuta: `torch.autograd.gradcheck`.
 
 </div>
 
@@ -438,26 +494,94 @@ En la libreta: la retropropagación tarda menos de un milisegundo; las diferenci
 </div>
 
 ---
+clicks: 2
+---
 
-# PyTorch: el mismo gradiente, automático
+# Una red es un grafo de cómputo
 
-<div class="cols codigo-chico" style="grid-template-columns: 3fr 2fr; gap: 40px">
+<GrafoComputo :paso="$clicks" />
+
+<div class="cols" style="gap: 40px">
+<div class="pequeno">
+
+Una neurona logística con un atributo $x = 1.5$, clase $y = 1$, pesos $w = -0.8$, $b = 0.4$: $\;u = wx$, $\;z = u + b$, $\;\hat y = \sigma(z)$, $\;\ell = -\ln \hat y$. **Hacia adelante** se evalúa cada nodo en orden.
+
+</div>
+<div class="pequeno" v-click="2">
+
+**Hacia atrás** se calcula el **adjunto** $\partial\ell/\partial v$ de cada valor $v$, de la salida a las hojas, multiplicando por la derivada **local** de cada nodo: $\partial\ell/\partial z = -\frac{1}{\hat y}\cdot\hat y(1-\hat y) = \hat y - y$.
+
+</div>
+</div>
+
+<!--
+Primer clic: los valores hacia adelante. Segundo clic: los adjuntos en rojo. Hacer las cuentas en el pizarrón: −1/0.31 = −3.226; σ' = 0.31 · 0.69 = 0.214; −3.226 · 0.214 = −0.690. El + copia el adjunto a sus dos entradas; el × lo multiplica por la otra entrada: ∂ℓ/∂w = −0.690 · 1.5 = −1.035.
+-->
+
+---
+
+# Cada nodo solo conoce su derivada local
+
+<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-```python
-pt = {k: torch.tensor(v, dtype=torch.float64, requires_grad=True)
-      for k, v in p0.items()}          # los mismos pesos que en NumPy
-logits = torch.tanh(X @ pt["W1"].T + pt["b1"]) @ pt["W2"].T + pt["b2"]
-perdida = F.cross_entropy(logits, y)  # softmax + entropía cruzada
-perdida.backward()                    # retropropagación
-pt["W1"].grad                         # ∂L/∂W[1]
-```
+Para un nodo $v = f(u_1, u_2)$, el adjunto que llega se **reparte** entre sus entradas:
+
+$$
+\frac{\partial\ell}{\partial u_k} \mathrel{+}= \frac{\partial\ell}{\partial v}\,\frac{\partial f}{\partial u_k}
+$$
+
+<div class="pequeno tenue">
+
+Se **suma** ($+=$) porque un valor puede alimentar a varios nodos: en $f(x) = x\cdot x + x$, la $x$ recibe tres contribuciones, $x + x + 1 = 2x + 1$.
+
+</div>
 
 <v-click>
 
-<div class="pequeno" style="margin-top: 18px">
+El algoritmo completo: ordenar los nodos (orden topológico), poner $\partial\ell/\partial\ell = 1$ y recorrer la lista al revés. En la libreta, un motor así ocupa **40 líneas** de Python.
 
-Diferencia máxima con nuestro `atras`: $4 \times 10^{-17}$, el último dígito de la doble precisión.
+</v-click>
+</div>
+<div>
+
+| nodo | qué le pasa al adjunto $\bar v$ |
+|---|---|
+| $u_1 + u_2$ | llega igual a las dos entradas |
+| $u_1 \cdot u_2$ | a $u_1$ le llega $\bar v\, u_2$, y al revés |
+| $\tanh u$ | se multiplica por $1 - \tanh^2 u$ |
+| $\operatorname{ReLU}(u)$ | pasa si $u > 0$, se anula si no |
+| $\vW\va$ | a $\va$ le llega $\vW\T\bar{\mathbf v}$; a $\vW$, $\bar{\mathbf v}\,\va\T$ |
+
+<div class="pequeno tenue">
+
+$\bar v = \partial\ell/\partial v$ es el adjunto de la salida del nodo.
+
+</div>
+</div>
+</div>
+
+---
+
+# Modo directo contra modo inverso
+
+<div class="cols" style="grid-template-columns: 5fr 6fr; gap: 40px">
+<div>
+
+También se puede derivar **hacia adelante**, propagando junto con cada valor su derivada respecto de **un** parámetro: una pasada por parámetro, como las diferencias finitas.
+
+<v-click>
+
+El modo **inverso** da todas las derivadas de **una** salida en una pasada, y una pérdida $L: \R^P \to \R$ tiene una sola salida.
+
+</v-click>
+
+<v-click>
+
+<div class="pequeno">
+
+En una red, el modo inverso es la **retropropagación**. Con $\boldsymbol\delta^{[l]} = \partial\ell/\partial\vz^{[l]}$ y la tabla anterior sale
+$\boldsymbol\delta^{[l]} = \big(\vW^{[l+1]\top}\boldsymbol\delta^{[l+1]}\big) \odot g'\big(\vz^{[l]}\big)$: el error viaja hacia atrás por las mismas matrices, transpuestas ($\odot$: entrada por entrada).
 
 </div>
 
@@ -465,40 +589,200 @@ Diferencia máxima con nuestro `atras`: $4 \times 10^{-17}$, el último dígito 
 </div>
 <div>
 
-<div class="pequeno">
+<CostoModos />
+
+<div class="pequeno tenue">
+
+Gradiente de una pérdida logística con $M = 500$ ejemplos: `torch.func.jacfwd` (directo) contra `jacrev` (inverso). Tiempos de una laptop.
+
+</div>
+</div>
+</div>
+
+<!--
+Con P = 3,000 el modo directo ya es unas 70 veces más lento, y la brecha crece linealmente con P. El modo directo sirve cuando hay pocas entradas y muchas salidas, que no es nuestro caso.
+-->
+
+---
+
+# PyTorch arma el grafo mientras el código corre
+
+<div class="cols codigo-chico" style="grid-template-columns: 1fr 1fr; gap: 40px">
+<div>
+
+```python
+w = torch.tensor(-0.8, requires_grad=True)
+b = torch.tensor(0.4, requires_grad=True)
+perdida = -torch.log(torch.sigmoid(w * 1.5 + b))
+perdida.backward()          # recorre el grafo al revés
+w.grad, b.grad              # (−1.035, −0.690)
+```
+
+<v-click>
+
+```text
+perdida.grad_fn:
+NegBackward0
+   LogBackward0
+      SigmoidBackward0
+         AddBackward0
+            MulBackward0
+               AccumulateGrad      ← w.grad
+            AccumulateGrad         ← b.grad
+```
+
+</v-click>
+</div>
+<div>
 
 <v-clicks>
 
-- Cada operación con un tensor que tiene `requires_grad` se anota en un **grafo de cómputo**.
-- El grafo se arma **mientras el código corre**: admite `if` y ciclos de Python.
-- `backward()` lo recorre hacia atrás con la regla de la cadena: **diferenciación automática** en modo inverso.
-- `F.cross_entropy` recibe **logits**: combina *softmax* y logaritmo de forma estable.
+- Un tensor con `requires_grad=True` es nuestro nodo: cada operación con él guarda en `grad_fn` cómo derivarla.
+- El grafo es **dinámico**: se construye en cada evaluación, así que admite `if`, ciclos y funciones de Python.
+- `backward()` hace el recorrido hacia atrás y deja el gradiente en el `.grad` de las hojas.
+- Los mismos números que el grafo de hace dos láminas.
 
 </v-clicks>
 
 </div>
 </div>
+
+---
+
+# Tres cosas de autograd que causan errores
+
+<div class="cols codigo-chico" style="grid-template-columns: 1fr 1fr; gap: 44px">
+<div>
+
+**1. Los gradientes se acumulan.** `backward()` **suma** en `.grad`, como el $+=$ de la regla local:
+
+```python
+x = torch.tensor(3.0, requires_grad=True)
+(x * x + x).backward()   # x.grad = 7
+(x * x + x).backward()   # x.grad = 14 (!)
+```
+
+Por eso el ciclo de entrenamiento empieza con `optimizador.zero_grad()`.
+
 </div>
+<div>
+
+<v-click>
+
+**2. Actualizar no se deriva.** El paso $\theta \leftarrow \theta - \eta\,\nabla_\theta L$ ($\eta$: tasa de aprendizaje) va fuera del grafo:
+
+```python
+with torch.no_grad():
+    for p in red.parameters():
+        p -= eta * p.grad
+```
+
+</v-click>
+
+<v-click>
+
+**3. `detach()`** corta el grafo: el tensor que devuelve es un número fijo para autograd. Sirve para guardar resultados o graficar sin arrastrar el grafo.
+
+</v-click>
+</div>
+</div>
+
+---
+
+# El mismo gradiente en tres bibliotecas
+
+<div class="cols codigo-chico" style="grid-template-columns: 1fr 1fr 1fr; gap: 24px">
+<div>
+
+**PyTorch**
+
+```python
+w = torch.tensor(-0.8,
+      requires_grad=True)
+l = -torch.log(
+      torch.sigmoid(w*1.5 + b))
+l.backward()
+w.grad
+```
+
+</div>
+<div>
+
+**TensorFlow**
+
+```python
+w = tf.Variable(-0.8)
+with tf.GradientTape() as cinta:
+    l = -tf.math.log(
+      tf.sigmoid(w*1.5 + b))
+cinta.gradient(l, w)
+```
+
+</div>
+<div>
+
+**JAX**
+
+```python
+def perdida(w, b):
+    return -jnp.log(
+      jax.nn.sigmoid(w*1.5 + b))
+
+jax.grad(perdida)(-0.8, b)
+```
+
+</div>
+</div>
+
+<div class="cols" style="gap: 44px; margin-top: 14px">
+<div class="pequeno">
+
+<v-click>
+
+Las tres graban un grafo y lo recorren en modo inverso. Las tres pueden además **compilarlo** para que corra más rápido en GPU: `torch.compile`, `tf.function`, `jax.jit`.
+
+</v-click>
+
+</div>
+<div class="pequeno">
+
+<v-click>
+
+**Usamos PyTorch**: su grafo dinámico se escribe y se depura como Python normal, y es la biblioteca de la mayor parte de la investigación y de los modelos abiertos que se publican. Dominar una de ellas es lo que permite construir cualquier arquitectura.
+
+</v-click>
+
+</div>
+</div>
+
+<!--
+Las tres dan −1.035. TensorFlow graba las operaciones en una «cinta»; JAX es funcional: transforma una función de Python en la función que calcula su gradiente. Lo que se aprende con PyTorch se traslada casi directamente.
+-->
 
 ---
 
 # Entrenar: descenso por gradiente con minilotes
 
 <LunasFrontera>
-<div class="pequeno" style="margin-top: 14px">
+<div class="pequeno codigo-chico" style="margin-top: 14px">
 
-Red 2-16-2 con $\tanh$, minilotes de 20, tasa de aprendizaje $\eta = 0.3$. Con pesos chicos, $\tanh z \approx z$: en la época 0 la red es casi lineal.
+```python
+for xb, yb in minilotes:
+    optimizador.zero_grad()
+    F.cross_entropy(red(xb), yb).backward()
+    optimizador.step()        # θ ← θ − η ∇θ L
+```
 
 </div>
 <div class="pequeno" v-click>
 
-Exactitud en 2,000 puntos nuevos: **0.943**, contra 0.857 de la regresión logística. Los picos de la curva son ruido de los minilotes.
+Red 2-16-2 con $\tanh$, minilotes de 20, $\eta = 0.3$. Exactitud en 2,000 puntos nuevos: **0.946**, contra 0.857 de la regresión logística.
 
 </div>
 </LunasFrontera>
 
 <!--
-Recorrer las épocas con los botones: 0, 5, 20, 100, 300. Hacia la época 20 la red apenas supera a la logística; después la frontera se dobla para seguir las lunas.
+Recorrer las épocas con los botones: 0, 5, 20, 100, 300. Con pesos chicos, tanh z ≈ z: en la época 0 la red es casi lineal. Después la frontera se dobla para seguir las lunas. Los picos de la curva son ruido de los minilotes.
 -->
 
 ---
@@ -508,19 +792,18 @@ Recorrer las épocas con los botones: 0, 5, 20, 100, 300. Hacia la época 20 la 
 <div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
 <div>
 
-1,347 dígitos de 8 × 8 de entrenamiento y 450 de prueba. Red 64-64-10 con ReLU, minilotes de 32, $\eta = 0.1$, 40 épocas. En la logística, $C = 1/\lambda$ es el inverso de la regularización.
+1,347 dígitos de 8 × 8 de entrenamiento y 450 de prueba. Red 64-64-10 con ReLU en PyTorch, minilotes de 32, $\eta = 0.1$, 40 épocas: **0.3 segundos**.
 
 | modelo | exactitud | errores |
 |---|---|---|
 | logística, $C = 10$ | 0.971 | 13 |
-| MLP en NumPy | 0.978 | 10 |
-| MLP en PyTorch | 0.973 | 12 |
+| MLP 64-64-10 | 0.973 | 12 |
 
 <v-click>
 
 <div class="pequeno tenue">
 
-Con 450 imágenes, cada error vale 0.2 puntos: **no hay una ventaja clara**. Los dígitos de 8 × 8 son casi lineales; las redes se lucen con imágenes más grandes.
+En la logística, $C = 1/\lambda$ es el inverso de la regularización. Con 450 imágenes, cada error vale 0.2 puntos: **no hay una ventaja clara**. Las redes se lucen con imágenes más grandes.
 
 </div>
 
@@ -532,19 +815,19 @@ Con 450 imágenes, cada error vale 0.2 puntos: **no hay una ventaja clara**. Los
 
 <div class="pequeno tenue" style="margin-top: 12px">
 
-Los 12 errores de la red de PyTorch: dígito real → predicho.
+Los 12 errores de la red: dígito real → predicho.
 
 </div>
 </div>
 </div>
 
 <!--
-Las dos redes no son idénticas: PyTorch inicializa con otra distribución (uniforme, parecida a Xavier), baraja con otro generador y trabaja en precisión simple. Con otra semilla cambian uno o dos errores. Un SVM con kernel gaussiano llega a 99.3 % en estos datos: la red pequeña no lo supera aquí.
+Un SVM con kernel gaussiano llega a 99.3 % en estos datos: la red pequeña no lo supera aquí.
 -->
 
 ---
 layout: seccion
-numero: 2
+numero: 3
 ---
 
 # Inicialización
@@ -552,28 +835,167 @@ numero: 2
 Que la señal y el gradiente sobrevivan a muchas capas.
 
 ---
+layout: pregunta
+---
 
-# La escala de los pesos se multiplica capa por capa
+# ¿Por qué no empezar con todos los pesos en cero?
 
-<div class="cols" style="grid-template-columns: 5fr 6fr; gap: 36px">
+<v-click>
+
+Porque todas las neuronas ocultas calcularían lo mismo, recibirían **el mismo gradiente** y seguirían iguales para siempre. En la libreta, con todos los pesos en 0.1, después de 40 épocas las 64 neuronas siguen siendo **una**: exactitud 0.23.
+
+</v-click>
+
+<v-click>
+
+Hay que **sortear** los pesos para romper la simetría. ¿De qué tamaño?
+
+</v-click>
+
+---
+
+# El tamaño de los pesos se multiplica
+
+<div class="cols" style="grid-template-columns: 5fr 6fr; gap: 40px">
 <div>
 
-Una neurona con $n_{\text{in}}$ entradas $a_j$ y pesos $w_j$ independientes de media cero, $z = \sum_{j=1}^{n_{\text{in}}} w_j a_j$:
+Una neurona suma $n_{\text{in}}$ entradas $a_j$ con pesos $w_j$: $z = \sum_{j=1}^{n_{\text{in}}} w_j a_j$. Con pesos independientes, de media cero:
 
 $$
-\Var(z) = n_{\text{in}} \Var(w)\, \E[a^2] .
+\Var(z) = n_{\text{in}}\,\Var(w)\,\E\big[a^2\big] .
 $$
 
 <v-click>
 
-Si $n_{\text{in}}\Var(w) \ne 1$ (en la escala que toca), la señal **crece o se apaga exponencialmente** con la profundidad.
+Con $n_{\text{in}} = 256$ entradas de varianza 1:
+
+| pesos | desviación de $z$ |
+|---|---|
+| $w \sim N(0, 1)$ | $\sqrt{256} = 16$ |
+| $w \sim N(0, 0.01^2)$ | $0.16$ |
+| $w \sim N(0, 1/n_{\text{in}})$ | $1$ |
 
 </v-click>
 
+</div>
+<div>
+
+<EscalaInicial />
+
+<div class="pequeno tenue">
+
+$z$ para 10,000 ejemplos con 256 entradas normales estándar. Con 20 capas, el factor se aplica 20 veces: la señal **explota** o **se apaga**.
+
+</div>
+</div>
+</div>
+
+---
+
+# Xavier y He: la varianza que conserva la escala
+
+<div class="cols" style="grid-template-columns: 1fr 1fr; gap: 48px">
+<div>
+
+### Xavier o Glorot (2010) · para $\tanh$ y sigmoide
+
+$$
+\Var(w) = \frac{2}{n_{\text{in}} + n_{\text{out}}}
+$$
+
+<div class="pequeno">
+
+Cerca de 0, $\tanh z \approx z$: hacia adelante hace falta $n_{\text{in}}\Var(w) = 1$. Hacia atrás el gradiente pasa por $\vW\T$, donde cuentan las $n_{\text{out}}$ salidas: haría falta $n_{\text{out}}\Var(w) = 1$. Se toma el **promedio**.
+
+</div>
+</div>
+<div>
+
+### He o Kaiming (2015) · para ReLU
+
+$$
+\Var(w) = \frac{2}{n_{\text{in}}}
+$$
+
+<div class="pequeno">
+
+ReLU anula la mitad de las $z$: $\E[\operatorname{ReLU}(z)^2] = \tfrac12\Var(z)$. Para compensar esa mitad se **duplica** la varianza.
+
+</div>
+</div>
+</div>
+
+<v-click>
+
+<div class="nota" style="margin-top: 20px">
+
+En los dos casos el sesgo empieza en 0: la asimetría ya la ponen los pesos.
+
+</div>
+
+</v-click>
+
+---
+
+# Cómo se sortean los pesos
+
+<div class="cols" style="grid-template-columns: 6fr 5fr; gap: 44px">
+<div>
+
+Decidida la varianza, se sortea de una **normal** $N(0, \Var(w))$ o de una **uniforme** $U(-r, r)$. Como la uniforme tiene varianza $r^2/3$, para la misma varianza $r = \sqrt{3\Var(w)}$.
+
+<v-click>
+
+**Ejemplo:** una capa de 64 entradas y 64 salidas.
+
+| | $\Var(w)$ | desviación | límite $r$ |
+|---|---|---|---|
+| Xavier | $2/128$ | 0.125 | $\sqrt{6/128} = 0.217$ |
+| He | $2/64$ | 0.177 | $\sqrt{6/64} = 0.306$ |
+
+</v-click>
+</div>
+<div class="codigo-chico">
+
+<v-click>
+
+```python
+capa = nn.Linear(64, 64)
+nn.init.xavier_uniform_(capa.weight)   # tanh
+nn.init.kaiming_normal_(capa.weight,   # ReLU
+                        nonlinearity="relu")
+nn.init.zeros_(capa.bias)
+```
+
+</v-click>
+
+<v-click>
+
+<div class="pequeno">
+
+Por omisión, `nn.Linear` sortea en $U(-1/\sqrt{n_{\text{in}}}, 1/\sqrt{n_{\text{in}}})$: $\Var(w) = 1/(3n_{\text{in}})$, más chica que He. En redes poco profundas casi no importa; en redes profundas con ReLU conviene pedir He.
+
+</div>
+
+</v-click>
+</div>
+</div>
+
+---
+
+# La escala de los pesos, capa por capa
+
+<div class="cols" style="grid-template-columns: 5fr 6fr; gap: 36px">
+<div>
+
+20 capas ReLU de 256 neuronas, alimentadas con los dígitos estandarizados, con cuatro formas de sortear los pesos.
+
 <v-clicks>
 
-- $\tanh$: $\E[a^2] \approx \Var(z)$; promediando adelante y atrás ($n_{\text{out}}$: salidas de la capa), **Xavier**: $\Var(w) = 2/(n_{\text{in}} + n_{\text{out}})$.
-- ReLU anula la mitad: $\E[a^2] = \tfrac12\Var(z)$, así que **He**: $\Var(w) = 2/n_{\text{in}}$.
+- **He**: la escala se mantiene hasta la capa 20.
+- **Xavier**, pensada para $\tanh$: cada capa ReLU divide la varianza entre 2; en la capa 20, la desviación es unas 500 veces menor que en la primera.
+- $N(0, 0.01^2)$: factor $256 \times 10^{-4}/2 \approx 0.013$ por capa; la señal desaparece.
+- $N(0, 1)$: factor $256/2 = 128$ por capa; activaciones de $10^{20}$.
 
 </v-clicks>
 </div>
@@ -583,15 +1005,11 @@ Si $n_{\text{in}}\Var(w) \ne 1$ (en la escala que toca), la señal **crece o se 
 
 <div class="pequeno tenue">
 
-20 capas ReLU de 256 neuronas, alimentadas con los dígitos estandarizados.
+Desviación estándar de las activaciones en cada capa.
 
 </div>
 </div>
 </div>
-
-<!--
-Con He la desviación estándar se mantiene en 0.72 hasta la capa 20. Con Xavier y ReLU cada capa divide la varianza entre 2: en la capa 20 es unas 850 veces menor que en la primera. N(0, 0.01²) multiplica la varianza por 256 × 10⁻⁴ / 2 ≈ 0.013 en cada capa; N(0, 1), por 128: activaciones de 10²⁰.
--->
 
 ---
 
@@ -639,13 +1057,12 @@ Norma del gradiente por capa en la inicialización, con 256 dígitos.
 # Para llevarse
 
 <div class="cols cols-6-4" style="flex: 1">
-<div style="font-size: 25px; line-height: 1.4">
+<div style="font-size: 22px; line-height: 1.38">
 
-1. Una capa oculta **aprende una representación** en la que el problema es lineal; sin no linealidad, todo se colapsa a un modelo lineal.
-2. Una capa ancha aproxima cualquier función continua, pero el teorema no dice cuántas neuronas, cómo encontrarlas ni si generalizan.
-3. Retropropagación: el error $\boldsymbol\delta^{[l]} = \partial \ell / \partial \vz^{[l]}$ viaja hacia atrás por $\vW^{[l]\top}$; el gradiente de los pesos $\vW^{[l]}$ es $\boldsymbol\delta^{[l]}\va^{[l-1]\top}$. Cuesta unas pocas pasadas hacia adelante.
-4. Todo gradiente hecho a mano se **verifica** con diferencias centradas.
-5. La escala inicial de los pesos decide si la señal sobrevive: Xavier para $\tanh$, He para ReLU.
+1. Una red es **ingeniería de características aprendida** más un **GLM** en la última capa: por eso usa las mismas pérdidas y su error de salida es $\hat y - y$. Sin no linealidad, todo es un modelo lineal.
+2. Una red es un **grafo de cómputo**. La diferenciación automática en modo inverso lo recorre hacia atrás con derivadas locales y da todo el gradiente al costo de unas pocas pasadas, sin importar cuántos parámetros haya. La retropropagación es ese modo inverso, y fue el parteaguas.
+3. PyTorch, TensorFlow y JAX derivan cualquier programa. En PyTorch: el grafo es dinámico, los gradientes se acumulan y la actualización va en `no_grad`.
+4. Los pesos se sortean para romper la simetría, con la escala que conserva la señal: **Xavier**, $2/(n_{\text{in}} + n_{\text{out}})$, para $\tanh$; **He**, $2/n_{\text{in}}$, para ReLU.
 
 </div>
 <div>
@@ -654,11 +1071,11 @@ Norma del gradiente por capa en la inicialización, con 256 dígitos.
 
 <div class="pequeno">
 
-**Libreta:** *Una red neuronal desde cero, y luego con PyTorch* (Unidad 6, ejemplo 1).
+**Libreta:** *Una red neuronal con PyTorch: grafos de cómputo y diferenciación automática* (Unidad 6, ejemplo 1).
 
-**Laboratorio 6:** retropropagación desde cero y entrenamiento con PyTorch.
+**Laboratorio 6:** diferenciación automática y entrenamiento con PyTorch.
 
-**Lectura:** I. Goodfellow, Y. Bengio y A. Courville, *Deep Learning*, secciones 6.1–6.5; *Learning From Data*, capítulo electrónico 7 (*Neural Networks*), secciones 7.1–7.2.
+**Lectura:** I. Goodfellow, Y. Bengio y A. Courville, *Deep Learning*, secciones 6.1–6.5; A. G. Baydin et al., «Automatic differentiation in machine learning: a survey», *JMLR* 18 (2018), secciones 1–3.
 
 </div>
 </div>

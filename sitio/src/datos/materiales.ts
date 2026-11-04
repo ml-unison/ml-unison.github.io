@@ -218,7 +218,8 @@ export const materiales: Record<string, Material> = {
   },
   '06-redes-neuronales': {
     objetivos: [
-      'Derivar e implementar la retropropagación en forma matricial para una red con softmax y entropía cruzada, y verificarla numéricamente.',
+      'Explicar cómo calcula gradientes la diferenciación automática en modo inverso sobre un grafo de cómputo, por qué cuesta lo mismo que unas pocas pasadas hacia adelante, y usar torch.autograd con soltura.',
+      'Interpretar una red como ingeniería de características aprendida más un modelo lineal generalizado en la última capa, y elegir la salida y la pérdida según el tipo de respuesta.',
       'Explicar con argumentos de varianza por qué hacen falta la no linealidad y una buena inicialización (Xavier o He), y reconocer el desvanecimiento del gradiente.',
       'Explicar por qué el momento acelera en problemas mal condicionados y por qué Adam corrige el sesgo; elegir la tasa de aprendizaje con un barrido.',
       'Diagnosticar el sobreajuste con las curvas de validación y aplicar parada temprana, dropout y normalización por lotes.',
@@ -227,19 +228,19 @@ export const materiales: Record<string, Material> = {
       'Medir un modelo de lenguaje con perplejidad, explicar el desvanecimiento del gradiente en las redes recurrentes y derivar la atención de producto punto escalado.',
     ],
     presentaciones: [
-      { id: 'u06-01-mlp-backprop', titulo: 'Perceptrón multicapa y retropropagación', descripcion: 'Del perceptrón de 1958 a la retropropagación: qué hace una capa oculta, qué promete y qué no la aproximación universal, el gradiente en forma matricial y la inicialización.' },
+      { id: 'u06-01-mlp-backprop', titulo: 'Perceptrón multicapa y diferenciación automática', descripcion: 'La red como atributos aprendidos más un modelo lineal generalizado, qué promete y qué no la aproximación universal, grafos de cómputo y diferenciación automática (PyTorch, TensorFlow, JAX), y las inicializaciones de Xavier y He.' },
       { id: 'u06-02-optimizacion', titulo: 'Entrenar redes: optimización y regularización', descripcion: 'Minilotes, tasa de aprendizaje, momento, Adam y calendarios; parada temprana, dropout, normalización por lotes y aumento de datos; el costo energético de entrenar.' },
       { id: 'u06-03-convolucionales', titulo: 'Redes convolucionales y transferencia', descripcion: 'Localidad y pesos compartidos: convolución, campo receptivo, pooling, conexiones residuales y transferencia, con Fashion-MNIST, EuroSAT y el caso Gender Shades.' },
       { id: 'u06-04-secuencias-atencion', titulo: 'Secuencias: redes recurrentes, atención y transformers', descripcion: 'Predecir la siguiente letra: perplejidad, n-gramas, el gradiente de las redes recurrentes, la LSTM, la atención y la razón del √d, y qué aprenden las cabezas de un transformer.' },
     ],
     libretas: [
-      { ruta: 'unidades/06-redes-neuronales/ejemplos/u06-e01-mlp-backprop.ipynb', titulo: 'Una red neuronal desde cero, y luego con PyTorch', descripcion: 'Un perceptrón multicapa en NumPy con su retropropagación verificada con diferencias finitas, comparado con PyTorch en los dígitos; por qué importa la inicialización.' },
+      { ruta: 'unidades/06-redes-neuronales/ejemplos/u06-e01-mlp-backprop.ipynb', titulo: 'Una red neuronal con PyTorch: grafos de cómputo y diferenciación automática', descripcion: 'Un motor de diferenciación automática de 40 líneas comparado con torch.autograd, el costo del modo directo y del inverso, la última capa como GLM, redes en las lunas y los dígitos, e inicialización de Xavier y He.' },
       { ruta: 'unidades/06-redes-neuronales/ejemplos/u06-e02-optimizacion.ipynb', titulo: 'Entrenar una red con Fashion-MNIST', descripcion: 'SGD, momento y Adam; el ruido del gradiente, el momento en un valle mal condicionado, parada temprana, dropout, normalización por lotes y más datos.' },
       { ruta: 'unidades/06-redes-neuronales/ejemplos/u06-e03-convolucionales.ipynb', titulo: 'Convoluciones con Fashion-MNIST y transferencia a imágenes de satélite', descripcion: 'La convolución programada y su equivariancia, una red convolucional contra un perceptrón multicapa, y una ResNet-18 de ImageNet aplicada a EuroSAT con pocos ejemplos.' },
       { ruta: 'unidades/06-redes-neuronales/ejemplos/u06-e04-secuencias-atencion.ipynb', titulo: 'Un modelo de lenguaje del Quijote, letra por letra', descripcion: 'De los n-gramas con suavizado de Laplace a una LSTM y un transformer mínimo escrito a mano, con perplejidad, temperatura y mapas de atención.' },
     ],
     laboratorios: [
-      { ruta: 'unidades/06-redes-neuronales/laboratorios/u06-lab06-backprop.ipynb', titulo: 'Laboratorio 6 · Retropropagación desde cero y entrenamiento con PyTorch', descripcion: 'Capa lineal, ReLU y softmax con sus pasadas hacia atrás, verificación con diferencias finitas y un perceptrón multicapa con SGD; el ciclo de entrenamiento en PyTorch y una red convolucional pequeña. Se verifica automáticamente.' },
+      { ruta: 'unidades/06-redes-neuronales/laboratorios/u06-lab06-backprop.ipynb', titulo: 'Laboratorio 6 · Diferenciación automática y entrenamiento con PyTorch', descripcion: 'Grafos de cómputo y torch.autograd: gradientes con backward(), su acumulación, una operación propia verificada con gradcheck y diferencias finitas; un perceptrón multicapa con inicialización de Xavier o He entrenado con SGD escrito a mano; el ciclo de entrenamiento con torch.optim y una red convolucional pequeña. Se verifica automáticamente.' },
     ],
     lecturas: [
       { obra: 'Goodfellow, Bengio y Courville (2016). Deep Learning. MIT Press.', detalle: 'Capítulos 6–10.' },

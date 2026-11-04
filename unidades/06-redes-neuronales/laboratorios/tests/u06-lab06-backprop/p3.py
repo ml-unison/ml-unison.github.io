@@ -2,25 +2,15 @@ OK_FORMAT = True
 
 test = {   'name': 'p3',
     'points': 2,
-    'suites': [   {   'cases': [   {   'code': '>>> _E, _dZ = softmax_entropia(np.zeros((2, 4)), np.array([0, 3]))\n'
-                                               ">>> assert abs(_E - np.log(4)) < 1e-12, 'con puntajes iguales cada clase tiene probabilidad 1/4 y la pérdida es log 4'\n"
-                                               ">>> assert np.allclose(_dZ, [[-0.375, 0.125, 0.125, 0.125], [0.125, 0.125, 0.125, -0.375]]), 'dZ = (P − Y)/N: aquí (1/4 − 1)/2 = −0.375 en la clase "
-                                               "correcta y (1/4)/2 = 0.125 en las otras'\n",
-                                       'hidden': False,
-                                       'locked': False},
-                                   {   'code': '>>> _rng = np.random.default_rng(3)\n'
-                                               '>>> _Z = _rng.normal(size=(5, 3))\n'
-                                               '>>> _y = np.array([0, 2, 1, 1, 0])\n'
-                                               '>>> _h = 1e-06\n'
-                                               '>>> _dif = np.zeros_like(_Z)\n'
-                                               '>>> for _i in range(5):\n'
-                                               '...     for _j in range(3):\n'
-                                               '...         _Zm, _Zp = (_Z.copy(), _Z.copy())\n'
-                                               '...         _Zm[_i, _j] -= _h\n'
-                                               '...         _Zp[_i, _j] += _h\n'
-                                               '...         _dif[_i, _j] = (softmax_entropia(_Zp, _y)[0] - softmax_entropia(_Zm, _y)[0]) / (2 * _h)\n'
-                                               ">>> assert np.allclose(softmax_entropia(_Z, _y)[1], _dif, atol=1e-07), 'dZ no coincide con las diferencias finitas de tu pérdida (¿dividiste entre "
-                                               "N?)'\n",
+    'suites': [   {   'cases': [   {   'code': '>>> _x = torch.tensor([-1000.0, -1.0, 0.0, 1.0, 1000.0], dtype=torch.float64, requires_grad=True)\n'
+                                               '>>> _s = softplus(_x)\n'
+                                               ">>> assert torch.isfinite(_s).all(), 'con x = ±1000 la softplus debe ser finita: usa max(x, 0) + log(1 + e^(−|x|))'\n"
+                                               '>>> assert torch.allclose(_s.detach(), torch.tensor([0.0, np.log1p(np.exp(-1)), np.log(2), 1 + np.log1p(np.exp(-1)), 1000.0], dtype=torch.float64)), '
+                                               "'softplus(−1000, −1, 0, 1, 1000) debe ser (0, 0.3133, 0.6931, 1.3133, 1000)'\n"
+                                               '>>> _s.sum().backward()\n'
+                                               ">>> assert torch.allclose(_x.grad, torch.sigmoid(_x.detach())), 'la derivada de la softplus es σ(x)'\n"
+                                               '>>> _xg = torch.randn(7, dtype=torch.float64, generator=torch.Generator().manual_seed(3), requires_grad=True)\n'
+                                               ">>> assert torch.autograd.gradcheck(softplus, (_xg,), raise_exception=False), 'gradcheck falla: revisa backward'\n",
                                        'hidden': False,
                                        'locked': False}],
                       'scored': True,

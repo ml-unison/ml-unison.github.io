@@ -1,12 +1,16 @@
 # Notas para continuar el trabajo con Claude Code
 
-Última actualización: 2026-11-04. Este archivo está en un **repositorio público**: aquí no van
+Última actualización: 2026-11-05. Este archivo está en un **repositorio público**: aquí no van
 soluciones, enunciados de exámenes ni tokens. Lo privado vive en `ml-unison/soluciones`.
 
 Al empezar una sesión en otra computadora, pídele a Claude: *«Lee `.claude/NOTAS.md` y
 `presentaciones/NOTACION.md` antes de empezar»*. La memoria automática de Claude
 (`~/.claude/projects/.../memory/`) **no viaja** entre computadoras; lo esencial está copiado aquí.
 Si cambia algo importante, actualiza este archivo y haz commit.
+
+Este archivo es el **estado actual y los acuerdos vigentes**. El historial de cada sesión (qué se hizo,
+en qué computadora, qué quedó pendiente) va en `.claude/BITACORA.md`: al final de cada sesión se agrega
+una entrada ahí y, si cambió el estado o un acuerdo, se actualiza también este archivo.
 
 ---
 
@@ -21,6 +25,9 @@ git clone https://github.com/ml-unison/soluciones.git          # privado: requie
 cd ml-unison.github.io
 uv sync --group dev && npm install
 ```
+
+La ruta exacta no importa, solo que queden lado a lado. Computadoras conocidas: una Mac
+(`~/Documents/Cursos/ML/`) y una Linux (`~/Documentos/Cursos/RdP-LCC/`).
 
 Requisitos:
 - [uv](https://docs.astral.sh/uv/), Node.js ≥ 24, `gh` autenticado con acceso a la organización `ml-unison`.
@@ -65,8 +72,9 @@ node herramientas/construir.mjs        # todo a _construccion/
 3. Proyecto (competencias de Kaggle): entrega única **30/11/2026** y después citas para la defensa oral.
 4. `refs/` (lista de cursos de DataCamp) está sin versionar; su contenido ya está en
    `sitio/src/datos/datacamp.ts`. Preguntar al profesor si se borra o se versiona.
-5. En `../soluciones` hay auxiliares de LaTeX de `examen-D` sin versionar: se pueden borrar
-   (`latexmk -c`) o agregar un `.gitignore`.
+5. En `../soluciones`, los auxiliares de LaTeX de `examen-A/B/C` (`.aux`, `.log`, `.fls`,
+   `.fdb_latexmk`, `.out`) están **versionados** y los de `examen-D` quedaron sin versionar en la Mac.
+   Propuesta pendiente de aprobar: agregarlos al `.gitignore` de `soluciones` y `git rm --cached`.
 
 ## 4. Acuerdos de operación
 
@@ -176,4 +184,4 @@ de las ideas, sin ejemplos). Desde entonces:
   *brief* común (estas convenciones + la retroalimentación del profesor) y reportan las cifras clave
   para que las láminas coincidan.
 - Verificar antes de dar algo por terminado: pruebas, libretas ejecutadas, KaTeX, desborde y capturas.
-- Al terminar, actualizar la sección 2 y 3 de este archivo.
+- Al terminar, actualizar la sección 2 y 3 de este archivo y agregar la entrada en `BITACORA.md`.

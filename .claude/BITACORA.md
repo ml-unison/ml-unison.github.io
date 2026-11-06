@@ -26,10 +26,10 @@ Primera sesión en esta computadora.
   `git checkout package-lock.json` para no mezclarlo en los commits.
 - Git no tenía identidad configurada; el profesor la configuró (`juliowaissman`,
   `julio.waissman@unison.mx`), igual que en sus commits anteriores.
-- Pendiente del punto 5 de NOTAS: aquí no existen los auxiliares de `examen-D` (no viajaron porque no
-  estaban versionados), pero los de `examen-A/B/C` (`.aux`, `.log`, `.fls`, `.fdb_latexmk`, `.out`)
-  **sí están versionados** en `soluciones`. Propuesta: agregar esos patrones al `.gitignore` de
-  `soluciones` y quitarlos del índice (`git rm --cached`). Falta confirmarlo con el profesor.
+- Limpieza de `soluciones` (aprobada): los auxiliares de LaTeX de `examen-A/B/C` estaban versionados;
+  se agregaron los patrones de LaTeX al `.gitignore` y se sacaron del índice (siguen en disco).
+  Commit `10bab66`, con push.
+- Push de `main` con la bitácora (`ae10fca`); solo notas, no cambia nada para los alumnos.
 - Acuerdo nuevo: llevar esta bitácora y actualizarla en cada sesión.
 
 ## Historia anterior (reconstruida de `git log` y de NOTAS)

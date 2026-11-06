@@ -72,9 +72,7 @@ node herramientas/construir.mjs        # todo a _construccion/
 3. Proyecto (competencias de Kaggle): entrega única **30/11/2026** y después citas para la defensa oral.
 4. `refs/` (lista de cursos de DataCamp) está sin versionar; su contenido ya está en
    `sitio/src/datos/datacamp.ts`. Preguntar al profesor si se borra o se versiona.
-5. En `../soluciones`, los auxiliares de LaTeX de `examen-A/B/C` (`.aux`, `.log`, `.fls`,
-   `.fdb_latexmk`, `.out`) están **versionados** y los de `examen-D` quedaron sin versionar en la Mac.
-   Propuesta pendiente de aprobar: agregarlos al `.gitignore` de `soluciones` y `git rm --cached`.
+
 
 ## 4. Acuerdos de operación
 

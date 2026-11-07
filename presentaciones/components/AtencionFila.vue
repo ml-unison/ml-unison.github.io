@@ -2,7 +2,7 @@
 // Una fila de la matriz de atención: a qué letras anteriores mira la letra seleccionada (clic para cambiarla).
 import { ref, computed } from 'vue'
 import { scaleLinear } from 'd3-scale'
-import datos from '../datos/u06-04.json'
+import datos from '../datos/u06-05.json'
 const A = (datos as any).atencion
 const props = withDefaults(defineProps<{ bloque?: number, cabeza?: number, consulta?: number }>(), { bloque: 2, cabeza: 2, consulta: -1 })
 const letras = [...A.letras].map((c: string) => c === ' ' ? '·' : c === '\n' ? '¶' : c)

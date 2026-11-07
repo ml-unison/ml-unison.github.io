@@ -4,7 +4,7 @@
 import { computed } from 'vue'
 import { scaleLinear } from 'd3-scale'
 import { line } from 'd3-shape'
-import datos from '../datos/u06-04.json'
+import datos from '../datos/u06-05.json'
 const G = (datos as any).gradiente
 const props = withDefaults(defineProps<{ series?: string[] }>(), { series: () => ['lstm_ini', 'lstm'] })
 const info: Record<string, { c: string, t: string, en: number }> = {

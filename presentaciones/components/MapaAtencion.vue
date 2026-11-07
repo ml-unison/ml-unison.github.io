@@ -2,7 +2,7 @@
 // Pesos de atención α_ts de una cabeza del transformer sobre las últimas 40 letras de una frase de validación.
 import { ref, computed } from 'vue'
 import { scaleLinear } from 'd3-scale'
-import datos from '../datos/u06-04.json'
+import datos from '../datos/u06-05.json'
 const A = (datos as any).atencion
 const props = withDefaults(defineProps<{ bloque?: number, cabeza?: number, botones?: boolean }>(), { bloque: 2, cabeza: 2, botones: true })
 const sel = ref<[number, number]>([props.bloque, props.cabeza])

@@ -2,7 +2,7 @@
 // Perplejidad de validación de la LSTM y del transformer durante el entrenamiento, con las líneas base de n-gramas.
 import { scaleLinear, scaleLog } from 'd3-scale'
 import { line } from 'd3-shape'
-import datos from '../datos/u06-04.json'
+import datos from '../datos/u06-05.json'
 const C = (datos as any).curvas
 const W = 640, H = 400, m = { l: 56, r: 120, t: 30, b: 70 }
 const x = scaleLinear().domain([0, 1500]).range([m.l, W - m.r])

@@ -2,7 +2,7 @@
 // Perplejidad de entrenamiento y validación de los n-gramas de caracteres del Quijote (n = 1…7).
 import { scaleLinear, scaleLog } from 'd3-scale'
 import { line } from 'd3-shape'
-import datos from '../datos/u06-04.json'
+import datos from '../datos/u06-05.json'
 const G = (datos as any).ngramas
 const props = withDefaults(defineProps<{ suave?: boolean }>(), { suave: true })
 const W = 640, H = 420, m = { l: 56, r: 190, t: 34, b: 70 }

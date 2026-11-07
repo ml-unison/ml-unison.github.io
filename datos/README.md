@@ -1,6 +1,6 @@
 # Datos del curso
 
-Las libretas cargan estos archivos con `rdp.datos.cargar(nombre)`. La función lee la copia local si existe y, si no, descarga la versión de GitHub. Guardamos copias en el repositorio para que las libretas sigan funcionando aunque la fuente original cambie o no esté disponible.
+Las libretas cargan estos archivos con `rdp.datos.cargar(nombre)` (tablas) o `rdp.datos.archivo(nombre)` (fotos y otros archivos, que devuelve una ruta local). La función lee la copia local si existe y, si no, descarga la versión de GitHub. Guardamos copias en el repositorio para que las libretas sigan funcionando aunque la fuente original cambie o no esté disponible.
 
 | Archivo | Contenido | Fuente | Licencia |
 |---|---|---|---|
@@ -19,6 +19,9 @@ Las libretas cargan estos archivos con `rdp.datos.cargar(nombre)`. La función l
 | `temperatura_hermosillo.csv` | Temperatura diaria (°C) en el aeropuerto de Hermosillo, Sonora (estación MXM00076160), de 1992 a 2024: `tmed` media (casi completa), `tmax` y `tmin` (con muchos faltantes), `lluvia` en mm. Faltan 82 de los 12,054 días. | M. J. Menne et al., *Journal of Atmospheric and Oceanic Technology* 29 (2012); Global Historical Climatology Network – Daily (GHCN-D), NOAA NCEI. | Dominio público |
 | `quijote.txt` | Texto completo de *El ingenioso hidalgo don Quijote de la Mancha*, de Miguel de Cervantes (2.1 millones de caracteres), sin el encabezado ni el pie de Project Gutenberg. Se carga con `rdp.datos.texto("quijote")`. | Project Gutenberg, libro 2000. | Dominio público |
 | `titanic.csv` | Los 1,309 pasajeros del *RMS Titanic*. | T. Cason a partir de la *Encyclopedia Titanica*, distribuida por F. Harrell (Vanderbilt). Versión de OpenML. | Ver la ficha de OpenML |
+| `fotos/unison_luis_encinas.jpg` | Edificio Principal de la Universidad de Sonora y el bulevar Luis Encinas, vistos desde la biblioteca universitaria (12 de junio de 2012). Se usa en la libreta de detección de objetos. | Metamario, [«LuisEncinasUnison.JPG»](https://commons.wikimedia.org/wiki/File:LuisEncinasUnison.JPG), Wikimedia Commons. Modificación: reducida de 3260 × 2196 a 1280 × 862 pixeles. | CC BY-SA 3.0 |
+| `fotos/calle_matamoros.jpg` | Calle Mariano Matamoros, en el centro de Hermosillo, de norte a sur, con el cerro de la Campana al fondo (2013). Se usa en la libreta de detección de objetos. | CarlosyFrancisca, [«Matamoros final centro.jpg»](https://commons.wikimedia.org/wiki/File:Matamoros_final_centro.jpg), Wikimedia Commons. Modificación: tamaño original (958 × 718), solo recomprimida en JPEG. | CC BY-SA 3.0 |
+| `fotos/boulevard_morelos.jpg` | Crucero del bulevar José María Morelos, en Hermosillo (10 de enero de 2006). Se usa en la libreta de detección de objetos. | Sergio R., [«PICT0922 - panoramio.jpg»](https://commons.wikimedia.org/wiki/File:PICT0922_-_panoramio.jpg), Wikimedia Commons (originalmente en Panoramio). Modificación: reducida de 2048 × 1536 a 1280 × 960 pixeles. | CC BY-SA 3.0 |
 
 Las libretas de redes neuronales descargan además *Fashion-MNIST* (H. Xiao, K. Rasul y R. Vollgraf, 2017; licencia MIT) y *EuroSAT* (P. Helber et al., 2019; licencia MIT) con `torchvision` la primera vez que se usan.
 

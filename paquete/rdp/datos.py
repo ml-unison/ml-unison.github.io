@@ -60,6 +60,23 @@ def cargar(nombre: str, rama: str | None = None, **kwargs) -> pd.DataFrame:
     raise FileNotFoundError(f"No encuentro '{nombre}' en datos/ (rama {rama or RAMA}).")
 
 
+def archivo(nombre: str, rama: str | None = None) -> Path:
+    """Ruta local de datos/<nombre> (por ejemplo 'fotos/calle.jpg'), para archivos que no son tablas.
+
+    Usa la copia del repositorio si existe; si no (Colab), la descarga una sola vez a
+    ~/.cache/rdp-datos/<rama>/ y devuelve esa ruta.
+    """
+    local = _local(nombre)
+    if local is not None:
+        return local
+    destino = Path.home() / ".cache" / "rdp-datos" / (rama or RAMA) / nombre
+    if not destino.exists():
+        destino.parent.mkdir(parents=True, exist_ok=True)
+        with urllib.request.urlopen(url(nombre, rama), timeout=60) as r:
+            destino.write_bytes(r.read())
+    return destino
+
+
 def texto(nombre: str, rama: str | None = None) -> str:
     """Lee datos/<nombre> (por ejemplo 'quijote.txt') como texto UTF-8."""
     archivo = nombre if Path(nombre).suffix else nombre + ".txt"

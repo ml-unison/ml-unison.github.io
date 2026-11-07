@@ -2,7 +2,7 @@
 // ‖∂h_T/∂h_t‖ en una RNN tanh de 256 unidades con W = ρQ (Q ortogonal), en escala logarítmica.
 import { scaleLinear } from 'd3-scale'
 import { line } from 'd3-shape'
-import datos from '../datos/u06-04.json'
+import datos from '../datos/u06-05.json'
 const R = (datos as any).rnn
 const W = 620, H = 420, m = { l: 70, r: 90, t: 34, b: 70 }
 const x = scaleLinear().domain([0, 100]).range([m.l, W - m.r])

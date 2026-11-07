@@ -1,6 +1,6 @@
 <script setup lang="ts">
 // EuroSAT (Sentinel-2, RGB, 64 × 64 pixeles = 640 m de lado): dos ejemplos de cada clase de uso de suelo.
-import datos from '../datos/u06-03.json'
+import datos from '../datos/u06-04.json'
 const E = (datos as any).eurosat
 withDefaults(defineProps<{ tam?: number }>(), { tam: 84 })
 </script>

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // Distribución del bigrama de Laplace para la letra que sigue a «q» y a un espacio.
 import { scaleBand, scaleLinear } from 'd3-scale'
-import datos from '../datos/u06-04.json'
+import datos from '../datos/u06-05.json'
 const S = (datos as any).siguiente
 const W = 560, H = 190, m = { l: 46, r: 8, t: 14, b: 40 }
 const vis = (c: string) => c === ' ' ? '·' : c === '\n' ? '¶' : c

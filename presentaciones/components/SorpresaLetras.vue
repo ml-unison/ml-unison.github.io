@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // Sorpresa −log₂ P(letra | contexto) del transformer en cada letra de una frase de validación.
 import { scaleLinear } from 'd3-scale'
-import datos from '../datos/u06-04.json'
+import datos from '../datos/u06-05.json'
 const S = (datos as any).sorpresa
 const color = scaleLinear<string>().domain([0, 2.5, 5.5, 8.5]).range(['#FFFFFF', '#C0CEE3', '#24398A', '#20305A']).clamp(true)
 // palabras con su espacio final, para no partir una palabra al cambiar de renglón

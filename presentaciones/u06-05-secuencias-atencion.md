@@ -661,7 +661,7 @@ Nuestro modelo escribe «vuesa merced» y abre diálogos con raya porque eso es 
 
 <div class="pequeno">
 
-**Libreta:** *Un modelo de lenguaje del Quijote, letra por letra* (Unidad 6, ejemplo 4).
+**Libreta:** *Un modelo de lenguaje del Quijote, letra por letra* (Unidad 6, ejemplo 7).
 
 **Lectura:** I. Goodfellow, Y. Bengio y A. Courville, *Deep Learning*, capítulo 10; A. Vaswani et al., «Attention is all you need», NeurIPS 2017; S. J. D. Prince, *Understanding Deep Learning*, capítulo 12.
 

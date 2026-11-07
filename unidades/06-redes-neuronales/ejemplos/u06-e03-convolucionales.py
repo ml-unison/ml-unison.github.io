@@ -14,23 +14,23 @@
 #
 # ---
 #
-# # Convoluciones con Fashion-MNIST y transferencia a imágenes de satélite
+# # Redes convolucionales con Fashion-MNIST: de LeNet a EfficientNet
 #
 # **Unidad 6 · Ejemplo 3**
 #
 # Un perceptrón multicapa trata una imagen como una lista de números: si revolvemos los pixeles con la misma permutación en todas las imágenes, aprende exactamente igual. Pero una imagen no es una lista: los pixeles vecinos están relacionados, y un borde, un botón o una costura significan lo mismo en cualquier parte del cuadro. Las **redes convolucionales** incorporan esas dos ideas en la arquitectura. En esta libreta vamos a:
 #
-# 1. calcular cuántos parámetros necesitaría un perceptrón multicapa para ver una foto, y por qué es demasiado;
+# 1. ver por qué las imágenes (y otros datos donde lo local importa) merecen una arquitectura propia, y cuántos parámetros necesitaría un perceptrón multicapa para ver una foto;
 # 2. programar la **convolución** discreta, aplicar a una prenda filtros de bordes hechos a mano y verificar su **equivariancia a traslaciones**;
 # 3. entender el **relleno**, el **paso**, los **canales**, el **campo receptivo** y el ***pooling***, y contar parámetros;
 # 4. entrenar una red convolucional pequeña en Fashion-MNIST y compararla con un perceptrón multicapa que tiene once veces más parámetros; mirar sus filtros, sus mapas de activación y sus errores;
-# 5. ver con una simulación por qué las **conexiones residuales** permiten entrenar redes muy profundas;
-# 6. usar una ResNet-18 entrenada en ImageNet para clasificar **imágenes de satélite** con muy pocos ejemplos etiquetados (**transferencia**), y compararla con una red entrenada desde cero con los mismos datos.
+# 5. comprobar que la parte convolucional de la red es un **preprocesamiento**: convierte pixeles en atributos, y encima cualquier clasificador (una regresión logística, por ejemplo) hace el resto;
+# 6. recorrer las arquitecturas que hicieron historia (LeNet, AlexNet, **VGG**, **ResNet**, **Inception**, **Xception** y **EfficientNet**), programando y contando las piezas que introdujo cada una.
 
 # %% [markdown]
 # ## 0. Preparación del entorno
 #
-# En Colab, la siguiente celda instala el paquete `rdp` del curso (estilo de gráficas, datos y cuestionarios). En tu máquina, si usas el entorno del repositorio, ya está instalado. PyTorch y torchvision ya vienen instalados en Colab. Si tienes una GPU (en Colab: *Entorno de ejecución → Cambiar tipo de entorno*), la libreta la usa; si no, corre en CPU en unos dos o tres minutos.
+# En Colab, la siguiente celda instala el paquete `rdp` del curso (estilo de gráficas, datos y cuestionarios). En tu máquina, si usas el entorno del repositorio, ya está instalado. PyTorch y torchvision ya vienen instalados en Colab. Si tienes una GPU (en Colab: *Entorno de ejecución → Cambiar tipo de entorno*), la libreta la usa; si no, corre en CPU en unos cinco minutos.
 
 # %%
 import os, sys
@@ -71,7 +71,26 @@ torch.manual_seed(SEMILLA)
 print("dispositivo:", dispositivo)
 
 # %% [markdown]
-# ## 1. Una pregunta para empezar: ¿cuántos parámetros?
+# ## 1. Por qué importan las imágenes (y no solo las imágenes)
+#
+# Buena parte de los datos que se generan hoy son imágenes: fotos de teléfonos, cámaras de vigilancia y de líneas de producción, estudios médicos, imágenes de satélite. Algunos ejemplos de problemas que se resolvieron con las redes de esta libreta:
+#
+# - **Medicina.** Detectar retinopatía diabética en fotografías del fondo del ojo (V. Gulshan et al., *JAMA*, 2016) o clasificar lesiones de la piel a partir de fotos (A. Esteva et al., *Nature*, 2017), con exactitudes comparables a las de especialistas en los conjuntos de prueba de esos estudios.
+# - **Agricultura y medio ambiente.** Los satélites Sentinel-2 del programa europeo Copernicus fotografían toda la superficie terrestre cada pocos días y sus imágenes son libres; con ellas se clasifican cultivos, se mide la deforestación o se vigilan sequías. En el campo, se cuentan espigas de trigo en fotos para estimar el rendimiento (el conjunto *Global Wheat Head Detection*, E. David et al., *Plant Phenomics*, 2020).
+# - **Industria y vida diaria.** Inspección visual de piezas defectuosas, lectura de placas y documentos, desbloqueo del teléfono con la cara.
+#
+# El momento en que las redes neuronales profundas se volvieron la herramienta estándar fue, precisamente, un concurso de imágenes: ImageNet 2012 (1.2 millones de fotos de entrenamiento en 1,000 clases), que ganó por mucho una red convolucional. Lo veremos en la sección 9.
+#
+# Pero lo que aprovechan estas redes no es que los datos sean fotos, sino que **lo local importa**: el valor en una posición se entiende mirando a sus vecinos, y el mismo patrón puede aparecer en cualquier lugar. Eso también pasa en:
+#
+# - el **audio**, convertido en espectrograma (una imagen de frecuencia contra tiempo), donde se reconocen sonidos y palabras (S. Hershey et al., ICASSP 2017);
+# - las **series de tiempo**, con convoluciones de una dimensión a lo largo del tiempo (WaveNet, A. van den Oord et al., 2016; S. Bai, J. Z. Kolter y V. Koltun, 2018);
+# - las **secuencias de ADN**, donde un filtro de una dimensión que recorre la cadena funciona como un detector de motivos, pequeñas subsecuencias con una función biológica (J. Zhou y O. G. Troyanskaya, *Nature Methods*, 2015).
+#
+# Todo lo que hagamos en esta libreta con imágenes de dos dimensiones se traslada a esos casos cambiando `nn.Conv2d` por `nn.Conv1d`.
+
+# %% [markdown]
+# ## 2. Una pregunta para empezar: ¿cuántos parámetros?
 #
 # Una foto modesta de 224 × 224 pixeles en color tiene $224 \times 224 \times 3 = 150{,}528$ números. Si la conectamos a una capa oculta de 1,000 neuronas, como hicimos con los dígitos de 8 × 8, cada neurona necesita un peso por número de entrada:
 
@@ -89,7 +108,7 @@ print(f"pesos de la primera capa con 1,000 neuronas: {entradas * 1000 + 1000:,}"
 # Una capa que mira ventanas de 3 × 3 y comparte sus pesos en todas las posiciones tiene $3 \times 3 \times 3 + 1 = 28$ parámetros por detector, sin importar el tamaño de la imagen. Esa capa es una **convolución**.
 
 # %% [markdown]
-# ## 2. Los datos y el problema: Fashion-MNIST
+# ## 3. Los datos y el problema: Fashion-MNIST
 #
 # **Datos.** Fashion-MNIST (H. Xiao, K. Rasul y R. Vollgraf, 2017) contiene 70,000 imágenes en escala de grises de 28 × 28 pixeles de artículos del catálogo de Zalando, una tienda de ropa en línea europea: 60,000 para entrenar y 10,000 para probar, con 10 clases balanceadas. Sus autores lo publicaron como reemplazo directo de MNIST (los dígitos escritos a mano de 28 × 28), que se había vuelto demasiado fácil: con MNIST, casi cualquier método llega a 97 % de exactitud y no distingue entre ideas buenas y malas. Licencia MIT; `torchvision` lo descarga la primera vez (unos 30 MB) a `~/.cache/rdp-datos`.
 #
@@ -121,7 +140,7 @@ plt.tight_layout()
 plt.show()
 
 # %% [markdown]
-# ## 3. La convolución
+# ## 4. La convolución
 #
 # ### Definición
 #
@@ -215,7 +234,7 @@ print("diferencia máxima:", np.abs(izq - der).max())
 # %% [markdown]
 # Una capa densa no tiene esta propiedad: sus pesos para el pixel (5, 5) no tienen nada que ver con los del pixel (7, 8), y lo que aprenda sobre un objeto en una posición no le sirve en otra.
 #
-# ## 4. Relleno, paso, canales y conteo de parámetros
+# ## 5. Relleno, paso, canales y conteo de parámetros
 #
 # Las capas convolucionales de una red tienen cuatro ingredientes más.
 #
@@ -269,9 +288,9 @@ pd.DataFrame({"capa": [f for f, _ in filas], "forma de la salida": [s for _, s i
 #
 # ### El campo receptivo crece con la profundidad
 #
-# Una neurona de `conv1` ve una ventana de 3 × 3 de la imagen. Una de `conv2` ve 3 × 3 posiciones del mapa anterior, ya reducido a la mitad por el *pooling*: en la imagen original eso abarca más. Si $r_\ell$ es el lado del **campo receptivo** después de la capa $\ell$ y $j_\ell$ la distancia, en pixeles de la imagen, entre dos posiciones vecinas del mapa, una capa con ventana $k$ y paso $s$ cumple
+# Una neurona de `conv1` ve una ventana de 3 × 3 de la imagen. Una de `conv2` ve 3 × 3 posiciones del mapa anterior, ya reducido a la mitad por el *pooling*: en la imagen original eso abarca más. Si $r_l$ es el lado del **campo receptivo** después de la capa $l$ y $j_l$ la distancia, en pixeles de la imagen, entre dos posiciones vecinas del mapa, una capa con ventana $k$ y paso $s$ cumple
 #
-# $$r_\ell = r_{\ell-1} + (k - 1)\, j_{\ell-1}, \qquad j_\ell = j_{\ell-1}\, s, \qquad r_0 = j_0 = 1 .$$
+# $$r_l = r_{l-1} + (k - 1)\, j_{l-1}, \qquad j_l = j_{l-1}\, s, \qquad r_0 = j_0 = 1 .$$
 #
 # Para nuestra red: `conv1` da $r = 3$; el *pooling* ($k = s = 2$) da $r = 4$, $j = 2$; `conv2` da $r = 4 + 2 \cdot 2 = 8$; el segundo *pooling*, $r = 8 + 1 \cdot 2 = 10$. Cada posición del mapa final «ve» un cuadro de 10 × 10 pixeles. Lo comprobamos con el gradiente: la salida de una posición solo puede depender de los pixeles en los que su gradiente no es cero.
 
@@ -324,7 +343,7 @@ pd.Series(invariancia, name="cambio relativo al mover 1 pixel").round(3)
 # %% [markdown]
 # Cada *pooling* reduce el cambio; después de dos, la representación es bastante más estable ante desplazamientos pequeños, aunque no del todo. La invariancia es **aproximada**: un desplazamiento que cruza la frontera de un bloque sí cambia el resultado, y el aumento de datos (mostrar a la red imágenes desplazadas) suele completar el trabajo.
 #
-# ## 5. Una red convolucional pequeña contra un perceptrón multicapa
+# ## 6. Una red convolucional pequeña contra un perceptrón multicapa
 #
 # Entrenamos con el mismo procedimiento la red convolucional de la sección anterior (20,490 parámetros) y un perceptrón multicapa con dos capas ocultas de 256 y 128 neuronas (235,146 parámetros, once veces más). Los dos con Adam, tasa de aprendizaje 0.001, minilotes de 64 imágenes y 3 épocas, y con el mismo orden de los minilotes. Normalizamos los pixeles con la media y la desviación estándar del conjunto de entrenamiento.
 
@@ -404,9 +423,9 @@ rdp.estilo.etiquetar(ax, EPOCAS + 0.08, {f"perceptrón multicapa ({contar(mlp):,
 plt.show()
 
 # %% [markdown]
-# Con 3 épocas la red convolucional supera al perceptrón multicapa por casi 3 puntos de exactitud (89.4 % contra 86.7 %), con once veces menos parámetros; es decir, comete una cuarta parte menos de errores. Ambos seguirían mejorando con más épocas (y regularización, como vimos en la libreta anterior); las redes convolucionales bien entrenadas pasan de 92 % en este conjunto. La ventaja no viene de tener más capacidad, sino de tener **la capacidad correcta**: la arquitectura ya «sabe» que los pixeles vecinos importan juntos y que un patrón vale lo mismo en cualquier posición. Es un **sesgo inductivo**, en el sentido de la Unidad 3: restringir el espacio de hipótesis de una forma que coincide con el problema reduce la varianza sin pagar en sesgo.
+# Con 3 épocas la red convolucional supera al perceptrón multicapa por 2.5 puntos de exactitud (89.3 % contra 86.8 %), con once veces menos parámetros; es decir, comete una quinta parte menos de errores (10.7 % de las imágenes de prueba contra 13.2 %). Ambos seguirían mejorando con más épocas (y regularización, como vimos en la libreta anterior); las redes convolucionales bien entrenadas pasan de 92 % en este conjunto. La ventaja no viene de tener más capacidad, sino de tener **la capacidad correcta**: la arquitectura ya «sabe» que los pixeles vecinos importan juntos y que un patrón vale lo mismo en cualquier posición. Es un **sesgo inductivo**, en el sentido de la Unidad 3: restringir el espacio de hipótesis de una forma que coincide con el problema reduce la varianza sin pagar en sesgo.
 #
-# ## 6. Qué aprendió la red
+# ## 7. Qué aprendió la red
 #
 # ### Filtros y mapas de activación
 #
@@ -475,17 +494,182 @@ plt.show()
 # %% [markdown]
 # Los errores no están repartidos al azar: casi todos están entre las prendas de la parte superior del cuerpo (camisa, camiseta, suéter, abrigo). La camisa es la clase más difícil: a 28 × 28 pixeles, en escala de grises, una camisa de manga corta sin botones visibles **es** una camiseta. Varias de las imágenes de arriba serían difíciles también para una persona. Un error que se concentra en pares de clases parecidas es una señal de que el límite está en la información de la imagen, no solo en el modelo.
 #
-# ## 7. Redes profundas y conexiones residuales
+# ## 8. La parte convolucional es un preprocesamiento
 #
-# **Un poco de historia.** Y. LeCun y sus colegas usaron redes convolucionales para leer dígitos de cheques y códigos postales desde finales de los años ochenta; su LeNet-5 (LeCun, Bottou, Bengio y Haffner, *Proceedings of the IEEE*, 1998) tenía dos capas convolucionales, cada una seguida de una reducción de tamaño, y unos 60,000 parámetros: es, en esencia, la red que acabamos de entrenar. En 2012, AlexNet (A. Krizhevsky, I. Sutskever y G. Hinton, NeurIPS 2012), con cinco capas convolucionales, 60 millones de parámetros, ReLU, *dropout* y dos GPU, ganó el concurso ImageNet (1.2 millones de fotos, 1,000 clases) con un error *top-5* de 15.3 %, contra 26.2 % del segundo lugar. Eso desató la carrera por redes más profundas: VGG (19 capas, 2014), GoogLeNet (22 capas, 2014)… y un obstáculo.
+# Miremos otra vez la red que entrenamos. Tiene dos partes:
 #
-# **El problema de la degradación.** K. He, X. Zhang, S. Ren y J. Sun (CVPR 2016) observaron que, al agregar capas a una red convolucional «simple», el error **de entrenamiento** empeoraba: una red de 56 capas se ajustaba peor que una de 20 en CIFAR-10. No era sobreajuste (es error de entrenamiento) y en principio la red profunda puede imitar a la menos profunda (bastaría con que las capas extra fueran la identidad), pero el descenso por gradiente no encontraba esa solución.
+# - `atributos`: dos bloques «convolución + ReLU + *max-pooling*» que convierten los $28 \times 28 = 784$ pixeles de una prenda en 32 mapas de $7 \times 7$, es decir, $32 \cdot 7 \cdot 7 = 1{,}568$ números. Cada uno dice qué tanto aparece un patrón (el que detecta uno de los 32 filtros de `conv2`) en una región de 10 × 10 pixeles de la imagen.
+# - `salida`: una capa lineal de 1,568 entradas a 10 salidas, seguida de la *softmax* que va dentro de la entropía cruzada. Eso es, exactamente, una **regresión logística multinomial** (Unidad 4) sobre esos 1,568 atributos.
 #
-# **La solución.** En lugar de pedirle a un bloque de capas que aprenda una transformación $H(\mathbf{x})$, se le pide que aprenda la **corrección** $F(\mathbf{x}) = H(\mathbf{x}) - \mathbf{x}$, y se suma la entrada: $\mathbf{x}_{\ell+1} = \mathbf{x}_\ell + F_\ell(\mathbf{x}_\ell)$. Si lo mejor es no hacer nada, basta con $F = 0$, que es fácil de alcanzar. Y el gradiente tiene un camino directo:
+# Visto así, una red convolucional es un **extractor de atributos** seguido de un clasificador de los que ya conocemos. La diferencia con la Unidad 4 es que los atributos no los diseñamos a mano (como los filtros de Sobel): se aprendieron junto con el clasificador, por descenso por gradiente.
 #
-# $$\frac{\partial \mathbf{x}_{\ell+1}}{\partial \mathbf{x}_\ell} = I + \frac{\partial F_\ell}{\partial \mathbf{x}_\ell}
+# Si eso es cierto, deberíamos poder **congelar** la parte convolucional ya entrenada, pasarle todas las imágenes una vez, guardar sus 1,568 atributos como una tabla común y corriente $\mathbf{X} \in \mathbb{R}^{M \times 1568}$, y ajustar encima un clasificador cualquiera. Comparamos cinco combinaciones:
+#
+# 1. los **pixeles crudos** (784 atributos) con una regresión logística: el punto de partida;
+# 2. la parte convolucional **con pesos al azar** (la `red_azar` de la sección 5, sin entrenar) con una regresión logística: ¿basta la arquitectura?;
+# 3. la parte convolucional **entrenada**, congelada, con una regresión logística de `scikit-learn`;
+# 4. la misma, con un perceptrón multicapa pequeño encima (una capa oculta de 128 neuronas);
+# 5. la red convolucional completa, como la entrenamos en la sección 6.
+#
+# Para que la regresión logística corra en pocos segundos en una CPU, la ajustamos con un **submuestreo** de 10,000 imágenes de entrenamiento (las primeras), estandarizando cada atributo y con una regularización $L_2$ fuerte (`C=0.01`, es decir, $\lambda = 1/C = 100$ en la escala de `scikit-learn`): con 1,568 atributos y solo 10,000 imágenes, la regularización por omisión (`C=1`) sobreajusta. El perceptrón multicapa de la opción 4 sí usa todas. La exactitud siempre se mide en las 10,000 imágenes de prueba.
+
+# %%
+@torch.no_grad()
+def extraer(f, Z, lote=2000):
+    """Aplica la función f (la parte convolucional) por lotes y aplana: una fila de atributos por imagen."""
+    return torch.cat([f(Z[i:i + lote].to(dispositivo)).flatten(1).cpu() for i in range(0, len(Z), lote)]).numpy()
+
+
+cnn.eval()
+red_azar.eval()
+t0 = time.time()
+A_ent, A_pru = extraer(cnn.atributos, Z_ent[:N_ENT]), extraer(cnn.atributos, Z_pru)
+print(f"atributos de la parte convolucional entrenada: {A_ent.shape} y {A_pru.shape} en {time.time() - t0:.1f} s")
+
+N_LOG = 3_000 if RAPIDO else 10_000          # submuestreo para la regresión logística
+
+
+def logistica_sobre(X_e, X_p):
+    """Regresión logística estandarizada, ajustada con las primeras N_LOG imágenes; exactitud de prueba y segundos."""
+    t0 = time.time()
+    modelo = make_pipeline(StandardScaler(), LogisticRegression(C=0.01, max_iter=1000))
+    modelo.fit(X_e[:N_LOG], y_ent[:N_LOG].numpy())
+    return modelo.score(X_p, y_pru.numpy()), time.time() - t0
+
+
+extractor = {}
+extractor["pixeles crudos + logística"] = logistica_sobre(Z_ent[:N_LOG].flatten(1).numpy(), Z_pru.flatten(1).numpy())
+extractor["conv. al azar + logística"] = logistica_sobre(extraer(red_azar.atributos, Z_ent[:N_LOG]), extraer(red_azar.atributos, Z_pru))
+extractor["conv. entrenada + logística"] = logistica_sobre(A_ent, A_pru)
+for nombre, (exact, seg) in extractor.items():
+    print(f"{nombre:30s} exactitud {exact:.4f}   ({seg:.0f} s)")
+
+# %% [markdown]
+# Ahora un perceptrón multicapa pequeño sobre los mismos atributos congelados. Como la parte convolucional ya no cambia, entrenarlo es barato: la red de abajo no participa en el descenso por gradiente, solo la tabla de atributos.
+
+# %%
+torch.manual_seed(SEMILLA)
+mlp_encima = nn.Sequential(nn.Linear(1568, 128), nn.ReLU(), nn.Linear(128, 10)).to(dispositivo)
+opt = torch.optim.Adam(mlp_encima.parameters(), lr=1e-3)
+T_ent, T_pru = torch.tensor(A_ent), torch.tensor(A_pru)
+cargador_atr = torch.utils.data.DataLoader(torch.utils.data.TensorDataset(T_ent, y_ent[:N_ENT]), batch_size=64,
+                                           shuffle=True, generator=torch.Generator().manual_seed(SEMILLA))
+t0 = time.time()
+for _ in range(EPOCAS):
+    entrenar_epoca(mlp_encima, cargador_atr, opt)
+exact_mlp_encima = evaluar(mlp_encima, torch.utils.data.DataLoader(torch.utils.data.TensorDataset(T_pru, y_pru), batch_size=1000))
+extractor["conv. entrenada + perceptrón"] = (exact_mlp_encima, time.time() - t0)
+extractor["red convolucional completa"] = (hist_cnn.iloc[-1, 2], t_cnn)
+
+tabla_extractor = pd.DataFrame(extractor, index=["exactitud de prueba", "segundos"]).T
+tabla_extractor["exactitud de prueba"] = tabla_extractor["exactitud de prueba"].round(4)
+tabla_extractor["segundos"] = tabla_extractor["segundos"].round(1)
+tabla_extractor
+
+# %%
+fig, ax = plt.subplots(figsize=(9, 4.2))
+nombres = list(extractor)[::-1]
+valores = [100 * extractor[n][0] for n in nombres]
+colores = [AZUL if "entrenada" in n or "completa" in n else GRIS for n in nombres]
+ax.barh(nombres, valores, color=colores)
+for i, v in enumerate(valores):
+    ax.text(v + 0.2, i, f"{v:.1f} %", va="center", fontsize=11, color=TINTA)
+ax.set_xlim(75, 95)
+ax.set_xlabel("exactitud de prueba (%)")
+ax.set_title("Mismos clasificadores, distintos atributos")
+ax.grid(axis="y", visible=False)
+plt.show()
+
+# %% [markdown]
+# Las cifras cuentan la historia completa:
+#
+# - Con los pixeles crudos, la regresión logística llega a 83.6 %. Es lineal en los pixeles: no puede expresar «hay un borde vertical por aquí».
+# - La parte convolucional **con pesos al azar** ya ayuda (87.2 %): la arquitectura (ventanas locales, ReLU, *pooling*) por sí sola produce atributos mejores que los pixeles. Pero el resto del camino lo da el entrenamiento.
+# - Con la parte convolucional **entrenada** y congelada, la misma regresión logística, con solo 10,000 imágenes, llega a 89.3 %, la misma exactitud de la red completa (89.3 %). Un perceptrón pequeño encima, entrenado con las 60,000 imágenes, llega a 90.5 %, un poco más que la red original: su capa oculta le da al clasificador de encima algo de flexibilidad que la capa lineal no tenía.
+#
+# Es decir: **lo que la red aprendió está en sus atributos**. La parte convolucional transforma 784 pixeles, sobre los que un modelo lineal se queda corto, en 1,568 atributos locales sobre los que casi cualquier clasificador funciona bien. A partir de aquí, el «modelo de encima» puede ser una regresión logística, un perceptrón multicapa, una máquina de vectores de soporte o un bosque aleatorio.
+#
+# Esta forma de pensar tiene una consecuencia importante: una parte convolucional entrenada con muchas imágenes de un problema puede servir como preprocesamiento **para otro problema**, y encima se ajusta un clasificador nuevo con pocos datos. Esa idea, la **transferencia**, es el tema de la siguiente libreta. Y tiene una advertencia: en nuestro experimento los atributos se aprendieron con las etiquetas de las 60,000 imágenes de entrenamiento; la logística de encima usa solo 10,000, pero se beneficia de lo que la parte convolucional ya aprendió con las otras 50,000.
+#
+# ## 9. Arquitecturas: de LeNet a EfficientNet
+#
+# Nuestra red tiene dos capas convolucionales. Las redes que ganaron los concursos de visión de la última década tienen decenas o cientos, y cada una introdujo una idea que hoy es parte del vocabulario. Las recorremos en orden, programando y contando la pieza clave de cada una. Para contar sin descargar nada usamos `torchvision.models.<arquitectura>(weights=None)`, que construye la red con pesos al azar: el número de parámetros solo depende de la arquitectura.
+#
+# ### LeNet y AlexNet
+#
+# Y. LeCun y sus colegas usaron redes convolucionales para leer dígitos de cheques y códigos postales desde finales de los años ochenta; su LeNet-5 (LeCun, Bottou, Bengio y Haffner, *Proceedings of the IEEE*, 1998) tenía dos capas convolucionales, cada una seguida de una reducción de tamaño, y unos 60,000 parámetros: es, en esencia, la red que acabamos de entrenar. En 2012, AlexNet (A. Krizhevsky, I. Sutskever y G. Hinton, NeurIPS 2012), con cinco capas convolucionales, unos 60 millones de parámetros, ReLU, *dropout* y dos GPU, ganó el concurso ImageNet (1.2 millones de fotos de entrenamiento, 1,000 clases) con un error *top-5* de 15.3 %, contra 26.2 % del segundo lugar. Eso desató la carrera por redes más profundas.
+#
+# ### VGG: solo filtros de 3 × 3
+#
+# K. Simonyan y A. Zisserman (Oxford, *Visual Geometry Group*, de ahí el nombre; ICLR 2015) hicieron la pregunta más sencilla: ¿qué pasa si solo aumentamos la profundidad, con una regla fija? Su regla: **todas** las convoluciones son de 3 × 3 con relleno 1, y cada cierto número de ellas un *max-pooling* reduce el mapa a la mitad y se duplican los canales (64, 128, 256, 512).
+#
+# ¿Por qué 3 × 3? Porque dos convoluciones de 3 × 3 seguidas **ven lo mismo** que una de 5 × 5, y tres ven lo mismo que una de 7 × 7. Lo verificamos con la recurrencia del campo receptivo de la sección 5:
+
+# %%
+print("dos 3×3 seguidas:", campo_receptivo([(3, 1), (3, 1)]), "   tres 3×3:", campo_receptivo([(3, 1)] * 3))
+
+C_VGG = 64
+dos_3x3 = nn.Sequential(nn.Conv2d(C_VGG, C_VGG, 3, padding=1, bias=False), nn.ReLU(),
+                        nn.Conv2d(C_VGG, C_VGG, 3, padding=1, bias=False))
+una_5x5 = nn.Conv2d(C_VGG, C_VGG, 5, padding=2, bias=False)
+vgg_cuenta = {"dos 3×3": contar(dos_3x3), "18 C²": 18 * C_VGG ** 2, "una 5×5": contar(una_5x5), "25 C²": 25 * C_VGG ** 2}
+print(f"con C = {C_VGG} canales de entrada y de salida (sin sesgos):", vgg_cuenta)
+print(f"la de 5×5 tiene {vgg_cuenta['una 5×5'] / vgg_cuenta['dos 3×3']:.2f} veces más parámetros")
+
+# %% [markdown]
+# Con $C$ canales de entrada y de salida, cada filtro de $k \times k$ tiene $C k^2$ pesos y hay $C$ filtros: $C^2 k^2$ pesos por capa. Dos capas de 3 × 3 suman $2 \cdot 9\, C^2 = 18\, C^2$; una de 5 × 5, $25\, C^2$. Con $C = 64$, son 73,728 contra 102,400: el mismo campo receptivo con 28 % menos parámetros y, además, una ReLU de más en medio, que hace a la función más expresiva.
+#
+# Ahora la red completa. VGG-16 tiene 13 capas convolucionales y 3 densas (16 capas con pesos):
+
+# %%
+def multiplicaciones(modelo, forma):
+    """Multiplicaciones de las capas convolucionales y lineales al procesar una imagen de la forma dada."""
+    total = 0
+
+    def gancho(m, entrada, salida):
+        nonlocal total
+        if isinstance(m, nn.Conv2d):
+            total += salida[0].numel() * (m.in_channels // m.groups) * m.kernel_size[0] * m.kernel_size[1]
+        else:
+            total += m.in_features * m.out_features
+
+    ganchos = [m.register_forward_hook(gancho) for m in modelo.modules() if isinstance(m, (nn.Conv2d, nn.Linear))]
+    modelo.eval()
+    with torch.no_grad():
+        modelo(torch.zeros(1, *forma))
+    for g in ganchos:
+        g.remove()
+    return total
+
+
+vgg16 = torchvision.models.vgg16(weights=None)
+vgg = {"parámetros": contar(vgg16), "en las capas densas": contar(vgg16.classifier),
+       "primera densa (25,088 → 4,096)": contar(vgg16.classifier[0])}
+vgg["fracción en las densas"] = vgg["en las capas densas"] / vgg["parámetros"]
+mult_vgg_conv = multiplicaciones(vgg16.features, (3, 224, 224))
+mult_vgg = multiplicaciones(vgg16, (3, 224, 224))
+vgg["fracción de las multiplicaciones en las convoluciones"] = mult_vgg_conv / mult_vgg
+print(vgg)
+print(f"multiplicaciones por imagen de 224×224: {mult_vgg / 1e9:.1f} mil millones")
+
+# %% [markdown]
+# VGG-16 tiene 138.4 millones de parámetros, y el **89 %** de ellos está en las tres capas densas del final; solo la primera, que recibe los $512 \times 7 \times 7 = 25{,}088$ atributos de la parte convolucional, tiene 102.8 millones. Pero el trabajo de cómputo está al revés: el 99 % de las 15.5 mil millones de multiplicaciones por imagen ocurre en las convoluciones, que aplican sus pocos pesos en todas las posiciones.
+#
+# VGG no ganó ImageNet 2014 (quedó segunda en clasificación), pero se convirtió en la red **de uso general**: su diseño regular la hacía fácil de entender y de reutilizar, y sus pesos se publicaron. Su parte convolucional se usó como preprocesamiento para muchos otros problemas, exactamente en el sentido de la sección 8:
+#
+# - A. S. Razavian, H. Azizpour, J. Sullivan y S. Carlsson («CNN features off-the-shelf: an astounding baseline for recognition», CVPR Workshops 2014) mostraron que los atributos de una red entrenada en ImageNet, con una máquina de vectores de soporte lineal encima, competían con los mejores métodos diseñados a mano en problemas muy distintos (escenas, aves, flores, recuperación de imágenes).
+# - L. A. Gatys, A. S. Ecker y M. Bethge («A neural algorithm of artistic style», 2015) usaron los mapas de activación de VGG para separar el «contenido» de una foto de su «estilo» y pintar una foto con el estilo de un cuadro.
+# - S. Ren, K. He, R. Girshick y J. Sun (Faster R-CNN, NeurIPS 2015) construyeron su detector de objetos sobre la parte convolucional de VGG-16.
+#
+# ### ResNet: redes muy profundas con conexiones residuales
+#
+# **El problema de la degradación.** Después de VGG la pregunta obvia era: ¿y si apilamos más capas? K. He, X. Zhang, S. Ren y J. Sun (CVPR 2016) observaron que, al agregar capas a una red convolucional «simple», el error **de entrenamiento** empeoraba: una red de 56 capas se ajustaba peor que una de 20 en CIFAR-10. No era sobreajuste (es error de entrenamiento) y en principio la red profunda puede imitar a la menos profunda (bastaría con que las capas extra fueran la identidad), pero el descenso por gradiente no encontraba esa solución.
+#
+# **La solución.** En lugar de pedirle a un bloque de capas que aprenda una transformación $H(\mathbf{x})$, se le pide que aprenda la **corrección** $F(\mathbf{x}) = H(\mathbf{x}) - \mathbf{x}$, y se suma la entrada: $\mathbf{x}_{l+1} = \mathbf{x}_l + F_l(\mathbf{x}_l)$. Si lo mejor es no hacer nada, basta con $F = 0$, que es fácil de alcanzar. Y el gradiente tiene un camino directo. Si $E$ es el error de la red y $L$ el número de bloques,
+#
+# $$\frac{\partial \mathbf{x}_{l+1}}{\partial \mathbf{x}_l} = I + \frac{\partial F_l}{\partial \mathbf{x}_l}
 # \qquad\Longrightarrow\qquad
-# \frac{\partial E}{\partial \mathbf{x}_\ell} = \frac{\partial E}{\partial \mathbf{x}_L}\prod_{m=\ell}^{L-1}\Big(I + \frac{\partial F_m}{\partial \mathbf{x}_m}\Big) .$$
+# \frac{\partial E}{\partial \mathbf{x}_l} = \frac{\partial E}{\partial \mathbf{x}_L}\prod_{m=l}^{L-1}\Big(I + \frac{\partial F_m}{\partial \mathbf{x}_m}\Big) .$$
 #
 # Al desarrollar el producto aparece el término $\partial E/\partial \mathbf{x}_L$ tal cual: el error de la salida llega a cualquier capa sin atravesar ninguna multiplicación por matrices de pesos. En una red sin atajos, el producto es $\prod_m \partial F_m/\partial \mathbf{x}_m$, y si esas jacobianas encogen los vectores, el gradiente se desvanece exponencialmente con la profundidad.
 #
@@ -539,223 +723,224 @@ plt.show()
 print({n: f"capa 1: {g[0]:.1e}" for n, g in grad.items()})
 
 # %% [markdown]
-# Con la inicialización por omisión de PyTorch (pesos uniformes con varianza $1/(3\,n_{\text{ent}})$), cada capa simple multiplica la varianza de la señal por cerca de $n_{\text{ent}} \cdot \frac{1}{3 n_{\text{ent}}} \cdot \frac12 = \frac16$, y el gradiente que llega a la primera capa es decenas de órdenes de magnitud menor que el de la última: esas capas no aprenden nada. La inicialización de He (Unidad 6, ejemplo 1) arregla la escala **al inicio**, pero no garantiza nada durante el entrenamiento, y es justo ahí donde He y sus colegas observaron la degradación. La red residual, con la misma inicialización mala, entrega gradientes del mismo orden a todas sus capas.
+# Con la inicialización por omisión de PyTorch (pesos uniformes con varianza $1/(3\,n_{\text{ent}})$), cada capa simple multiplica la varianza de la señal por cerca de $n_{\text{ent}} \cdot \frac{1}{3 n_{\text{ent}}} \cdot \frac12 = \frac16$, y el gradiente que llega a la primera capa es unos 14 órdenes de magnitud menor que el de la última: esas capas no aprenden nada. La inicialización de He (Unidad 6, ejemplo 1) arregla la escala **al inicio**, pero no garantiza nada durante el entrenamiento, y es justo ahí donde He y sus colegas observaron la degradación. La red residual, con la misma inicialización mala, entrega gradientes del mismo orden a todas sus capas.
 #
-# Con conexiones residuales (y normalización por lotes) se entrenaron redes de 152 capas que ganaron ImageNet 2015 con 3.57 % de error *top-5*. ResNet-18, la que usaremos enseguida, es la versión pequeña: 18 capas con pesos y 11.7 millones de parámetros.
+# **Los bloques de una ResNet.** En una ResNet real, $F$ no es una capa lineal sino un par de convoluciones con **normalización por lotes** (*batch normalization*, que reescala cada canal con la media y la varianza del minilote). Hay dos versiones:
 #
-# ## 8. Transferencia: imágenes de satélite con pocas etiquetas
+# - el **bloque básico** (ResNet-18 y ResNet-34): dos convoluciones de 3 × 3 con $C$ canales, y la suma con la entrada;
+# - el **bloque *bottleneck*** (cuello de botella; ResNet-50, 101 y 152): una convolución de **1 × 1** que reduce los canales (de 256 a 64, por ejemplo), una de 3 × 3 que trabaja con pocos canales y otra de 1 × 1 que los vuelve a ampliar.
 #
-# ### Los datos y el problema
-#
-# **Datos.** EuroSAT (P. Helber, B. Bischke, A. Dengel y D. Borth, *IEEE Journal of Selected Topics in Applied Earth Observations and Remote Sensing*, 2019) tiene 27,000 imágenes de 64 × 64 pixeles tomadas por el satélite Sentinel-2 del programa Copernicus de la Unión Europea, sobre territorio europeo, etiquetadas en 10 clases de uso de suelo. Cada pixel cubre 10 m × 10 m, así que una imagen es un cuadro de 640 m de lado. Usamos la versión RGB (el satélite mide 13 bandas espectrales). Licencia MIT; `torchvision` la descarga la primera vez (unos 90 MB).
-#
-# **Problema.** Clasificar el uso de suelo de un cuadro de terreno. Etiquetar imágenes de satélite es caro (alguien tiene que saber qué hay en cada cuadro), así que la pregunta es: **¿qué tan bien podemos hacerlo con 10, 50 o 200 imágenes etiquetadas por clase?**
-#
-# **La idea de la transferencia.** Una ResNet-18 entrenada en ImageNet (fotos de perros, autos, frutas…) aprendió en sus capas intermedias detectores de bordes, texturas, patrones repetidos y formas que sirven para muchas otras imágenes. Quitamos su última capa (la que decide entre las 1,000 clases de ImageNet) y usamos los 512 números que entrega la penúltima como **atributos** de cada imagen de satélite; encima ajustamos una regresión logística, como en la Unidad 4. La red no ve ninguna imagen de satélite durante su entrenamiento.
+# Una convolución de 1 × 1 no mira a los vecinos: en cada pixel mezcla los $C$ canales con una capa lineal de $C$ a $C'$ números, la misma en todas las posiciones. Sirve para cambiar el número de canales barato. Programemos los dos bloques:
 
 # %%
-CLASES_SAT = ["cultivo anual", "bosque", "vegetación herbácea", "carretera", "zona industrial",
-              "pastizal", "cultivo permanente", "zona residencial", "río", "mar o lago"]
+class BloqueBasico(nn.Module):
+    """x + F(x), con F = conv 3×3 → BN → ReLU → conv 3×3 → BN."""
 
-eurosat = torchvision.datasets.EuroSAT(RAIZ_DATOS, download=True)
-y_sat = np.array(eurosat.targets)
-print(f"{len(eurosat):,} imágenes;", dict(zip(eurosat.classes, np.bincount(y_sat))))
+    def __init__(self, C):
+        super().__init__()
+        self.conv1, self.bn1 = nn.Conv2d(C, C, 3, padding=1, bias=False), nn.BatchNorm2d(C)
+        self.conv2, self.bn2 = nn.Conv2d(C, C, 3, padding=1, bias=False), nn.BatchNorm2d(C)
+
+    def forward(self, x):
+        F_x = self.bn2(self.conv2(F.relu(self.bn1(self.conv1(x)))))
+        return F.relu(x + F_x)
+
+
+class BloqueCuello(nn.Module):
+    """x + F(x), con F = conv 1×1 (C → C_m) → conv 3×3 (C_m → C_m) → conv 1×1 (C_m → C), con BN y ReLU."""
+
+    def __init__(self, C, C_m):
+        super().__init__()
+        self.reducir, self.bn1 = nn.Conv2d(C, C_m, 1, bias=False), nn.BatchNorm2d(C_m)
+        self.conv, self.bn2 = nn.Conv2d(C_m, C_m, 3, padding=1, bias=False), nn.BatchNorm2d(C_m)
+        self.ampliar, self.bn3 = nn.Conv2d(C_m, C, 1, bias=False), nn.BatchNorm2d(C)
+
+    def forward(self, x):
+        h = F.relu(self.bn1(self.reducir(x)))
+        h = F.relu(self.bn2(self.conv(h)))
+        return F.relu(x + self.bn3(self.ampliar(h)))
+
+
+def pesos_conv(modelo):
+    """Pesos de las capas convolucionales (sin contar la normalización por lotes)."""
+    return sum(m.weight.numel() for m in modelo.modules() if isinstance(m, nn.Conv2d))
+
+
+x = torch.randn(2, 256, 56, 56)
+basico, cuello = BloqueBasico(256), BloqueCuello(256, 64)
+print("formas:", tuple(basico(x).shape), tuple(cuello(x).shape))
+bloques_resnet = pd.DataFrame({
+    "pesos de las convoluciones": [pesos_conv(basico), pesos_conv(cuello)],
+    "multiplicaciones (mapa de 56×56)": [multiplicaciones(basico, (256, 56, 56)), multiplicaciones(cuello, (256, 56, 56))],
+}, index=["básico: dos 3×3 de 256 canales", "bottleneck: 1×1 (256→64), 3×3 (64), 1×1 (64→256)"])
+bloques_resnet
 
 # %% [markdown]
-# Para que la libreta corra en CPU, trabajamos con un subconjunto fijo: para cada clase, 200 imágenes al azar forman la reserva de entrenamiento y otras 100, distintas, la prueba (1,000 imágenes de prueba en total). Ordenamos la reserva de modo que sus primeras $10k$ imágenes tengan exactamente $k$ de cada clase; así, el conjunto con 10 por clase está contenido en el de 50, y este en el de 200.
+# Con 256 canales, dos convoluciones de 3 × 3 tienen $2 \cdot 9 \cdot 256^2 = 1{,}179{,}648$ pesos; el bloque *bottleneck* tiene $256 \cdot 64 + 9 \cdot 64^2 + 64 \cdot 256 = 69{,}632$, unas **17 veces menos**, con la misma entrada y la misma salida. Así se pudieron apilar 50, 101 y hasta 152 capas sin que el costo se disparara. Con conexiones residuales, normalización por lotes y bloques *bottleneck*, la ResNet-152 ganó ImageNet 2015 con 3.57 % de error *top-5* (un ensamble de varias redes).
+#
+# ### Inception: varias ventanas a la vez
+#
+# ¿De qué tamaño debe ser el filtro, 1 × 1, 3 × 3 o 5 × 5? C. Szegedy y sus colegas de Google (GoogLeNet, ganadora de ImageNet 2014, CVPR 2015) contestaron: **de todos**. Un **módulo Inception** aplica en paralelo, a la misma entrada, convoluciones de 1 × 1, 3 × 3 y 5 × 5 y un *max-pooling* de 3 × 3, y concatena sus salidas en la dimensión de los canales. La red aprende cuál rama le sirve en cada lugar.
+#
+# El problema es el costo: una convolución de 5 × 5 sobre 192 canales es cara. La solución es la misma convolución de 1 × 1 de los bloques *bottleneck* (de hecho, Inception la usó primero): **reducir** los canales antes de las ramas caras. Programamos el primer módulo de GoogLeNet («3a»), que recibe un mapa de 28 × 28 con 192 canales y entrega 64 + 128 + 32 + 32 = 256 canales; las ramas de 3 × 3 y de 5 × 5 se reducen antes a 96 y 16 canales.
 
 # %%
-POR_CLASE = (10, 50) if RAPIDO else (10, 50, 200)
-N_PRUEBA_SAT = 50 if RAPIDO else 100
-rng = np.random.default_rng(SEMILLA)
-reserva, prueba = [], []
-for c in range(10):
-    ids = rng.permutation(np.where(y_sat == c)[0])
-    reserva.append(ids[:max(POR_CLASE)])
-    prueba.append(ids[max(POR_CLASE):max(POR_CLASE) + N_PRUEBA_SAT])
-ids_ent = np.stack(reserva, axis=1).ravel()        # intercalado: clase 0, 1, …, 9, 0, 1, …
-ids_pru = np.concatenate(prueba)
+class ModuloInception(nn.Module):
+    def __init__(self, C_ent, c1, r3, c3, r5, c5, cp, reducir=True):
+        super().__init__()
+        conv = lambda a, b, k: nn.Conv2d(a, b, k, padding=k // 2, bias=False)
+        self.rama1 = conv(C_ent, c1, 1)
+        if reducir:
+            self.rama3 = nn.Sequential(conv(C_ent, r3, 1), nn.ReLU(), conv(r3, c3, 3))
+            self.rama5 = nn.Sequential(conv(C_ent, r5, 1), nn.ReLU(), conv(r5, c5, 5))
+        else:
+            self.rama3, self.rama5 = conv(C_ent, c3, 3), conv(C_ent, c5, 5)
+        self.rama_pool = nn.Sequential(nn.MaxPool2d(3, stride=1, padding=1), conv(C_ent, cp, 1))
+
+    def forward(self, x):
+        ramas = (self.rama1, self.rama3, self.rama5, self.rama_pool)
+        return torch.cat([F.relu(r(x)) for r in ramas], dim=1)
 
 
-def cargar_sat(ids):
-    return torch.stack([torchvision.transforms.functional.to_tensor(eurosat[int(i)][0]) for i in ids])
-
-
-S_ent, S_pru = cargar_sat(ids_ent), cargar_sat(ids_pru)
-ys_ent, ys_pru = y_sat[ids_ent], y_sat[ids_pru]
-print(S_ent.shape, S_pru.shape)
-
-fig, ejes = plt.subplots(3, 10, figsize=(13, 4.6))
-for c in range(10):
-    for f in range(3):
-        ax = ejes[f, c]
-        ax.imshow(S_ent[ys_ent == c][f].permute(1, 2, 0))
-        ax.axis("off")
-    ejes[0, c].set_title(CLASES_SAT[c].replace(" ", "\n", 1) if len(CLASES_SAT[c]) > 12 else CLASES_SAT[c], fontsize=10.5, loc="center")
-plt.tight_layout()
-plt.show()
+inc_con = ModuloInception(192, 64, 96, 128, 16, 32, 32, reducir=True)
+inc_sin = ModuloInception(192, 64, 96, 128, 16, 32, 32, reducir=False)
+print("forma de la salida:", tuple(inc_con(torch.zeros(1, 192, 28, 28)).shape))
+inception_cuenta = pd.DataFrame({
+    "parámetros": [contar(inc_sin), contar(inc_con)],
+    "multiplicaciones (28×28)": [multiplicaciones(inc_sin, (192, 28, 28)), multiplicaciones(inc_con, (192, 28, 28))],
+}, index=["sin reducción 1×1", "con reducción 1×1 (GoogLeNet 3a)"])
+inception_cuenta
 
 # %% [markdown]
-# ### Atributos de una red preentrenada
+# Sin reducción, la rama de 3 × 3 tiene $192 \cdot 128 \cdot 9 = 221{,}184$ pesos y la de 5 × 5, $192 \cdot 32 \cdot 25 = 153{,}600$. Con la reducción, $192 \cdot 96 + 96 \cdot 128 \cdot 9 = 129{,}024$ y $192 \cdot 16 + 16 \cdot 32 \cdot 25 = 15{,}872$: la rama de 5 × 5 se vuelve casi diez veces más barata. El módulo completo pasa de 393,216 a 163,328 parámetros (2.4 veces menos), y de 308 a 128 millones de multiplicaciones por imagen. GoogLeNet completa, con nueve módulos así, tiene unos 6.6 millones de parámetros, veinte veces menos que VGG-16, y ganó ImageNet 2014, con VGG en segundo lugar.
 #
-# Las imágenes se normalizan con la media y la desviación estándar de ImageNet por canal, que es lo que la red espera. No cambiamos su tamaño: ResNet-18 termina con un promedio global (*global average pooling*) y acepta imágenes de cualquier tamaño.
+# ### Xception: la convolución separable en profundidad
+#
+# Una convolución normal hace dos cosas a la vez: mira a los **vecinos** (la ventana de $k \times k$) y **mezcla los canales** (cada filtro abarca los $C$ canales de entrada). F. Chollet (Xception, «*Extreme Inception*», CVPR 2017) llevó la idea de Inception al extremo y las separó por completo:
+#
+# 1. **en profundidad** (*depthwise*): un filtro de $k \times k$ **por canal**, que solo mira a los vecinos dentro de su canal: $C k^2$ pesos;
+# 2. **puntual** (*pointwise*): una convolución de 1 × 1 que mezcla los canales: $C C'$ pesos.
+#
+# En PyTorch, el paso 1 es una `nn.Conv2d` con `groups=C`: los canales se reparten en $C$ grupos de uno, y cada filtro ve solo su grupo.
 
 # %%
-resnet = torchvision.models.resnet18(weights="IMAGENET1K_V1")
-print(f"ResNet-18: {contar(resnet):,} parámetros")
-resnet.fc = nn.Identity()            # quitamos la capa de 1,000 clases: la salida es el vector de 512 atributos
-resnet.eval().to(dispositivo)
-
-MEDIA_IN = torch.tensor([0.485, 0.456, 0.406]).view(1, 3, 1, 1)
-DE_IN = torch.tensor([0.229, 0.224, 0.225]).view(1, 3, 1, 1)
-N_ent_sat, N_pru_sat = (S_ent - MEDIA_IN) / DE_IN, (S_pru - MEDIA_IN) / DE_IN
+def separable(C, C2, k):
+    """Convolución separable en profundidad: k×k por canal (groups=C) seguida de 1×1 de C a C2 canales."""
+    return nn.Sequential(nn.Conv2d(C, C, k, padding=k // 2, groups=C, bias=False),
+                         nn.Conv2d(C, C2, 1, bias=False))
 
 
-@torch.no_grad()
-def atributos_resnet(X, lote=100):
-    return torch.cat([resnet(X[i:i + lote].to(dispositivo)).cpu() for i in range(0, len(X), lote)]).numpy()
+C_SEP, K_SEP = 256, 3
+normal, sep = nn.Conv2d(C_SEP, C_SEP, K_SEP, padding=1, bias=False), separable(C_SEP, C_SEP, K_SEP)
+x = torch.randn(1, C_SEP, 28, 28)
+print("formas:", tuple(normal(x).shape), tuple(sep(x).shape))
 
-
-t0 = time.time()
-A_ent, A_pru = atributos_resnet(N_ent_sat), atributos_resnet(N_pru_sat)
-print(f"atributos: {A_ent.shape} y {A_pru.shape} en {time.time() - t0:.0f} s")
-
-exact_transfer = {}
-for k in POR_CLASE:
-    logistica = make_pipeline(StandardScaler(), LogisticRegression(C=0.1, max_iter=3000))
-    logistica.fit(A_ent[:10 * k], ys_ent[:10 * k])
-    exact_transfer[k] = logistica.score(A_pru, ys_pru)
-pd.Series(exact_transfer, name="exactitud de prueba").rename_axis("imágenes por clase")
+filas_sep = []
+for C2 in (64, 256):
+    for k in (3, 5):
+        p_normal, p_sep = contar(nn.Conv2d(C_SEP, C2, k, bias=False)), contar(separable(C_SEP, C2, k))
+        filas_sep.append({"C": C_SEP, "C'": C2, "k": k, "normal: C C' k²": p_normal, "separable: C k² + C C'": p_sep,
+                          "razón": p_sep / p_normal, "1/C' + 1/k²": 1 / C2 + 1 / k ** 2})
+separable_cuenta = pd.DataFrame(filas_sep)
+mult_sep = {"normal": multiplicaciones(normal, (C_SEP, 28, 28)), "separable": multiplicaciones(sep, (C_SEP, 28, 28))}
+print(f"multiplicaciones con C = C' = {C_SEP}, k = 3, mapa de 28×28:", mult_sep,
+      f"razón {mult_sep['separable'] / mult_sep['normal']:.3f}")
+separable_cuenta.round(4)
 
 # %% [markdown]
-# Con solo **10 imágenes por clase** (100 en total), una regresión logística sobre los atributos de ImageNet acierta en más de tres de cada cuatro imágenes de satélite, en un problema de 10 clases donde adivinar daría 10 %.
+# La razón entre los dos conteos es
 #
-# ### La comparación: una red desde cero con los mismos datos
+# $$\frac{C k^2 + C C'}{C C' k^2} = \frac{1}{C'} + \frac{1}{k^2} ,$$
 #
-# ¿Es mérito de la red preentrenada o el problema es fácil? Entrenemos desde cero una red convolucional pequeña (tres bloques convolución + ReLU + *max-pooling*, un promedio global y una capa lineal: unos 24,000 parámetros) con las mismas imágenes. Para darle una oportunidad justa usamos **aumento de datos**: en cada paso volteamos al azar las imágenes horizontal y verticalmente (una foto de satélite volteada sigue siendo del mismo tipo de suelo). Le damos a cada tamaño de muestra el mismo presupuesto: 600 pasos de Adam con minilotes de 32.
+# y con muchos canales de salida queda cerca de $1/k^2$: con filtros de 3 × 3, la separable usa unas **9 veces menos** parámetros (0.115 con $C = C' = 256$), y con 5 × 5, unas 24 veces menos. Las multiplicaciones bajan en la misma proporción, porque cada peso se aplica una vez por pixel del mapa: con $C = C' = 256$ en un mapa de 28 × 28, de 462 a 53 millones. El precio es que la separable es una función más restringida (no puede mezclar a la vez vecinos y canales), pero Chollet mostró que, apilando muchas, la red resultante (Xception, 22.9 millones de parámetros) era más exacta en ImageNet que Inception V3 con un número parecido de parámetros. La misma convolución es la base de MobileNet (A. G. Howard et al., 2017), pensada para teléfonos, y de EfficientNet.
+#
+# ### EfficientNet: crecer en las tres direcciones a la vez
+#
+# Para hacer más exacta una red hay tres perillas: más **profundidad** (más capas), más **ancho** (más canales por capa) o más **resolución** (imágenes de entrada más grandes). M. Tan y Q. V. Le (EfficientNet, ICML 2019) observaron que girar una sola se satura pronto, y propusieron el **escalamiento compuesto**: un solo coeficiente $\phi$ las mueve todas,
+#
+# $$\text{profundidad} \propto \alpha^\phi, \qquad \text{ancho} \propto \beta^\phi, \qquad \text{resolución} \propto \gamma^\phi, \qquad \text{con } \alpha \cdot \beta^2 \cdot \gamma^2 \approx 2 .$$
+#
+# La restricción viene de contar multiplicaciones: el costo de una convolución crece en proporción a la profundidad, al **cuadrado** del ancho (canales de entrada por canales de salida) y al **cuadrado** de la resolución (filas por columnas). Así, cada unidad de $\phi$ duplica, aproximadamente, el costo. Con una búsqueda en una red pequeña (EfficientNet-B0, hecha de convoluciones separables en profundidad), los autores eligieron $\alpha = 1.2$, $\beta = 1.1$ y $\gamma = 1.15$:
 
 # %%
-def red_satelite():
-    return nn.Sequential(
-        nn.Conv2d(3, 16, 3, padding=1), nn.ReLU(), nn.MaxPool2d(2),        # 64 → 32
-        nn.Conv2d(16, 32, 3, padding=1), nn.ReLU(), nn.MaxPool2d(2),       # 32 → 16
-        nn.Conv2d(32, 64, 3, padding=1), nn.ReLU(), nn.MaxPool2d(2),       # 16 → 8
-        nn.AdaptiveAvgPool2d(1), nn.Flatten(), nn.Linear(64, 10))
+ALFA, BETA, GAMMA = 1.2, 1.1, 1.15
+print(f"α·β²·γ² = {ALFA * BETA ** 2 * GAMMA ** 2:.3f}")
+escalamiento = pd.DataFrame({
+    "profundidad (×)": [ALFA ** f for f in range(5)],
+    "ancho (×)": [BETA ** f for f in range(5)],
+    "resolución (pixeles)": [round(224 * GAMMA ** f) for f in range(5)],
+    "costo (×)": [(ALFA * BETA ** 2 * GAMMA ** 2) ** f for f in range(5)],
+}, index=pd.Index(range(5), name="φ"))
+escalamiento.round(2)
 
-
-def entrenar_pasos(modelo, X, y, pasos, lr=1e-3, lote=32):
-    """Adam con minilotes al azar y volteos aleatorios (aumento de datos)."""
-    modelo.to(dispositivo).train()
-    opt = torch.optim.Adam(modelo.parameters(), lr=lr)
-    g = torch.Generator().manual_seed(SEMILLA)
-    y = torch.as_tensor(y)
-    for _ in range(pasos):
-        idx = torch.randint(len(X), (lote,), generator=g)
-        xb = X[idx]
-        if torch.rand(1, generator=g) < 0.5:
-            xb = xb.flip(3)
-        if torch.rand(1, generator=g) < 0.5:
-            xb = xb.flip(2)
-        opt.zero_grad()
-        F.cross_entropy(modelo(xb.to(dispositivo)), y[idx].to(dispositivo)).backward()
-        opt.step()
-    modelo.eval()
-    with torch.no_grad():
-        pred = torch.cat([modelo(N_pru_sat[i:i + 200].to(dispositivo)).argmax(1).cpu() for i in range(0, len(N_pru_sat), 200)])
-    return (pred.numpy() == ys_pru).mean()
-
-
-PASOS = 150 if RAPIDO else 600
-print(f"red desde cero: {contar(red_satelite()):,} parámetros")
-exact_cero = {}
-t0 = time.time()
-for k in POR_CLASE:
-    torch.manual_seed(SEMILLA)
-    exact_cero[k] = entrenar_pasos(red_satelite(), N_ent_sat[:10 * k], ys_ent[:10 * k], PASOS)
-print(f"{time.time() - t0:.0f} s")
-
-comparacion = pd.DataFrame({"transferencia (ResNet-18 + logística)": exact_transfer, "red pequeña desde cero": exact_cero})
-comparacion.index.name = "imágenes por clase"
-comparacion
+# %% [markdown]
+# Con $\phi = 3$, la red tiene 1.7 veces más capas, 1.33 veces más canales y ve imágenes de 341 pixeles en lugar de 224, por unas 7 veces el costo. (Los modelos B1 a B7 publicados redondean estos factores a resoluciones y números de capas concretos.)
+#
+# ### La historia en una tabla
+#
+# Juntemos todo. Contamos los parámetros de cada arquitectura con `torchvision` (sin descargar pesos) y anotamos la exactitud *top-1* en el conjunto de validación de ImageNet (la fracción de imágenes en las que la primera respuesta es la correcta) que documenta `torchvision` para sus pesos `IMAGENET1K_V1`. Esa cifra se lee de los metadatos de los pesos, sin descargarlos. Son entrenamientos de `torchvision`, no siempre idénticos a los de los artículos originales. Xception no está en `torchvision`; para ella usamos las cifras del artículo de Chollet (22.9 millones de parámetros y 79.0 % de exactitud *top-1*). Inception V3 (Szegedy et al., CVPR 2016) es la tercera versión de GoogLeNet; la contamos sin su clasificador auxiliar, que solo se usa al entrenar.
 
 # %%
-fig, ax = plt.subplots(figsize=(8, 4.6))
-ks = list(POR_CLASE)
-ax.plot(ks, [100 * exact_transfer[k] for k in ks], "o-", color=AZUL)
-ax.plot(ks, [100 * exact_cero[k] for k in ks], "o-", color=ROJO)
-ax.axhline(10, color=GRIS, ls=":", lw=1.5)
-ax.text(ks[0], 12, "adivinar al azar", color=TENUE, fontsize=11)
+M = torchvision.models
+redes = {   # nombre: (año, constructor sin pesos, pesos documentados)
+    "AlexNet": (2012, lambda: M.alexnet(weights=None), M.AlexNet_Weights.IMAGENET1K_V1),
+    "VGG-16": (2014, lambda: M.vgg16(weights=None), M.VGG16_Weights.IMAGENET1K_V1),
+    "GoogLeNet": (2014, lambda: M.googlenet(weights=None, init_weights=False, aux_logits=False), M.GoogLeNet_Weights.IMAGENET1K_V1),
+    "ResNet-18": (2015, lambda: M.resnet18(weights=None), M.ResNet18_Weights.IMAGENET1K_V1),
+    "ResNet-50": (2015, lambda: M.resnet50(weights=None), M.ResNet50_Weights.IMAGENET1K_V1),
+    "Inception V3": (2015, lambda: M.inception_v3(weights=None, init_weights=False, aux_logits=False), M.Inception_V3_Weights.IMAGENET1K_V1),
+    "EfficientNet-B0": (2019, lambda: M.efficientnet_b0(weights=None), M.EfficientNet_B0_Weights.IMAGENET1K_V1),
+}
+filas_arq = []
+for nombre, (anio, construir, pesos) in redes.items():
+    filas_arq.append({"arquitectura": nombre, "año": anio, "parámetros (millones)": contar(construir()) / 1e6,
+                      "exactitud top-1 (%)": pesos.meta["_metrics"]["ImageNet-1K"]["acc@1"], "fuente de la exactitud": "torchvision"})
+filas_arq.append({"arquitectura": "Xception", "año": 2017, "parámetros (millones)": 22.9,
+                  "exactitud top-1 (%)": 79.0, "fuente de la exactitud": "Chollet (2017)"})
+arquitecturas = pd.DataFrame(filas_arq).sort_values("año", kind="stable").set_index("arquitectura")
+arquitecturas.round(2)
+
+# %%
+fig, ax = plt.subplots(figsize=(9, 5))
+for nombre, f in arquitecturas.iterrows():
+    color = DORADO_OSC if nombre == "EfficientNet-B0" else AZUL
+    ax.scatter(f["parámetros (millones)"], f["exactitud top-1 (%)"], s=60, color=color, zorder=3)
+    ax.annotate(f"{nombre} ({f['año']})", (f["parámetros (millones)"], f["exactitud top-1 (%)"]),
+                xytext=(7, -4), textcoords="offset points", fontsize=11, color=TINTA)
 ax.set_xscale("log")
-ax.set_xticks(ks, [str(k) for k in ks])
-ax.minorticks_off()
-ax.set_xlim(ks[0] * 0.8, ks[-1] * 3.2)
-ax.set_ylim(0, 100)
-ax.set_xlabel("imágenes etiquetadas por clase (escala logarítmica)")
-ax.set_ylabel("exactitud de prueba (%)")
-ax.set_title("EuroSAT: transferencia contra entrenar desde cero")
-rdp.estilo.etiquetar(ax, ks[-1] * 1.12, {"ResNet-18 de ImageNet + logística": 100 * exact_transfer[ks[-1]],
-                                         "red pequeña desde cero": 100 * exact_cero[ks[-1]]})
+ax.set_xlim(3, 400)
+ax.set_ylim(54, 82)
+ax.set_xlabel("millones de parámetros (escala logarítmica)")
+ax.set_ylabel("exactitud top-1 en ImageNet (%)")
+ax.set_title("Más exactitud no requirió más parámetros")
 plt.show()
 
 # %% [markdown]
-# La red preentrenada con 10 imágenes por clase supera a la red desde cero con 200. Entrenar desde cero no es inútil: con miles de imágenes por clase y más pasos, una red convolucional entrenada solo con EuroSAT llega a exactitudes muy altas (los autores del conjunto reportan 98.57 % ajustando redes profundas preentrenadas con el 80 % de los datos). La transferencia rinde más **cuando hay pocas etiquetas**, que es la situación común en la práctica: en imágenes médicas, agrícolas o industriales casi nunca hay millones de ejemplos etiquetados.
-#
-# ¿Por qué funcionan atributos aprendidos en fotos de perros y autos sobre imágenes de satélite? Porque las primeras capas aprenden cosas muy generales (bordes, colores, texturas) y las intermedias, combinaciones de ellas (rayas, cuadrículas, manchas) que también describen un campo cultivado, un bosque o una zona residencial. Veamos dónde se equivoca el modelo con más datos:
-
-# %%
-k = max(POR_CLASE)
-logistica = make_pipeline(StandardScaler(), LogisticRegression(C=0.1, max_iter=3000)).fit(A_ent[:10 * k], ys_ent[:10 * k])
-mc_sat = confusion_matrix(ys_pru, logistica.predict(A_pru))
-pares_sat = [(mc_sat[i, j], CLASES_SAT[i], CLASES_SAT[j]) for i in range(10) for j in range(10) if i != j]
-print("exactitud por clase:", {CLASES_SAT[c]: round(mc_sat[c, c] / mc_sat[c].sum(), 2) for c in range(10)})
-pd.DataFrame(sorted(pares_sat, reverse=True)[:5], columns=["casos", "verdadera", "predicha"])
-
-# %% [markdown]
-# Los errores vuelven a ser razonables: ríos y carreteras que se confunden entre sí (en los dos casos, una franja larga que cruza el cuadro) y tipos de vegetación y cultivo que se parecen a esta resolución.
-#
-# ### Ajuste fino (opcional, con GPU)
-#
-# La transferencia tiene un segundo nivel: en lugar de congelar la red y entrenar solo la logística de encima, se continúa el entrenamiento de **toda** la red con las imágenes nuevas y una tasa de aprendizaje pequeña, para que los atributos se adapten al problema. Esto se llama **ajuste fino** (*fine-tuning*). Es mucho más caro (hay que retropropagar por los 11 millones de parámetros), así que solo lo corremos si hay una GPU. En Colab, activa la GPU y compara su exactitud con la de la tabla anterior.
-
-# %%
-if dispositivo.type == "cuda":
-    for k in POR_CLASE:
-        torch.manual_seed(SEMILLA)
-        ajustada = torchvision.models.resnet18(weights="IMAGENET1K_V1")
-        ajustada.fc = nn.Linear(512, 10)
-        exactitud = entrenar_pasos(ajustada, N_ent_sat[:10 * k], ys_ent[:10 * k], pasos=300, lr=1e-4)
-        print(f"ajuste fino con {k} imágenes por clase: exactitud {exactitud:.3f}")
-else:
-    print("Sin GPU: se omite el ajuste fino.")
-
-# %% [markdown]
-# ## 9. Lo que se hereda: el caso *Gender Shades*
-#
-# La transferencia es poderosa porque el modelo **hereda** lo que aprendió con otros datos. También hereda sus huecos. J. Buolamwini y T. Gebru («Gender Shades», *Conference on Fairness, Accountability and Transparency*, 2018) evaluaron los clasificadores comerciales de género a partir de fotos de rostros de Microsoft, IBM y Face++ con 1,270 fotos de parlamentarios de seis países (tres africanos y tres europeos), etiquetadas por género y por tono de piel con la escala de Fitzpatrick. Los tres sistemas tenían su mayor error en las **mujeres de piel oscura**, de hasta **34.7 %**, mientras que el error máximo en **hombres de piel clara** fue de **0.8 %**. Los autores también mostraron que dos conjuntos de rostros muy usados para entrenar y evaluar, IJB-A y Adience, tenían entre 79.6 % y 86.2 % de personas de piel clara.
-#
-# Un detector de atributos entrenado con datos que representan mal a un grupo produce atributos peores para ese grupo, y ningún clasificador que se ajuste encima puede recuperar la información que no está ahí. Al usar un modelo preentrenado conviene preguntarse, igual que con cualquier conjunto de datos (Unidad 1): **¿con qué datos se entrenó, a quién representan y a quién no?** Y evaluar por separado en cada grupo relevante, como hicimos en la Unidad 3.
+# La gráfica resume la década: de AlexNet a VGG-16 la exactitud subió a costa de más del doble de parámetros; desde ahí, cada idea nueva (las conexiones residuales, la reducción con 1 × 1, las convoluciones separables, el escalamiento compuesto) dio **más exactitud con menos parámetros**. EfficientNet-B0, con 5.3 millones, es más exacta que VGG-16, que tiene 26 veces más. (Un detalle: en la tabla, GoogLeNet queda ligeramente por debajo de VGG-16, aunque ganó el concurso de 2014. Las cifras de `torchvision` son de una sola red evaluada con un solo recorte de cada imagen; en el concurso, ambos equipos usaron ensambles de varias redes y varios recortes.)
 #
 # ## 10. Cierre
 #
+# - Las imágenes, y en general los datos en los que lo local importa (audio, series, secuencias de ADN), tienen una estructura que una capa densa ignora.
 # - Una convolución es una capa lineal con dos restricciones: **conexiones locales** y **pesos compartidos**. El resultado es equivariante a traslaciones y tiene muchísimos menos parámetros que una capa densa.
 # - El tamaño de la salida es $\lfloor (n + 2p - k)/s \rfloor + 1$; los parámetros, $(C_{\text{ent}}k^2 + 1)C_{\text{sal}}$; el campo receptivo crece con la profundidad y con el *pooling*.
 # - Con once veces menos parámetros, una red convolucional pequeña le gana a un perceptrón multicapa en Fashion-MNIST: el sesgo inductivo correcto vale más que la capacidad.
-# - Las conexiones residuales, $\mathbf{x} + F(\mathbf{x})$, dan al gradiente un camino directo y permiten entrenar redes de cientos de capas.
-# - Con pocas etiquetas, los atributos de una red preentrenada en otro problema superan por mucho a entrenar desde cero; pero el modelo hereda los sesgos de sus datos de origen.
+# - La parte convolucional es un **preprocesamiento aprendido**: con ella congelada, una regresión logística encima alcanza la exactitud de la red completa.
+# - Las arquitecturas se volvieron más profundas y más eficientes: filtros de 3 × 3 apilados (VGG), conexiones residuales y bloques *bottleneck* (ResNet), ramas en paralelo con reducción 1 × 1 (Inception), convoluciones separables (Xception) y escalamiento compuesto (EfficientNet).
 #
-# *Referencias:* Y. LeCun, L. Bottou, Y. Bengio y P. Haffner, «Gradient-based learning applied to document recognition», *Proc. IEEE* 86 (1998). A. Krizhevsky, I. Sutskever y G. E. Hinton, «ImageNet classification with deep convolutional neural networks», NeurIPS (2012). K. He, X. Zhang, S. Ren y J. Sun, «Deep residual learning for image recognition», CVPR (2016). H. Xiao, K. Rasul y R. Vollgraf, «Fashion-MNIST», arXiv:1708.07747 (2017). P. Helber et al., «EuroSAT», *IEEE JSTARS* 12 (2019). J. Buolamwini y T. Gebru, «Gender Shades», PMLR 81 (2018). I. Goodfellow, Y. Bengio y A. Courville, *Deep Learning*, MIT Press (2016), capítulo 9.
+# *Referencias:* Y. LeCun, L. Bottou, Y. Bengio y P. Haffner, «Gradient-based learning applied to document recognition», *Proc. IEEE* 86 (1998). A. Krizhevsky, I. Sutskever y G. E. Hinton, «ImageNet classification with deep convolutional neural networks», NeurIPS (2012). K. Simonyan y A. Zisserman, «Very deep convolutional networks for large-scale image recognition», ICLR (2015). A. S. Razavian et al., «CNN features off-the-shelf: an astounding baseline for recognition», CVPR Workshops (2014). L. A. Gatys, A. S. Ecker y M. Bethge, «A neural algorithm of artistic style», arXiv:1508.06576 (2015). S. Ren, K. He, R. Girshick y J. Sun, «Faster R-CNN», NeurIPS (2015). K. He, X. Zhang, S. Ren y J. Sun, «Deep residual learning for image recognition», CVPR (2016). C. Szegedy et al., «Going deeper with convolutions», CVPR (2015), y «Rethinking the Inception architecture for computer vision», CVPR (2016). F. Chollet, «Xception: deep learning with depthwise separable convolutions», CVPR (2017). A. G. Howard et al., «MobileNets», arXiv:1704.04861 (2017). M. Tan y Q. V. Le, «EfficientNet: rethinking model scaling for convolutional neural networks», ICML (2019). H. Xiao, K. Rasul y R. Vollgraf, «Fashion-MNIST», arXiv:1708.07747 (2017). I. Goodfellow, Y. Bengio y A. Courville, *Deep Learning*, MIT Press (2016), capítulo 9. Exactitudes de `torchvision`: <https://pytorch.org/vision/stable/models.html>.
 
 # %% [markdown]
 # ## 11. Autoevaluación
 
 # %%
-rdp.quiz.mostrar("u06", ids=["u06-p09", "u06-p10", "u06-p11", "u06-p12"])
+rdp.quiz.mostrar("u06", ids=["u06-p09", "u06-p10", "u06-p11"])
 
 # %% [markdown]
 # ## 12. Ejercicios
 #
 # 1. **Contar a mano.** Una capa convolucional recibe un mapa de $32 \times 32 \times 64$ y aplica 128 filtros de $5 \times 5$ con relleno 2 y paso 2. ¿De qué tamaño es la salida y cuántos parámetros tiene? ¿Cuántos tendría una capa densa que produjera una salida del mismo tamaño? Comprueba con `nn.Conv2d` y `nn.Linear`.
 # 2. **Equivariancia y *pooling*.** (a) Demuestra que la composición de dos convoluciones es equivariante a traslaciones y que también lo es una ReLU aplicada pixel por pixel. (b) Da un ejemplo de una imagen de una dimensión y un desplazamiento de un pixel para los que el *max-pooling* de tamaño 2 y paso 2 **no** es invariante. (c) ¿Para qué desplazamientos sí lo es siempre?
-# 3. **Campo receptivo.** Usa la recurrencia de la sección 4 para calcular el campo receptivo de tres capas convolucionales de $3 \times 3$ seguidas, sin *pooling*, y compáralo con el de una sola capa de $7 \times 7$. Compara también el número de parámetros con $C$ canales de entrada y salida en todas. (Este fue el argumento de VGG para usar solo filtros de 3 × 3.)
-# 4. **Gradiente en una red residual.** Para una red escalar $x_{\ell+1} = x_\ell + a\,x_\ell$ con $L$ bloques, calcula $\partial x_L/\partial x_0$ y compárala con la red simple $x_{\ell+1} = a\,x_\ell$ cuando $|a| < 1$. ¿Qué pasa en la red residual si $a$ es pequeño y $L$ grande? ¿Y si $a = -1$?
-# 5. **Más etiquetas, otro modelo.** Agrega a la comparación de EuroSAT el caso de 1,000 imágenes por clase (la reserva tiene que crecer). ¿Alcanza la red desde cero a la transferencia? Prueba también más pasos. Si tienes GPU, compara con el ajuste fino.
+# 3. **Campo receptivo.** Usa la recurrencia de la sección 5 para calcular el campo receptivo de tres capas convolucionales de $3 \times 3$ seguidas, sin *pooling*, y compáralo con el de una sola capa de $7 \times 7$. Compara también el número de parámetros con $C$ canales de entrada y salida en todas.
+# 4. **Otro clasificador encima.** En la sección 8, sustituye la regresión logística por un bosque aleatorio o una máquina de vectores de soporte sobre los mismos atributos congelados. ¿Cambia mucho la exactitud? ¿Y si usas los atributos de la **primera** capa convolucional (después de su *pooling*: $16 \times 14 \times 14$ números) en lugar de los de la segunda?
+# 5. **Gradiente en una red residual.** Para una red escalar $x_{l+1} = x_l + a\,x_l$ con $L$ bloques, calcula $\partial x_L/\partial x_0$ y compárala con la red simple $x_{l+1} = a\,x_l$ cuando $|a| < 1$. ¿Qué pasa en la red residual si $a$ es pequeño y $L$ grande? ¿Y si $a = -1$?
+# 6. **Una red separable.** Reemplaza `conv2` de `RedConv` por una convolución separable en profundidad (`separable(16, 32, 3)`), entrena con el mismo procedimiento y compara parámetros y exactitud con la red original.

@@ -2,7 +2,7 @@
 // Norma del gradiente (antes del recorte) en cada paso del entrenamiento de la LSTM.
 import { scaleLinear, scaleLog } from 'd3-scale'
 import { line } from 'd3-shape'
-import datos from '../datos/u06-04.json'
+import datos from '../datos/u06-05.json'
 const R = (datos as any).recorte
 const W = 620, H = 380, m = { l: 62, r: 20, t: 30, b: 70 }
 const x = scaleLinear().domain([0, R.normas.length]).range([m.l, W - m.r])

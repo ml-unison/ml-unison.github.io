@@ -1,6 +1,6 @@
 # Notas para continuar el trabajo con Claude Code
 
-Última actualización: 2026-11-05. Este archivo está en un **repositorio público**: aquí no van
+Última actualización: 2026-11-06. Este archivo está en un **repositorio público**: aquí no van
 soluciones, enunciados de exámenes ni tokens. Lo privado vive en `ml-unison/soluciones`.
 
 Al empezar una sesión en otra computadora, pídele a Claude: *«Lee `.claude/NOTAS.md` y
@@ -60,17 +60,25 @@ node herramientas/construir.mjs        # todo a _construccion/
   - U6 tema 1, rehecho: diferenciación automática y grafos de cómputo en lugar de retropropagación a
     mano; la red como ingeniería de características más un GLM en la última capa; Xavier/He con
     números. Lab 6 Parte A ahora es de `torch.autograd`.
+  - U6 tema 3 dividido en dos (2026-11-06, en `rediseno-2027`, **sin publicar**): `u06-03-convolucionales`
+    (por qué imágenes, la parte convolucional como preprocesamiento, VGG, ResNet, Inception, Xception,
+    EfficientNet) y `u06-04-transferencia-deteccion` (qué ve cada capa, última capa contra ajuste fino,
+    detección de R-CNN a YOLO26). Secuencias pasó a `u06-05` (libreta `e07`). Libretas nuevas e04
+    transferencia, e05 detección y e06 ajuste fino de YOLO con Global Wheat (solo Colab con GPU).
 - **Examen intermedio 2026-2** (privado, `../soluciones/examenes/intermedio-2026-2/`): los 4 exámenes
   (A–D, dos problemas cada uno) están redactados, con material verificado y notas para calificar en su
   `README.md`. Falta confirmar con el profesor la versión final y cuándo se aplica en Teams.
 
 ## 3. Qué falta / siguientes pasos
 
-1. Seguir revisando los temas que el profesor indique (la clase va por la U6). Cada revisión: libreta,
+1. U6 temas 3 y 4: que el profesor revise la vista previa y apruebe el merge. Correr en Colab con GPU
+   `u06-e06-yolo-trigo` y subir su `resultados_yolo_trigo.json` si se quieren sus cifras en la lámina
+   del trigo. Las fotos de `datos/fotos/` y `rdp.datos.archivo` solo existen para Colab tras el merge.
+2. Seguir revisando los temas que el profesor indique (la clase va por la U6). Cada revisión: libreta,
    módulo de datos de láminas, presentación, laboratorio y quiz si aplica, con cifras que coincidan.
-2. Intermedio: revisión final con el profesor, compilar PDFs y aplicarlo en Teams.
-3. Proyecto (competencias de Kaggle): entrega única **30/11/2026** y después citas para la defensa oral.
-4. `refs/` (lista de cursos de DataCamp) está sin versionar; su contenido ya está en
+3. Intermedio: revisión final con el profesor, compilar PDFs y aplicarlo en Teams.
+4. Proyecto (competencias de Kaggle): entrega única **30/11/2026** y después citas para la defensa oral.
+5. `refs/` (lista de cursos de DataCamp) está sin versionar; su contenido ya está en
    `sitio/src/datos/datacamp.ts`. Preguntar al profesor si se borra o se versiona.
 
 
@@ -173,7 +181,10 @@ de las ideas, sin ejemplos). Desde entonces:
 - sklearn ≥ 1.9: `LogisticRegression(penalty=None)` está obsoleto; usar `C=np.inf`.
 - otter 7 solo descarga pruebas por URL en JupyterLite: `laboratorios.py` inserta una celda que las baja
   de GitHub a `tests/<lab>/`.
-- Regenerar los JSON de redes neuronales tarda minutos (reentrenan modelos).
+- Regenerar los JSON de redes neuronales tarda minutos (reentrenan modelos). `u06_04.py` tarda ~10 min
+  y descarga ~750 MB (VGG-16, Imagenette, EuroSAT); incluye la detección (`_u06_04_deteccion.py`).
+- Slidev registra los componentes al arrancar: si creas uno nuevo con el servidor corriendo, reinícialo.
+- `ultralytics` (YOLO) es dependencia del proyecto; su licencia es AGPL-3.0.
 
 ## 9. Forma de trabajar que ha funcionado
 

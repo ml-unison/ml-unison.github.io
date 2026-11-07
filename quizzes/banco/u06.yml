@@ -212,3 +212,79 @@ preguntas:
     retro: El error cuadrático es la verosimilitud normal; para conteos puede predecir valores negativos y no modela que la varianza crece con la media.
   explicacion: |
     El GLM de conteos es la regresión de Poisson: liga logarítmica, $\hat y = e^{z}$, y menos el logaritmo de la verosimilitud, $\ell = \hat y - y\ln\hat y$ (más una constante). En PyTorch es `nn.PoissonNLLLoss(log_input=True)`, que recibe $z$. Como en todo GLM con liga canónica, $\partial \ell/\partial z = \hat y - y$.
+- id: u06-p20
+  tipo: numerica
+  enunciado: |
+    Con $C = 64$ canales de entrada y de salida (sin sesgos), ¿cuántos parámetros **menos** tienen dos convoluciones de $3 \times 3$ apiladas que una sola de $5 \times 5$? Las dos opciones ven un cuadro de $5 \times 5$ de la entrada.
+  respuesta: 28672
+  tolerancia: 0
+  explicacion: |
+    Dos de $3 \times 3$: $2 \cdot 9 \cdot 64^2 = 73{,}728$. Una de $5 \times 5$: $25 \cdot 64^2 = 102{,}400$. La diferencia es $7 \cdot 64^2 = 28{,}672$, un 28 % menos. Es la idea de VGG: solo filtros de $3 \times 3$, y además una ReLU más entre las dos capas.
+- id: u06-p21
+  tipo: opcion
+  enunciado: |
+    Una red de 56 capas sin conexiones residuales tiene **mayor error de entrenamiento** que una de 20 capas con el mismo diseño. ¿Qué lo explica mejor?
+  opciones:
+  - texto: El descenso por gradiente no encuentra una solución que la red podría representar (las capas extra copiando su entrada); el gradiente se degrada al atravesar tantas capas.
+    correcta: true
+  - texto: La red de 56 capas se sobreajusta.
+    retro: El sobreajuste da error de entrenamiento **menor** y de prueba mayor. Aquí el de entrenamiento es mayor.
+  - texto: La red de 56 capas tiene menos capacidad.
+    retro: Tiene más capacidad, porque puede imitar a la de 20 si 36 capas aprenden la identidad.
+  - texto: Faltan datos para entrenar 56 capas.
+    retro: La falta de datos produce sobreajuste, no un peor ajuste a los datos de entrenamiento.
+  explicacion: |
+    Es el problema de la degradación (He et al., 2016). Con un bloque residual, $\mathbf{a}^{[l+1]} = \mathbf{a}^{[l]} + F^{[l]}(\mathbf{a}^{[l]})$, no hacer nada es $F = 0$, fácil de encontrar, y el gradiente tiene un camino directo por los atajos.
+- id: u06-p22
+  tipo: numerica
+  enunciado: |
+    Una convolución normal de $3 \times 3$ va de $C = 128$ a $C' = 128$ canales. Su versión separable en profundidad (un filtro de $3 \times 3$ por canal, seguido de una convolución $1 \times 1$) tiene, sin sesgos, ¿cuántas veces menos parámetros? Da dos decimales.
+  respuesta: 8.41
+  tolerancia: 0.01
+  explicacion: |
+    Normal: $C C' k^2 = 128 \cdot 128 \cdot 9 = 147{,}456$. Separable: $C k^2 + C C' = 1{,}152 + 16{,}384 = 17{,}536$. Razón: $147{,}456 / 17{,}536 \approx 8.41$. En general, la separable cuesta $\tfrac{1}{C'} + \tfrac{1}{k^2}$ de la normal; con muchos canales y $k = 3$, casi 9 veces menos. Es la pieza básica de Xception, MobileNet y EfficientNet.
+- id: u06-p23
+  tipo: opcion
+  enunciado: |
+    Tienes 300 radiografías etiquetadas y una ResNet-18 preentrenada en ImageNet. ¿Qué haces **primero**?
+  opciones:
+  - texto: Congelar la red, sustituir la última capa por una con tus clases y entrenar solo esa capa; si no alcanza, ajuste fino de toda la red con tasa pequeña.
+    correcta: true
+  - texto: Entrenar toda la red desde cero, con pesos al azar, porque las radiografías no se parecen a ImageNet.
+    retro: Con 300 imágenes, 11 millones de parámetros se sobreajustan. Las primeras capas (bordes, texturas) sirven también para radiografías.
+  - texto: Ajuste fino de toda la red con la misma tasa de aprendizaje con que se entrenó en ImageNet.
+    retro: Una tasa grande borra lo aprendido en ImageNet en pocos pasos. El ajuste fino se hace con tasa pequeña.
+  - texto: Usar la red tal cual, con sus 1,000 clases de ImageNet.
+    retro: ImageNet no tiene clases de radiografías; hay que cambiar al menos la última capa.
+  explicacion: |
+    Se empieza por lo barato y difícil de sobreajustar: la parte convolucional congelada como preprocesamiento y un clasificador nuevo encima. El ajuste fino con tasa pequeña es el siguiente paso, comparado siempre en validación.
+- id: u06-p24
+  tipo: numerica
+  enunciado: |
+    Una caja verdadera va de $(0, 0)$ a $(10, 10)$ y la predicha de $(5, 0)$ a $(15, 10)$. ¿Cuánto vale su IoU? Da dos decimales.
+  respuesta: 0.33
+  tolerancia: 0.01
+  explicacion: |
+    Intersección: de $(5, 0)$ a $(10, 10)$, área 50. Unión: $100 + 100 - 50 = 150$. IoU $= 50/150 = 1/3 \approx 0.33$: con el umbral usual de 0.5 **no** cuenta como acierto, aunque la caja tape la mitad del objeto.
+- id: u06-p25
+  tipo: opcion
+  enunciado: |
+    ¿Por qué R-CNN (2014) tardaba decenas de segundos por imagen y Faster R-CNN (2015) unas décimas?
+  opciones:
+  - texto: R-CNN pasaba por la red convolucional cada una de unas 2,000 regiones recortadas; Faster R-CNN pasa la imagen una sola vez y recorta las regiones del mapa de atributos, que también usa para proponerlas.
+    correcta: true
+  - texto: Faster R-CNN usa una red mucho más chica que R-CNN.
+    retro: Las dos se probaron con la misma VGG-16. La diferencia es cuántas veces se usa.
+  - texto: Faster R-CNN no usa supresión de no máximos.
+    retro: Sí la usa, sobre las propuestas y sobre las detecciones finales.
+  - texto: R-CNN no usaba GPU.
+    retro: Los 47 s por imagen de R-CNN con VGG-16 son en GPU.
+  explicacion: |
+    El cómputo de la parte convolucional se comparte entre todas las regiones. YOLO da un paso más: una sola pasada predice todas las cajas, sin etapa de propuestas.
+- id: u06-p26
+  tipo: vf
+  enunciado: |
+    En YOLO, la celda de la rejilla responsable de detectar un objeto es la que contiene el centro de su caja.
+  respuesta: true
+  explicacion: |
+    Verdadero. Cada celda predice cajas (posición, tamaño y confianza) y probabilidades de clase para los objetos cuyo centro cae en ella. Una sola pasada da todas las predicciones; después se aplica supresión de no máximos.

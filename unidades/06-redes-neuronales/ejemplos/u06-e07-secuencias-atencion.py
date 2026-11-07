@@ -16,7 +16,7 @@
 #
 # # Un modelo de lenguaje del *Quijote*, letra por letra
 #
-# **Unidad 6 · Ejemplo 4**
+# **Unidad 6 · Ejemplo 7**
 #
 # Si leemos «En un lugar de la Man», casi cualquiera completa la siguiente letra sin dudar. Si leemos «dijo », las opciones son muchas más. Un **modelo de lenguaje** es exactamente eso: una distribución de probabilidad para lo que sigue, dado lo que ya se leyó. Es la tarea con la que se entrenan los grandes modelos de lenguaje actuales, y aquí la vamos a resolver en pequeño, con la novela de Cervantes y unos cuantos minutos de CPU. En esta libreta vamos a:
 #

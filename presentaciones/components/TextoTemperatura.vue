@@ -1,7 +1,7 @@
 <script setup lang="ts">
 // Texto generado por el transformer del Quijote a partir del mismo inicio, con distintas temperaturas.
 import { ref } from 'vue'
-import datos from '../datos/u06-04.json'
+import datos from '../datos/u06-05.json'
 const G = (datos as any).generados
 const props = withDefaults(defineProps<{ inicial?: string, largo?: number }>(), { inicial: '0.8', largo: 260 })
 const tau = ref(props.inicial)

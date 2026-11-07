@@ -1,4 +1,4 @@
-"""Láminas de la Unidad 6, tema 3: redes convolucionales y transferencia.
+"""Láminas de la Unidad 6, tema 3: redes convolucionales (de LeNet a EfficientNet).
 
 Para que las cifras de las láminas sean exactamente las de la libreta, este módulo
 **ejecuta la libreta** `u06-e03-convolucionales.py` (el mismo código, las mismas
@@ -9,8 +9,6 @@ actualiza este módulo.
 
 from __future__ import annotations
 
-import base64
-import io
 import os
 import runpy
 from pathlib import Path
@@ -20,16 +18,6 @@ import numpy as np
 from _comun import r
 
 LIBRETA = Path(__file__).resolve().parents[2] / "unidades/06-redes-neuronales/ejemplos/u06-e03-convolucionales.py"
-
-
-def _png(t) -> str:
-    """Tensor (3, H, W) en [0, 1] → PNG en base64 (data URI)."""
-    from PIL import Image
-
-    a = (np.clip(t.permute(1, 2, 0).numpy(), 0, 1) * 255).round().astype(np.uint8)
-    buf = io.BytesIO()
-    Image.fromarray(a).save(buf, format="PNG", optimize=True)
-    return "data:image/png;base64," + base64.b64encode(buf.getvalue()).decode()
 
 
 def _ejecutar_libreta() -> dict:
@@ -101,17 +89,62 @@ def datos() -> dict:
     # --- conexiones residuales
     out["residual"] = {k: r(np.log10(v), 3) for k, v in ns["grad"].items()}
 
-    # --- transferencia
-    S_ent, ys_ent = ns["S_ent"], ns["ys_ent"]
-    out["eurosat"] = {
-        "clases": ns["CLASES_SAT"],
-        "imagenes": [[_png(S_ent[np.where(ys_ent == c)[0][f]]) for f in range(2)] for c in range(10)],
-        "k": list(ns["POR_CLASE"]),
-        "transfer": [round(float(ns["exact_transfer"][k]), 3) for k in ns["POR_CLASE"]],
-        "cero": [round(float(ns["exact_cero"][k]), 3) for k in ns["POR_CLASE"]],
-        "params_resnet": ns["contar"](ns["resnet"]) + 512 * 1000 + 1000,   # se le quitó la capa fc
-        "params_cero": ns["contar"](ns["red_satelite"]()),
-        "pasos": ns["PASOS"],
-        "n_prueba": len(ns["ys_pru"]),
+    # --- la parte convolucional como preprocesamiento: mismos clasificadores, distintos atributos
+    out["extractor"] = {
+        "filas": [{"nombre": n, "exactitud": round(float(e), 4), "segundos": round(float(t), 1)}
+                  for n, (e, t) in ns["extractor"].items()],
+        "n_logistica": ns["N_LOG"], "n_atributos": int(ns["A_pru"].shape[1]),
     }
+
+    # --- VGG: dos 3×3 contra una 5×5; VGG-16 completa
+    vgg = ns["vgg"]
+    out["vgg"] = {
+        "C": ns["C_VGG"], "dos3x3": ns["vgg_cuenta"]["dos 3×3"], "una5x5": ns["vgg_cuenta"]["una 5×5"],
+        "campo": {"dos3x3": ns["campo_receptivo"]([(3, 1), (3, 1)])[-1],
+                  "tres3x3": ns["campo_receptivo"]([(3, 1)] * 3)[-1]},
+        "params": vgg["parámetros"], "params_densas": vgg["en las capas densas"],
+        "params_primera_densa": vgg["primera densa (25,088 → 4,096)"],
+        "frac_densas": round(vgg["fracción en las densas"], 4),
+        "mult": ns["mult_vgg"], "frac_mult_conv": round(vgg["fracción de las multiplicaciones en las convoluciones"], 4),
+    }
+
+    # --- ResNet: bloque básico contra bottleneck (256 canales, mapa de 56×56)
+    br = ns["bloques_resnet"]
+    out["bottleneck"] = {
+        "C": 256, "C_m": 64,
+        "basico": {"pesos": int(br.iloc[0, 0]), "mult": int(br.iloc[0, 1])},
+        "cuello": {"pesos": int(br.iloc[1, 0]), "mult": int(br.iloc[1, 1])},
+    }
+
+    # --- Inception 3a: con y sin reducción 1×1
+    ic = ns["inception_cuenta"]
+    out["inception"] = {
+        "entrada": 192, "salidas": [64, 128, 32, 32], "reducciones": [96, 16], "lado": 28,
+        "sin": {"params": int(ic.iloc[0, 0]), "mult": int(ic.iloc[0, 1])},
+        "con": {"params": int(ic.iloc[1, 0]), "mult": int(ic.iloc[1, 1])},
+    }
+
+    # --- convolución separable en profundidad
+    out["separable"] = {
+        "tabla": [{"C": int(f["C"]), "C2": int(f["C'"]), "k": int(f["k"]), "normal": int(f["normal: C C' k²"]),
+                   "separable": int(f["separable: C k² + C C'"]), "razon": round(float(f["razón"]), 4),
+                   "aprox": round(float(f["1/C' + 1/k²"]), 4)} for _, f in ns["separable_cuenta"].iterrows()],
+        "mult": {k: int(v) for k, v in ns["mult_sep"].items()}, "lado": 28,
+    }
+
+    # --- EfficientNet: escalamiento compuesto
+    esc = ns["escalamiento"]
+    out["efficientnet"] = {
+        "alfa": ns["ALFA"], "beta": ns["BETA"], "gamma": ns["GAMMA"],
+        "producto": round(ns["ALFA"] * ns["BETA"] ** 2 * ns["GAMMA"] ** 2, 4),
+        "phi": [{"phi": int(p), "profundidad": round(float(f.iloc[0]), 3), "ancho": round(float(f.iloc[1]), 3),
+                 "resolucion": int(f.iloc[2]), "costo": round(float(f.iloc[3]), 3)} for p, f in esc.iterrows()],
+    }
+
+    # --- tabla de arquitecturas: parámetros (torchvision, sin pesos) y exactitud top-1 en ImageNet
+    out["arquitecturas"] = [
+        {"nombre": n, "anio": int(f["año"]), "params_m": round(float(f["parámetros (millones)"]), 2),
+         "top1": round(float(f["exactitud top-1 (%)"]), 2), "fuente": f["fuente de la exactitud"]}
+        for n, f in ns["arquitecturas"].iterrows()
+    ]
     return out

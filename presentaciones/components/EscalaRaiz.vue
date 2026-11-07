@@ -4,7 +4,7 @@
 import { ref, computed } from 'vue'
 import { scaleLinear, scaleLog } from 'd3-scale'
 import { line } from 'd3-shape'
-import datos from '../datos/u06-04.json'
+import datos from '../datos/u06-05.json'
 const E = (datos as any).escala
 const W = 600, H = 360, m = { l: 64, r: 110, t: 30, b: 66 }
 const x = scaleLog().base(2).domain([4, 1024]).range([m.l, W - m.r])

@@ -25,6 +25,7 @@ dependencies = [
     # Unidad 6
     "torch>=2.5",
     "torchvision>=0.20",
+    "ultralytics>=8.3",
     # Unidad 7
     "statsmodels>=0.14",
     # Unidad 8

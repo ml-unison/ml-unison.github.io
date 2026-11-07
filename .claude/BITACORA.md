@@ -10,6 +10,29 @@ las anteriores, con fecha, computadora, qué se hizo, acuerdos nuevos y pendient
 
 ---
 
+## 2026-11-06 · Linux (`~/Documentos/Cursos/RdP-LCC/`)
+
+U6 tema 3 dividido en dos presentaciones, a pedido del profesor (plan aprobado). Todo en la rama
+`rediseno-2027`, sin commit ni push todavía.
+
+- **`u06-03-convolucionales`** (31 láminas): por qué importan las imágenes (2 billones de fotos al año,
+  FDA, Sentinel-2, trigo), lo local importa también en audio, series y ADN; la red convolucional como
+  preprocesamiento + clasificador (logística sobre atributos convolucionales congelados: 89.3 %, igual
+  que la red completa; sobre pixeles, 83.6 %); VGG, ResNet (degradación, bloque, cuello de botella),
+  Inception, Xception, EfficientNet y exactitud contra parámetros.
+- **`u06-04-transferencia-deteccion`** (26 láminas, nueva): parches y máxima activación por capa de una
+  VGG-16 (calculados por nosotros), dónde hay modelos preentrenados, tres formas de transferir con
+  EuroSAT (k = 10/50/200: logística 77/86/89 %, última capa 78/87/89 %, ajuste fino 77/88/91 %, desde
+  cero 55/63/66 %), Gender Shades, IoU, NMS, R-CNN → Faster R-CNN → YOLO, demo de YOLO26n con fotos CC
+  de Hermosillo (Wikimedia Commons) y ajuste fino con Global Wheat.
+- Secuencias renombrada a `u06-05` (libreta `u06-e07`). Libretas nuevas: e04 transferencia, e05
+  detección, e06 ajuste fino de YOLO (Colab con GPU; en CI corre un modo rápido sintético).
+- 16 componentes nuevos, 7 preguntas nuevas en el quiz u06 (p20–p26), `ultralytics` agregado al proyecto,
+  `rdp.datos.archivo()` para archivos de `datos/` (fotos).
+- Verificado: pytest, libretas de la U6 en modo CI, KaTeX, desbordes, construcción y capturas.
+- Créditos de Colab: no hace falta comprarlos; la T4 gratuita alcanza para la libreta de YOLO (~1 h).
+- Pendiente: revisión del profesor, commit, push a la vista previa y merge; correr e06 en Colab.
+
 ## 2026-11-05 · Linux (`~/Documentos/Cursos/RdP-LCC/`)
 
 Primera sesión en esta computadora.

@@ -10,6 +10,13 @@ las anteriores, con fecha, computadora, qué se hizo, acuerdos nuevos y pendient
 
 ---
 
+## 2026-11-09 · Linux (`~/Documentos/Cursos/RdP-LCC/`)
+
+- Merge de `rediseno-2027` a `main` (avance directo, `4d94719`) a pedido del profesor: U6 temas 3 y 4
+  (convolucionales; transferencia y detección con YOLO) y libretas e04–e07 publicadas. CI de la vista
+  previa en verde antes del merge; «Publicar sitio» en `main` terminó con éxito.
+- Pendiente: correr `u06-e06-yolo-trigo` en Colab con GPU para las cifras de la lámina del trigo.
+
 ## 2026-11-06 · Linux (`~/Documentos/Cursos/RdP-LCC/`)
 
 U6 tema 3 dividido en dos presentaciones, a pedido del profesor (plan aprobado). Todo en la rama

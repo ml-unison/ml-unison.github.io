@@ -1,6 +1,6 @@
 # Notas para continuar el trabajo con Claude Code
 
-Última actualización: 2026-11-06. Este archivo está en un **repositorio público**: aquí no van
+Última actualización: 2026-11-09. Este archivo está en un **repositorio público**: aquí no van
 soluciones, enunciados de exámenes ni tokens. Lo privado vive en `ml-unison/soluciones`.
 
 Al empezar una sesión en otra computadora, pídele a Claude: *«Lee `.claude/NOTAS.md` y
@@ -48,7 +48,7 @@ node herramientas/construir.mjs        # todo a _construccion/
 
 - El sitio rediseñado (Astro + Slidev) es el oficial desde el 2026-10-29: <https://ml-unison.github.io>.
   El profesor ya da clase con él (semestre **2026-2**).
-- `main` y `rediseno-2027` están al mismo commit (`8c7a2fe`). Todo está publicado.
+- `main` y `rediseno-2027` están al mismo commit. Todo está publicado (U6 temas 3 y 4 desde el 2026-11-09).
 - El material viejo (Jekyll) está en la etiqueta `legado-2026`.
 - Las 8 unidades están producidas: 27 presentaciones, libretas de ejemplo, 8 laboratorios
   autocalificados (otter-grader) y 8 bancos de quiz.
@@ -60,7 +60,7 @@ node herramientas/construir.mjs        # todo a _construccion/
   - U6 tema 1, rehecho: diferenciación automática y grafos de cómputo en lugar de retropropagación a
     mano; la red como ingeniería de características más un GLM en la última capa; Xavier/He con
     números. Lab 6 Parte A ahora es de `torch.autograd`.
-  - U6 tema 3 dividido en dos (2026-11-06, en `rediseno-2027`, **sin publicar**): `u06-03-convolucionales`
+  - U6 tema 3 dividido en dos (2026-11-06, publicado el 2026-11-09): `u06-03-convolucionales`
     (por qué imágenes, la parte convolucional como preprocesamiento, VGG, ResNet, Inception, Xception,
     EfficientNet) y `u06-04-transferencia-deteccion` (qué ve cada capa, última capa contra ajuste fino,
     detección de R-CNN a YOLO26). Secuencias pasó a `u06-05` (libreta `e07`). Libretas nuevas e04
@@ -71,9 +71,9 @@ node herramientas/construir.mjs        # todo a _construccion/
 
 ## 3. Qué falta / siguientes pasos
 
-1. U6 temas 3 y 4: que el profesor revise la vista previa y apruebe el merge. Correr en Colab con GPU
+1. U6 temas 3 y 4 ya publicados. Pendiente: correr en Colab con GPU
    `u06-e06-yolo-trigo` y subir su `resultados_yolo_trigo.json` si se quieren sus cifras en la lámina
-   del trigo. Las fotos de `datos/fotos/` y `rdp.datos.archivo` solo existen para Colab tras el merge.
+   del trigo. Las fotos de `datos/fotos/` y `rdp.datos.archivo` ya están en `main`, así que Colab las encuentra.
 2. Seguir revisando los temas que el profesor indique (la clase va por la U6). Cada revisión: libreta,
    módulo de datos de láminas, presentación, laboratorio y quiz si aplica, con cifras que coincidan.
 3. Intermedio: revisión final con el profesor, compilar PDFs y aplicarlo en Teams.

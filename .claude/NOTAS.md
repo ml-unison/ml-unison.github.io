@@ -27,7 +27,7 @@ uv sync --group dev && npm install
 ```
 
 La ruta exacta no importa, solo que queden lado a lado. Computadoras conocidas: una Mac
-(`~/Documents/Cursos/ML/`) y una Linux (`~/Documentos/Cursos/RdP-LCC/`).
+(`~/Documents/Cursos/ML/`) y una Linux (`~/Documentos/Cursos/RdP-LCC/`). Si es una nueva, agrégala aquí.
 
 Requisitos:
 - [uv](https://docs.astral.sh/uv/), Node.js ≥ 24, `gh` autenticado con acceso a la organización `ml-unison`.

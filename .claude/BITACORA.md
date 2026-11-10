@@ -16,6 +16,9 @@ las anteriores, con fecha, computadora, qué se hizo, acuerdos nuevos y pendient
   (convolucionales; transferencia y detección con YOLO) y libretas e04–e07 publicadas. CI de la vista
   previa en verde antes del merge; «Publicar sitio» en `main` terminó con éxito.
 - Pendiente: correr `u06-e06-yolo-trigo` en Colab con GPU para las cifras de la lámina del trigo.
+- Fin de sesión: la siguiente será en una computadora nueva (ni la Mac ni esta Linux). Al llegar,
+  seguir la sección 1 de `NOTAS.md` (clonar ambos repos lado a lado, `uv sync --group dev`,
+  `npm install`, comprobación rápida) y anotar aquí la computadora y su ruta.
 
 ## 2026-11-06 · Linux (`~/Documentos/Cursos/RdP-LCC/`)
 
